@@ -2,24 +2,12 @@ package com.example.eco_plant.database
 
 import java.io.InputStream
 
-class PlantDatabaseHelper {
+class PlantDatabaseHelper(inputStream: InputStream) {
     var plantSpecies: List<PlantSpecies> = listOf()
-    private var csvPath: String = ""
 
-    constructor(
-        csvPath: String
-    ) {
-        this.csvPath = csvPath
-        plantSpecies = readCSV(javaClass.classLoader!!.getResourceAsStream(csvPath)!!)
+    init {
+        plantSpecies = readCSV(inputStream)
     }
-
-    // Create a function getSpecies that returns a PlantSpecies object from a string
-    // The species is a parameter of type string taht should be searched in the csv column species
-    // When matching the species with the asked services (nitrogen_provision, storage_and_return_water, soil_structuration) you need to :
-    // - get the values of the services in column value and add it to the relevant cell of the PlantSpecies services array
-    // - get the values of the reliabilities in column reliability and add it to the relevant cell of the PlantSpecies reliabilities array
-    // - get the values of the cultural conditions in column cultural_conditions and add it to the relevant cell of the PlantSpecies culturalConditions array
-    // The function should return a PlantSpecies object
 
     private fun readCSV(inputStream: InputStream): List<PlantSpecies> {
         val reader = inputStream.bufferedReader()
@@ -29,15 +17,13 @@ class PlantDatabaseHelper {
             val values = line.split(";")
             if (values.size == 5) {
                 val plant = values[1]
-                // if plant already in speciesList, add the values to the existing PlantSpecies
-                // else create it
                 if (speciesList.any { it.name == plant }) {
                     val existingSpecies = speciesList.find { it.name == plant }!!
                     val serviceIndex = when (values[0]) {
                         "nitrogen_provision" -> 0
                         "storage_and_return_water" -> 1
                         "soil_structuration" -> 2
-                        else -> -1 // err
+                        else -> -1
                     }
                     if (serviceIndex != -1) {
                         existingSpecies.services[serviceIndex] = values[2].toFloat()
@@ -52,7 +38,7 @@ class PlantDatabaseHelper {
                         "nitrogen_provision" -> 0
                         "storage_and_return_water" -> 1
                         "soil_structuration" -> 2
-                        else -> -1 // err
+                        else -> -1
                     }
                     if (serviceIndex != -1) {
                         services[serviceIndex] = values[2].toFloat()
