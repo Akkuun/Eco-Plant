@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Headings -->
+    <style name="Heading.H1">
+        <item name="android:fontFamily">@font/inter_24pt_extrabold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Heading.H2">
+        <item name="android:fontFamily">@font/inter_24pt_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Heading.H3">
+        <item name="android:fontFamily">@font/inter_24pt_extrabold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Heading.H4">
+        <item name="android:fontFamily">@font/inter_18pt_bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Heading.H5">
+        <item name="android:fontFamily">@font/inter_18pt_bold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Body -->
+    <style name="Body.XL">
+        <item name="android:fontFamily">@font/inter_18pt_regular</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="Body.L">
+        <item name="android:fontFamily">@font/inter_18pt_regular</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="Body.M">
+        <item name="android:fontFamily">@font/inter_18pt_regular</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="Body.S">
+        <item name="android:fontFamily">@font/inter_18pt_regular</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="Body.XS">
+        <item name="android:fontFamily">@font/inter_18pt_semibold</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <!-- Action -->
+    <style name="Action.L">
+        <item name="android:fontFamily">@font/inter_18pt_semibold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Action.M">
+        <item name="android:fontFamily">@font/inter_18pt_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Action.S">
+        <item name="android:fontFamily">@font/inter_18pt_semibold</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

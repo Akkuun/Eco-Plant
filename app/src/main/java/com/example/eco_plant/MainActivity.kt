@@ -17,31 +17,35 @@ import com.example.eco_plant.database.PlantDatabaseHelper
 import com.example.eco_plant.ui.theme.EcoPlantTheme
 import com.example.eco_plant.ui.theme.InterTypography
 class MainActivity : ComponentActivity() {
-    private var plantDatabaseHelper: PlantDatabaseHelper? = null
+//    private var plantDatabaseHelper: PlantDatabaseHelper? = null
+//
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        enableEdgeToEdge()
+//
+//        val inputStream = assets.open("data-1744126677780.csv")
+//        plantDatabaseHelper = PlantDatabaseHelper(inputStream)
+//
+//        // Display the first 5 plants
+//        for (i in 0..4) {
+//            println(plantDatabaseHelper!!.plantSpecies[i].name)
+//            println("Services:")
+//            for (j in 0..2) {
+//                println(plantDatabaseHelper!!.plantSpecies[i].services[j])
+//            }
+//            println("Reliabilities:")
+//            for (j in 0..2) {
+//                println(plantDatabaseHelper!!.plantSpecies[i].reliabilities[j])
+//            }
+//            println("Cultural Conditions:")
+//            for (j in 0..2) {
+//                println(plantDatabaseHelper!!.plantSpecies[i].culturalConditions[j])
+//            }
+//        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        val inputStream = assets.open("data-1744126677780.csv")
-        plantDatabaseHelper = PlantDatabaseHelper(inputStream)
-
-        // Display the first 5 plants
-        for (i in 0..4) {
-            println(plantDatabaseHelper!!.plantSpecies[i].name)
-            println("Services:")
-            for (j in 0..2) {
-                println(plantDatabaseHelper!!.plantSpecies[i].services[j])
-            }
-            println("Reliabilities:")
-            for (j in 0..2) {
-                println(plantDatabaseHelper!!.plantSpecies[i].reliabilities[j])
-            }
-            println("Cultural Conditions:")
-            for (j in 0..2) {
-                println(plantDatabaseHelper!!.plantSpecies[i].culturalConditions[j])
-            }
-        }
 
         setContent {
             EcoPlantTheme {
@@ -54,6 +58,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 }
 
 @Composable
