@@ -28,6 +28,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.eco_plant.R
+import androidx.compose.runtime.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.lint.kotlin.metadata.Visibility
+
 
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -68,37 +78,91 @@ Box(
        }
 
 
-        // Partie basse (formulaire / connexion)
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(15.dp)
-                .align(Alignment.Start)
-            ,
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(modifier = Modifier.height(50.dp))
-                OutlinedTextField(placeholder = { Text(stringResource(R.string.email_adress)) }, value = "", onValueChange = {}, label = { Text(stringResource(R.string.email_adress)) })
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    placeholder = { Text(stringResource(R.string.password)) },
-                    value = "",
-                    onValueChange = {},
-                    label = { Text(stringResource(R.string.password)) }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.forgot_password),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Button(onClick = { /* Action */ }) {
-                    Text(stringResource(R.string.login))
-                }
+        LoginForm();
+    }
+}
 
+@Composable
+fun LoginForm() {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    // Partie basse (formulaire / connexion)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 15.dp), // Plus de padding à gauche
+        contentAlignment = Alignment.TopStart
+    ) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.height(50.dp))
+
+            // Champ Email
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = { Text(stringResource(R.string.email_adress)) },
+                label = { Text(stringResource(R.string.email_adress)) },
+                shape = RoundedCornerShape(16.dp), // arrondi
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Champ Password avec icône œil
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = { Text(stringResource(R.string.password)) },
+                label = { Text(stringResource(R.string.password)) },
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            painter = painterResource(id = image),
+                            contentDescription = if (passwordVisible) "Masquer le mot de passe" else "Afficher le mot de passe"
+                        )
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.forgot_password),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { /* Handle forgot password */ }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { /* Action */ },
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.login))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row {
+                Text(text = "Not a member? ")
+                Text(
+                    text = "Register Now",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable {
+                        // Action pour aller à la page d'inscription
+                    }
+                )
             }
         }
     }
