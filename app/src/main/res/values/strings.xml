@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Eco-Plant</string>
+    <string name="app_name" translatable="false">Eco-Plant</string>
     <!-- Nav bar -->
     <string name="map">Map</string>
     <string name="history">History</string>
@@ -12,4 +12,7 @@
     <string name="mail">Mail</string>
     <string name="password">Password</string>
     <string name="confirm_password">Confirm Password</string>
+    <string name="welcome">Welcome !</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="email_adress">Email adress</string>
 </resources>

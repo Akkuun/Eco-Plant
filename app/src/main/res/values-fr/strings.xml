@@ -11,4 +11,7 @@
     <string name="mail">Courriel</string>
     <string name="password">Mot de passe</string>
     <string name="confirm_password">Confirmer le mot de passe</string>
+    <string name="welcome">Bienvenue !</string>
+    <string name="forgot_password">Mot de passe oublié?</string>
+    <string name="email_adress">Adresse e-mail</string>
 </resources>
