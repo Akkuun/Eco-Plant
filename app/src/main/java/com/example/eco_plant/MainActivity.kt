@@ -26,8 +26,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         lifecycleScope.launch {
-            val inputStream = assets.open("data-1744126677780.csv")
-            val plantDatabaseHelper = PlantDatabaseHelper.createAsync(inputStream)
+            val plantDatabaseHelper = PlantDatabaseHelper.getInstance(applicationContext)
             // Use plants safely on the main thread here
 
             // Display the first 5 plants
@@ -47,6 +46,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
 
 
 
