@@ -13,16 +13,19 @@ import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     background = Neutral.Dark.DarkHigh,
-    primary = HighlightColors.HighlightsHigh,
+    primary = HighlightColors.HighlightsLowLow,
     secondary = Support.Sucess.SuccessMedium,
     tertiary = Support.Warning.WarningMedium
 )
-
+//Light Theme
 private val LightColorScheme = lightColorScheme(
     background = Neutral.Light.LightHigh,
-    primary = HighlightColors.HighlightsLow,
-    secondary = Support.Sucess.SuccessMediumLow,
-    tertiary = Support.Warning.WarningMediumLow
+    primary =  HighlightColors.HighlightsMedium, //
+    secondary = HighlightColors.HighlightsHigh, // Text des bouton
+    tertiary = HighlightColors.HighlightsMediumLow, // Text des bouton
+    error = Support.Error.ErrorHigh,
+
+
 )
 
 @Composable

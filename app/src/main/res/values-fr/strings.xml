@@ -14,4 +14,6 @@
     <string name="welcome">Bienvenue !</string>
     <string name="forgot_password">Mot de passe oublié?</string>
     <string name="email_adress">Adresse e-mail</string>
+    <string name="not_a_member">Pas encore membre?</string>
+    <string name="register_now">Inscrivez-vous maintenant</string>
 </resources>

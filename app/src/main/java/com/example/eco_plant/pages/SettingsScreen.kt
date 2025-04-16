@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.ButtonDefaults
 import androidx.lint.kotlin.metadata.Visibility
 
 
@@ -81,7 +82,7 @@ Box(
         LoginForm();
     }
 }
-
+@Preview(showBackground = true)
 @Composable
 fun LoginForm() {
     var email by remember { mutableStateOf("") }
@@ -145,6 +146,11 @@ fun LoginForm() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+
+                ),
                 onClick = { /* Action */ },
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -154,10 +160,15 @@ fun LoginForm() {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row {
-                Text(text = "Not a member? ")
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Text(text = stringResource(R.string.not_a_member))
                 Text(
-                    text = "Register Now",
+                    text = " "+stringResource(R.string.register_now),
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable {
                         // Action pour aller à la page d'inscription
