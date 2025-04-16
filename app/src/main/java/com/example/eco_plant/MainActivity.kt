@@ -1,5 +1,6 @@
 package com.example.eco_plant
 
+import com.example.eco_plant.pages.*
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,17 +8,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.eco_plant.database.PlantDatabaseHelper
 import com.example.eco_plant.ui.theme.EcoPlantTheme
 import com.example.eco_plant.ui.theme.InterTypography
+import com.example.eco_plant.database.PlantDatabaseHelper
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+
 
 class MainActivity : ComponentActivity() {
 
@@ -25,59 +27,130 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Chargement async de la BDD
         lifecycleScope.launch {
-            val plantDatabaseHelper = PlantDatabaseHelper.getInstance(applicationContext)
-            // Use plants safely on the main thread here
-
-            // Display the first 5 plants
-            for (i in 0..4) {
-                println(plantDatabaseHelper.plantSpecies[i].name)
-                println("Services:")
-                for (j in 0..2) {
-                    println(plantDatabaseHelper.plantSpecies[i].services[j])
-                }
-                println("Reliabilities:")
-                for (j in 0..2) {
-                    println(plantDatabaseHelper.plantSpecies[i].reliabilities[j])
-                }
-                println("Cultural Conditions:")
-                for (j in 0..2) {
-                    println(plantDatabaseHelper.plantSpecies[i].culturalConditions[j])
-                }
+            val db = PlantDatabaseHelper.getInstance(applicationContext)
+            db.plantSpecies.take(5).forEach {
+                println(it.name)
+                println("Services: ${it.services.take(3)}")
+                println("Reliabilities: ${it.reliabilities.take(3)}")
+                println("Cultural Conditions: ${it.culturalConditions.take(3)}")
             }
         }
 
-
-
-
-
         setContent {
             EcoPlantTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                MainScreen()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun MainScreen() {
+    var selectedItem by remember { mutableStateOf(2) }
+    // Bottom nav bar
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            painterResource(
+                                if (selectedItem == 0) R.drawable.ic_map_filled else R.drawable.ic_map_unfilled
+                            ),
+                            contentDescription = "Map"
+                        )
+                    },
+                    label = { Text("Map") },
+                    selected = selectedItem == 0,
+                    onClick = { selectedItem = 0 }
+                )
+
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            painterResource(
+                                if (selectedItem == 1) R.drawable.ic_history_filled else R.drawable.ic_history_unfilled
+                            ),
+                            contentDescription = "History"
+                        )
+                    },
+                    label = { Text("History") },
+                    selected = selectedItem == 1,
+                    onClick = { selectedItem = 1 }
+                )
+
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            painterResource(
+                                if (selectedItem == 2) R.drawable.ic_plant_filled else R.drawable.ic_plant_unfilled
+                            ),
+                            contentDescription = "Scan"
+                        )
+                    },
+                    label = { Text("Scan") },
+                    selected = selectedItem == 2,
+                    onClick = { selectedItem = 2 }
+                )
+
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            painterResource(
+                                if (selectedItem == 3) R.drawable.ic_settings_filled else R.drawable.ic_settings_unfilled
+                            ),
+                            contentDescription = "Settings"
+                        )
+                    },
+                    label = { Text("Settings") },
+                    selected = selectedItem == 3,
+                    onClick = { selectedItem = 3 }
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            when (selectedItem) {
+                0 -> MapScreen()
+                1 -> HistoryScreen()
+                2 -> ScanScreen()
+                3 -> SettingsScreen()
+            }
+        }
+    }
+}
+
+@Composable
+fun Greeting(name: String) {
     Text(
-        text = "Hello $name!",
+        text = "Bienvenue sur $name",
         style = InterTypography.displayLarge,
     )
 }
 
+
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-  EcoPlantTheme {
-      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-          Greeting("Android")
-      }
-  }
+fun PreviewMainScreen() {
+    EcoPlantTheme {
+        MainScreen()
+    }
+}
+
+fun getCorrectIcon(selectedItem: Int): Int {
+    //switch case in Kotlin
+    return when (selectedItem) {
+        0 -> R.drawable.ic_map_filled
+        1 -> R.drawable.ic_history_filled
+        2 -> R.drawable.ic_plant_filled
+        3 -> R.drawable.ic_settings_filled
+        else -> R.drawable.ic_map_filled
+    }
 }
