@@ -110,13 +110,16 @@ fun MainScreen() {
                 )
             }
         }
-    ) { innerPadding ->
+    ) {
+        //
+        innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
+            // Switch case on the selected item (navigation)
             when (selectedItem) {
                 0 -> MapScreen()
                 1 -> HistoryScreen()
@@ -125,14 +128,6 @@ fun MainScreen() {
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String) {
-    Text(
-        text = "Bienvenue sur $name",
-        style = InterTypography.displayLarge,
-    )
 }
 
 
@@ -144,13 +139,3 @@ fun PreviewMainScreen() {
     }
 }
 
-fun getCorrectIcon(selectedItem: Int): Int {
-    //switch case in Kotlin
-    return when (selectedItem) {
-        0 -> R.drawable.ic_map_filled
-        1 -> R.drawable.ic_history_filled
-        2 -> R.drawable.ic_plant_filled
-        3 -> R.drawable.ic_settings_filled
-        else -> R.drawable.ic_map_filled
-    }
-}
