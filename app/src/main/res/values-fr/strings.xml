@@ -1,0 +1,14 @@
+<resources>
+    <!-- Nav bar -->
+    <string name="map">Carte</string>
+    <string name="history">Historique</string>
+    <string name="scan">Scanner</string>
+    <string name="settings">Paramètres</string>
+    <string name="login">Connexion</string>
+    <!-- User page -->
+    <string name="register">S\'inscrire</string>
+    <string name="logout">Déconnexion</string>
+    <string name="mail">Courriel</string>
+    <string name="password">Mot de passe</string>
+    <string name="confirm_password">Confirmer le mot de passe</string>
+</resources>

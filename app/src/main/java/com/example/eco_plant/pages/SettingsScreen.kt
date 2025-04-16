@@ -2,6 +2,7 @@ package com.example.eco_plant.pages
 
 
 import android.widget.VideoView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +26,8 @@ import com.example.eco_plant.R
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SettingsScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+
 
        // Partie haute (video)
        Box(
