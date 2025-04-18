@@ -12,20 +12,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = HighlightColors.HighlightsHigh,
+    background = Neutral.Dark.DarkHigh,
+    primary = HighlightColors.HighlightsLowLow,
     secondary = Support.Sucess.SuccessMedium,
-    tertiary = Support.Warning.WarningMedium
+    tertiary = Support.Warning.WarningMedium,
+    error = Support.Error.ErrorHigh,
 )
-
+//Light Theme
 private val LightColorScheme = lightColorScheme(
-    primary = HighlightColors.HighlightsLow,
-    secondary = Support.Sucess.SuccessMediumLow,
-    tertiary = Support.Warning.WarningMediumLow
+    background = Neutral.Light.LightHigh,
+    primary =  HighlightColors.HighlightsMedium, //
+    secondary = HighlightColors.HighlightsHigh, // Text des bouton
+    tertiary = HighlightColors.HighlightsMediumLow, // Text des bouton
+    error = Support.Error.ErrorHigh,
+
+
 )
 
 @Composable
 fun EcoPlantTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = isSystemInDarkTheme(), // Note pour plus tard faire || option.darkTheme==true
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {

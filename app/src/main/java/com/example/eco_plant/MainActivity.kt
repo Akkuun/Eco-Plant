@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.eco_plant.ui.theme.EcoPlantTheme
 import com.example.eco_plant.ui.theme.InterTypography
@@ -39,7 +41,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            EcoPlantTheme {
+            EcoPlantTheme(dynamicColor = false){ // Forcer le thème sombre
                 MainScreen()
             }
         }
@@ -49,7 +51,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     var selectedItem by remember { mutableStateOf(2) }
-    // Bottom nav bar
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -59,10 +60,10 @@ fun MainScreen() {
                             painterResource(
                                 if (selectedItem == 0) R.drawable.ic_map_filled else R.drawable.ic_map_unfilled
                             ),
-                            contentDescription = "Map"
+                            contentDescription = stringResource(id = R.string.map)
                         )
                     },
-                    label = { Text("Map") },
+                    label = { Text(stringResource(id = R.string.map)) },
                     selected = selectedItem == 0,
                     onClick = { selectedItem = 0 }
                 )
@@ -73,10 +74,10 @@ fun MainScreen() {
                             painterResource(
                                 if (selectedItem == 1) R.drawable.ic_history_filled else R.drawable.ic_history_unfilled
                             ),
-                            contentDescription = "History"
+                            contentDescription = stringResource(id = R.string.history)
                         )
                     },
-                    label = { Text("History") },
+                    label = { Text(stringResource(id = R.string.history)) },
                     selected = selectedItem == 1,
                     onClick = { selectedItem = 1 }
                 )
@@ -87,10 +88,10 @@ fun MainScreen() {
                             painterResource(
                                 if (selectedItem == 2) R.drawable.ic_plant_filled else R.drawable.ic_plant_unfilled
                             ),
-                            contentDescription = "Scan"
+                            contentDescription = stringResource(id = R.string.scan)
                         )
                     },
-                    label = { Text("Scan") },
+                    label = { Text(stringResource(id = R.string.scan)) },
                     selected = selectedItem == 2,
                     onClick = { selectedItem = 2 }
                 )
@@ -101,25 +102,23 @@ fun MainScreen() {
                             painterResource(
                                 if (selectedItem == 3) R.drawable.ic_settings_filled else R.drawable.ic_settings_unfilled
                             ),
-                            contentDescription = "Settings"
+                            contentDescription = stringResource(id = R.string.settings)
                         )
                     },
-                    label = { Text("Settings") },
+                    label = { Text(stringResource(id = R.string.settings)) },
                     selected = selectedItem == 3,
                     onClick = { selectedItem = 3 }
                 )
             }
         }
-    ) {
-        //
-        innerPadding ->
+    ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center
         ) {
-            // Switch case on the selected item (navigation)
             when (selectedItem) {
                 0 -> MapScreen()
                 1 -> HistoryScreen()
@@ -130,12 +129,4 @@ fun MainScreen() {
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewMainScreen() {
-    EcoPlantTheme {
-        MainScreen()
-    }
-}
 
