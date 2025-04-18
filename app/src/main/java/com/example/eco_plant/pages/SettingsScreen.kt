@@ -34,8 +34,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.navigation.compose.rememberNavController
-
 
 
 @Composable
@@ -50,8 +48,6 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
     Column(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-
-
         // Upper part of the Form : background image
         Box(
             modifier = Modifier
@@ -83,7 +79,6 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                 modifier = Modifier.clickable(interactionSource  = interactionSource, indication = null) { keyboardController?.hide() } // On hide le clavier quand on touche le texte
             )
         }
-
 
         // Bottom part of the Form
         Box(
