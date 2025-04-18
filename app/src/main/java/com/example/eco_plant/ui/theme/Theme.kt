@@ -15,7 +15,8 @@ private val DarkColorScheme = darkColorScheme(
     background = Neutral.Dark.DarkHigh,
     primary = HighlightColors.HighlightsLowLow,
     secondary = Support.Sucess.SuccessMedium,
-    tertiary = Support.Warning.WarningMedium
+    tertiary = Support.Warning.WarningMedium,
+    error = Support.Error.ErrorHigh,
 )
 //Light Theme
 private val LightColorScheme = lightColorScheme(

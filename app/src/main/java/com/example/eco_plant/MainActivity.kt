@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            EcoPlantTheme {
+            EcoPlantTheme(dynamicColor = false){ // Forcer le thème sombre
                 MainScreen()
             }
         }
@@ -129,12 +129,4 @@ fun MainScreen() {
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewMainScreen() {
-    EcoPlantTheme {
-        MainScreen()
-    }
-}
 

@@ -144,20 +144,23 @@ fun LoginForm() {
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
+            Text(
+                text = "Test Couleur",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(8.dp)
+            )
             Button(
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-
-                ),
                 onClick = { /* Action */ },
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.login))
+                Text(
+                    text = stringResource(R.string.login),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Row (
