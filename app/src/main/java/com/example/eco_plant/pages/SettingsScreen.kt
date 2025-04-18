@@ -36,22 +36,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val interactionSource = remember { MutableInteractionSource() }
+    val keyboardController = LocalSoftwareKeyboardController.current // to hide the keyboard
+    val interactionSource = remember { MutableInteractionSource() } // to handle clicks
 
 
     Column(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-
-
-// Partie haute (image arrondi)
+        // Upper part of the Form : background image
         Box(
             modifier = Modifier
                 .weight(0.6f)
@@ -74,7 +71,7 @@ fun SettingsScreen() {
                 .align(Alignment.Start), // Align the box to the left
             contentAlignment = Alignment.Center
         ) {
-            // Contenu de la boîte de connexion
+
             Text(
                 text = stringResource(R.string.welcome),
                 style = MaterialTheme.typography.displayLarge,
@@ -83,8 +80,7 @@ fun SettingsScreen() {
             )
         }
 
-
-        // Partie basse (formulaire / connexion)
+        // Bottom part of the Form
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,7 +93,7 @@ fun SettingsScreen() {
             ) {
                 Spacer(modifier = Modifier.height(50.dp))
 
-                // Champ Email
+                // Email text field
                 OutlinedTextField(
 
                     value = email,
@@ -112,7 +108,7 @@ fun SettingsScreen() {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Champ Password avec icône œil
+                // Password text field
                 OutlinedTextField(
 
                     value = password,
@@ -136,7 +132,7 @@ fun SettingsScreen() {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
+                // Forgot password button
                 Text(
                     text = stringResource(R.string.forgot_password),
                     style = MaterialTheme.typography.bodyLarge,
@@ -173,7 +169,10 @@ fun SettingsScreen() {
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = MaterialTheme.typography.displaySmall.fontSize,
                         modifier = Modifier.clickable {
-                            // Action pour aller à la page d'inscription
+                            // Handle register now click
+                            NavigationController.navigate("sign_in")
+
+
                         }
                     )
                 }
