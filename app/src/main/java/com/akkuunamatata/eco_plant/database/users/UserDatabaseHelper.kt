@@ -1,4 +1,4 @@
-package com.example.eco_plant.database.users
+package com.akkuunamatata.eco_plant.database.users
 
 import com.google.firebase.auth.FirebaseAuth
 

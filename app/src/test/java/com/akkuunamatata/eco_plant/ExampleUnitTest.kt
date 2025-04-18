@@ -1,4 +1,4 @@
-package com.example.eco_plant
+package com.akkuunamatata.eco_plant
 
 import org.junit.Test
 

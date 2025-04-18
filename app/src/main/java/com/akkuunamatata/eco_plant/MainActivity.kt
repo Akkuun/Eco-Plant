@@ -1,4 +1,4 @@
-package com.example.eco_plant
+package com.akkuunamatata.eco_plant
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -18,9 +18,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.eco_plant.pages.*
-import com.example.eco_plant.ui.theme.EcoPlantTheme
-import com.example.eco_plant.database.plants.PlantDatabaseHelper
+import com.akkuunamatata.eco_plant.pages.*
+import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
+import com.akkuunamatata.eco_plant.database.plants.PlantDatabaseHelper
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {

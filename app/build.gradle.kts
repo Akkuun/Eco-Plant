@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.eco_plant"
+    namespace = "com.akkuunamatata.eco_plant"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.eco_plant"
+        applicationId = "com.akkuunamatata.eco_plant"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

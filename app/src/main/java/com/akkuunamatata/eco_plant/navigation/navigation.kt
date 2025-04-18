@@ -1,4 +1,4 @@
-package com.example.eco_plant.navigation
+package com.akkuunamatata.eco_plant.navigation
 
 object Routes {
     const val MAP = "map"
