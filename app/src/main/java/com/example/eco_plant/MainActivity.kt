@@ -1,27 +1,28 @@
 package com.example.eco_plant
 
-import com.example.eco_plant.pages.*
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.eco_plant.ui.theme.EcoPlantTheme
-import com.example.eco_plant.ui.theme.InterTypography
-import com.example.eco_plant.database.PlantDatabaseHelper
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.eco_plant.pages.*
+import com.example.eco_plant.ui.theme.EcoPlantTheme
+import com.example.eco_plant.database.PlantDatabaseHelper
 import kotlinx.coroutines.launch
-
 
 class MainActivity : ComponentActivity() {
 
@@ -41,16 +42,34 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            EcoPlantTheme(dynamicColor = false){ // Forcer le thème sombre
-                MainScreen()
+            EcoPlantTheme(dynamicColor = false) { // Use the custom theme
+                AppNavigation()
             }
         }
     }
 }
 
 @Composable
-fun MainScreen() {
-    var selectedItem by remember { mutableStateOf(2) }
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "map"
+    ) {
+        composable("map") { MapScreen() }
+        composable("history") { HistoryScreen() }
+        composable("scan") { ScanScreen() }
+        composable("settings") { SettingsScreen(navController) }
+        composable("sign_in") { SignInScreen() }
+    }
+
+    MainScreen(navController)
+}
+
+@Composable
+fun MainScreen(navController: androidx.navigation.NavHostController) {
+    var selectedItem by remember { mutableStateOf(0) }
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -65,7 +84,10 @@ fun MainScreen() {
                     },
                     label = { Text(stringResource(id = R.string.map)) },
                     selected = selectedItem == 0,
-                    onClick = { selectedItem = 0 }
+                    onClick = {
+                        selectedItem = 0
+                        navController.navigate("map")
+                    }
                 )
 
                 NavigationBarItem(
@@ -79,7 +101,10 @@ fun MainScreen() {
                     },
                     label = { Text(stringResource(id = R.string.history)) },
                     selected = selectedItem == 1,
-                    onClick = { selectedItem = 1 }
+                    onClick = {
+                        selectedItem = 1
+                        navController.navigate("history")
+                    }
                 )
 
                 NavigationBarItem(
@@ -93,7 +118,10 @@ fun MainScreen() {
                     },
                     label = { Text(stringResource(id = R.string.scan)) },
                     selected = selectedItem == 2,
-                    onClick = { selectedItem = 2 }
+                    onClick = {
+                        selectedItem = 2
+                        navController.navigate("scan")
+                    }
                 )
 
                 NavigationBarItem(
@@ -107,26 +135,24 @@ fun MainScreen() {
                     },
                     label = { Text(stringResource(id = R.string.settings)) },
                     selected = selectedItem == 3,
-                    onClick = { selectedItem = 3 }
+                    onClick = {
+                        selectedItem = 3
+                        navController.navigate("settings")
+                    }
                 )
             }
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background),
-            contentAlignment = Alignment.Center
+        NavHost(
+            navController = navController,
+            startDestination = "map",
+            modifier = Modifier.padding(innerPadding) // Appliquer le padding
         ) {
-            when (selectedItem) {
-                0 -> MapScreen()
-                1 -> HistoryScreen()
-                2 -> ScanScreen()
-                3 -> SettingsScreen()
-            }
+            composable("map") { MapScreen() }
+            composable("history") { HistoryScreen() }
+            composable("scan") { ScanScreen() }
+            composable("settings") { SettingsScreen(navController) }
+            composable("sign_in") { SignInScreen() }
         }
     }
 }
-
-
