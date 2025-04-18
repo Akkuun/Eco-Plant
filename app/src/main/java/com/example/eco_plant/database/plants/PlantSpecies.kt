@@ -1,4 +1,4 @@
-package com.example.eco_plant.database
+package com.example.eco_plant.database.plants
 
 enum class PlantService(val id: Int) {
     NITROGEN_PROVISION(0),
