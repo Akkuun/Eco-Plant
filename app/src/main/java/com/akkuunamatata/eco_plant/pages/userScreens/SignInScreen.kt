@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -99,7 +101,8 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                         emailError = false
                     },
                     label = stringResource(id = R.string.email_adress),
-                    isError = emailError
+                    isError = emailError,
+                    keyboardType = KeyboardType.Email // Set the keyboard type to Email
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -114,7 +117,8 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                     isError = passwordError,
                     isPassword = true,
                     passwordVisible = passwordVisible,
-                    onPasswordToggle = { passwordVisible = !passwordVisible }
+                    onPasswordToggle = { passwordVisible = !passwordVisible },
+                    keyboardType = KeyboardType.Password // Set the keyboard type to Password
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -129,7 +133,8 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                     isError = confirmPasswordError,
                     isPassword = true,
                     passwordVisible = confirmPasswordVisible,
-                    onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible }
+                    onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible },
+                    keyboardType = KeyboardType.Password // Set the keyboard type to Password
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -159,34 +164,43 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                             auth.createUserWithEmailAndPassword(email, password)
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
-                                        val uid = auth.currentUser?.uid
-                                        if(uid != null) {
-                                            // Store the name in the database
-                                            val userData = hashMapOf(
-                                                "name" to name,
-                                                "email" to email
-                                            )
-                                            dl.collection("users").document(uid)
-                                                .set(userData)
-                                                .addOnSuccessListener {
+                                        val user = auth.currentUser
+                                        user?.sendEmailVerification()
+                                            ?.addOnCompleteListener { emailTask ->
+                                                if (emailTask.isSuccessful) {
+                                                    val uid = user.uid
+                                                    if (uid != null) {
+                                                        // Enregistrer le nom dans la base de données
+                                                        val userData = hashMapOf(
+                                                            "name" to name,
+                                                            "email" to email
+                                                        )
+                                                        dl.collection("users").document(uid)
+                                                            .set(userData)
+                                                            .addOnSuccessListener {
+                                                                Toast.makeText(
+                                                                    context,
+                                                                    "Inscription réussie. Veuillez vérifier votre email pour confirmer votre compte.",
+                                                                    Toast.LENGTH_SHORT
+                                                                ).show()
+                                                                NavigationController.navigate("login") // Rediriger vers l'écran de connexion
+                                                            }
+                                                            .addOnFailureListener { e ->
+                                                                Toast.makeText(
+                                                                    context,
+                                                                    "Erreur lors de l'enregistrement des données : ${e.message}",
+                                                                    Toast.LENGTH_SHORT
+                                                                ).show()
+                                                            }
+                                                    }
+                                                } else {
                                                     Toast.makeText(
                                                         context,
-                                                        "Inscription réussie",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                    NavigationController.navigate("scan")
-                                                }
-                                                .addOnFailureListener { e ->
-                                                    // Handle the error
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Erreur lors de l'enregistrement des données : ${e.message}",
+                                                        "Erreur lors de l'envoi de l'email de confirmation : ${emailTask.exception?.message}",
                                                         Toast.LENGTH_SHORT
                                                     ).show()
                                                 }
-                                        }
-
-
+                                            }
                                     } else {
                                         Toast.makeText(
                                             context,
@@ -205,11 +219,12 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
         }
     }
 }
+
 fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
-    if(confirmPassword.isEmpty()){
+    if (confirmPassword.isEmpty()) {
         return false
     }
-    if(password != confirmPassword){
+    if (password != confirmPassword) {
         return false
     }
     return true;
@@ -217,22 +232,22 @@ fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
 }
 
 fun checkPassword(password: String): Boolean {
-    if(password.isEmpty()){
+    if (password.isEmpty()) {
         return false
     }
-    if(password.length < 6){
+    if (password.length < 6) {
         return false
     }
-    if(!password.any { it.isDigit() }){
+    if (!password.any { it.isDigit() }) {
         return false
     }
-    if(!password.any { it.isLetter() }){
+    if (!password.any { it.isLetter() }) {
         return false
     }
-    if(!password.any { it.isUpperCase() }){
+    if (!password.any { it.isUpperCase() }) {
         return false
     }
-    if(!password.any { it.isLowerCase() }){
+    if (!password.any { it.isLowerCase() }) {
         return false
     }
     return true;
@@ -240,10 +255,10 @@ fun checkPassword(password: String): Boolean {
 }
 
 fun checkEmail(email: String): Boolean {
-    if(email.isEmpty()){
+    if (email.isEmpty()) {
         return false
     }
-    if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
         return false
     }
     return true;
@@ -252,13 +267,13 @@ fun checkEmail(email: String): Boolean {
 
 // Function to check if the name is valid
 fun checkName(name: String): Boolean {
-    if(name.isEmpty()){
+    if (name.isEmpty()) {
         return false
     }
-    if(name.length < 3){
+    if (name.length < 3) {
         return false
     }
-    if(!name.all { it.isLetter() || it.isWhitespace() }){
+    if (!name.all { it.isLetter() || it.isWhitespace() }) {
         return false
     }
     return true;
@@ -274,7 +289,8 @@ fun CustomTextField(
     modifier: Modifier = Modifier,
     isPassword: Boolean = false,
     passwordVisible: Boolean = false,
-    onPasswordToggle: (() -> Unit)? = null
+    onPasswordToggle: (() -> Unit)? = null,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
     OutlinedTextField(
         value = value,
@@ -286,7 +302,8 @@ fun CustomTextField(
         visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
         trailingIcon = if (isPassword) {
             {
-                val image = if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
+                val image =
+                    if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
                 IconButton(onClick = { onPasswordToggle?.invoke() }) {
                     Icon(
                         painter = painterResource(id = image),
@@ -294,6 +311,7 @@ fun CustomTextField(
                     )
                 }
             }
-        } else null
+        } else null,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType) // Set the keyboard type
     )
 }

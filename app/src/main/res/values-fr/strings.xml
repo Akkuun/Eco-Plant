@@ -15,7 +15,7 @@
     <string name="forgot_password">Mot de passe oublié?</string>
     <string name="email_adress">Adresse e-mail</string>
     <string name="not_a_member">Pas encore membre?</string>
-    <string name="register_now">Inscrivez-vous maintenant</string>
+    <string name="register_now">Inscrivez-vous</string>
     <!-- SignIn page -->
     <string name="sign_in">S\'inscrire</string>
     <string name="create_an_account">Créer un compte pour continuer</string>
