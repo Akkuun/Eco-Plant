@@ -16,7 +16,9 @@ private val DarkColorScheme = darkColorScheme(
     secondary = Support.Sucess.SuccessMedium,
     tertiary = Support.Warning.WarningMedium,
     error = Support.Error.ErrorHigh,
-    surface = Neutral.Dark.Darkest
+    surface = Neutral.Dark.Darkest,
+    surfaceVariant = Neutral.Dark.Dark,
+    inverseSurface = HighlightColors.Dark,
 )
 //Light Theme
 private val LightColorScheme = lightColorScheme(
