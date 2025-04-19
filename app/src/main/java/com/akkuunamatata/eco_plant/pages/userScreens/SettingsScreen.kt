@@ -44,6 +44,8 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
     val keyboardController = LocalSoftwareKeyboardController.current // to hide the keyboard
     val interactionSource = remember { MutableInteractionSource() } // to handle clicks
     val auth = FirebaseAuth.getInstance()
+    var emailError by remember { mutableStateOf(false) }
+    var passwordError by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -95,40 +97,42 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
 
                 // Email text field
                 OutlinedTextField(
-
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        email = it
+                        emailError = false // Réinitialise l'erreur lorsque l'utilisateur modifie le champ
+                    },
                     placeholder = { Text(stringResource(R.string.email_adress)) },
                     label = { Text(stringResource(R.string.email_adress)) },
-                    shape = RoundedCornerShape(16.dp), // arrondi
+                    shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth(),
-
-
-                    )
+                    isError = emailError // Affiche une bordure rouge si emailError est vrai
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Password text field
                 OutlinedTextField(
-
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = {
+                        password = it
+                        passwordError = false // Réinitialise l'erreur lorsque l'utilisateur modifie le champ
+                    },
                     placeholder = { Text(stringResource(R.string.password)) },
                     label = { Text(stringResource(R.string.password)) },
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth(),
-
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
-                        val image =
-                            if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
+                        val image = if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 painter = painterResource(id = image),
                                 contentDescription = if (passwordVisible) "Masquer le mot de passe" else "Afficher le mot de passe"
                             )
                         }
-                    }
+                    },
+                    isError = passwordError // Affiche une bordure rouge si passwordError est vrai
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -144,26 +148,33 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
 
                 Button(
                     onClick = {
-                        // Handle login click
-                        // Check if the name is not empty
-                        if(email.isNotEmpty() && password.isNotEmpty()) {
+                        emailError = email.isEmpty()
+                        passwordError = password.isEmpty()
+
+                        if (!emailError && !passwordError) {
                             auth.signInWithEmailAndPassword(email, password)
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
-                                        // Login successful
                                         NavigationController.navigate("sign_in")
                                     } else {
-                                        // Login failed
-                                        // Handle error by showing a message and highlighting the wrong field
-
+                                        // highlight both fields in red and Snackbar messge
+                                        emailError = true
+                                        passwordError = true
+//                                        Snackbar(
+//                                            action = {
+//                                                Text(
+//                                                    text = stringResource(R.string.close),
+//                                                    color = MaterialTheme.colorScheme.primary,
+//                                                    modifier = Modifier.clickable { /* Handle close */ }
+//                                                )
+//                                            },
+//                                            content = {
+//                                                Text(text = stringResource(R.string.login_failed))
+//                                            }
+//                                        )
                                     }
                                 }
-                        } else {
-                            // Show error message
                         }
-
-
-
                     },
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
