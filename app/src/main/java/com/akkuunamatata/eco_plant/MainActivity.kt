@@ -30,7 +30,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseApp.initializeApp(this) ?: throw IllegalStateException("FirebaseApp n'a pas pu être initialisé.")
+        // Firebase init in sync to help performances
+        lifecycleScope.launch {
+            FirebaseApp.initializeApp(this@MainActivity) ?: throw IllegalStateException("FirebaseApp n'a pas pu être initialisé.")
+        }
         enableEdgeToEdge()
 
         // Chargement async de la BDD
@@ -149,8 +152,10 @@ fun MainScreen(navController: androidx.navigation.NavHostController) {
         NavHost(
             navController = navController,
             startDestination = "map",
-            modifier = Modifier.padding(innerPadding) // Appliquer le padding
-        ) {
+            modifier = Modifier.padding(innerPadding)
+        )
+        // routes definitions
+        {
             composable("map") { MapScreen() }
             composable("history") { HistoryScreen() }
             composable("scan") { ScanScreen() }
