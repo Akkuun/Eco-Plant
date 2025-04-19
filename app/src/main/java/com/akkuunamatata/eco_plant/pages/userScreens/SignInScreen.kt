@@ -1,5 +1,6 @@
 package com.akkuunamatata.eco_plant.pages.userScreens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,18 +35,23 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
 fun SignInScreen() {
+
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current // to hide the keyboard
-    val interactionSource = remember { MutableInteractionSource() } // to handle clicks
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val interactionSource = remember { MutableInteractionSource() }
     var isChecked by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -69,11 +76,7 @@ fun SignInScreen() {
             )
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Form part
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Name
+            Column(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     shape = RoundedCornerShape(16.dp),
                     value = name,
@@ -83,7 +86,6 @@ fun SignInScreen() {
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Email
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -94,7 +96,6 @@ fun SignInScreen() {
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Password
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -115,10 +116,10 @@ fun SignInScreen() {
                     }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                // Confirm Password
+
                 OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
                     placeholder = { Text(stringResource(R.string.confirm_password)) },
                     label = { Text(stringResource(R.string.confirm_password)) },
                     shape = RoundedCornerShape(16.dp),
@@ -136,51 +137,40 @@ fun SignInScreen() {
                     }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Checkbox(
-                        checked = isChecked,
-                        onCheckedChange = { isChecked = it },
-                        modifier = Modifier.padding(8.dp)
-                    )
 
-                    Column() {
-                        Row {
-                            Text(
-                                text = stringResource(id = R.string.accept_term) + " ",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
-                            Text(
-                                text = stringResource(id = R.string.terms_and_conditions),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.clickable { /* Handle terms and conditions click */ }
-                            )
-                        }
-
-                        Row {
-                            Text(
-                                text = stringResource(id = R.string.and_the) + " ",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
-                            Text(
-                                text = stringResource(id = R.string.privacy_policy),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.clickable { /* Handle privacy policy click */ }
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Sign In button
                 Button(
-                    onClick = { /* Handle sign in */ },
+                    onClick = {
+                        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                "Tous les champs doivent être remplis",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else if (password != confirmPassword) {
+                            Toast.makeText(
+                                context,
+                                "Les mots de passe ne correspondent pas",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        Toast.makeText(
+                                            context,
+                                            "Compte créé avec succès",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Erreur : ${task.exception?.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                        }
+                    },
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -189,8 +179,6 @@ fun SignInScreen() {
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
-
-
             }
         }
     }
