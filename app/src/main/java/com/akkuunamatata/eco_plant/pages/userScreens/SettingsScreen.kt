@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.google.firebase.auth.FirebaseAuth
 
@@ -46,6 +47,7 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
     val auth = FirebaseAuth.getInstance()
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
+    var showSnackbar by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -157,21 +159,9 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                                     if (task.isSuccessful) {
                                         NavigationController.navigate("sign_in")
                                     } else {
-                                        // highlight both fields in red and Snackbar messge
                                         emailError = true
                                         passwordError = true
-//                                        Snackbar(
-//                                            action = {
-//                                                Text(
-//                                                    text = stringResource(R.string.close),
-//                                                    color = MaterialTheme.colorScheme.primary,
-//                                                    modifier = Modifier.clickable { /* Handle close */ }
-//                                                )
-//                                            },
-//                                            content = {
-//                                                Text(text = stringResource(R.string.login_failed))
-//                                            }
-//                                        )
+                                        showSnackbar = true // Affiche le Snackbar
                                     }
                                 }
                         }
@@ -182,6 +172,21 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                     Text(
                         text = stringResource(R.string.login),
                         style = MaterialTheme.typography.labelLarge
+                    )
+                }
+                // Snackbar for login error
+                if (showSnackbar) {
+                    Snackbar(
+                        action = {
+                            Text(
+                                text = stringResource(R.string.close),
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.clickable { showSnackbar = false } // Ferme le Snackbar
+                            )
+                        },
+                        content = {
+                            Text(text = stringResource(R.string.login_failed))
+                        }
                     )
                 }
                 Spacer(modifier = Modifier.height(24.dp))

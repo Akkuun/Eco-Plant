@@ -27,4 +27,6 @@
     <string name="retry">Réessayer</string>
     <string name="error">Erreur</string>
     <string name="login_failed">Échec de la connexion</string>
+    <string name="close">Fermer</string>
+    <string name="welcome_back">Content de vous revoir </string>
 </resources>
