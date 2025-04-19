@@ -18,6 +18,7 @@ package com.akkuunamatata.eco_plant
         import androidx.navigation.compose.composable
         import androidx.navigation.compose.rememberNavController
         import com.akkuunamatata.eco_plant.pages.*
+        import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
         import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
         import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
         import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
@@ -53,7 +54,7 @@ package com.akkuunamatata.eco_plant
                 ) {
                     composable("map") { MapScreen() }
                     composable("history") { HistoryScreen() }
-                    composable("scan") { ScanScreen() }
+                    composable("scan") { ScanScreen(navController) }
                     composable("settings") { SettingsScreen(navController) }
                     composable("sign_in") { SignInScreen(navController) }
                     composable("mailCheckup") { EmailVerificationScreen(navController) }
