@@ -31,7 +31,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -50,7 +52,7 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
-
+    val dl = FirebaseFirestore.getInstance()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -157,12 +159,34 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                             auth.createUserWithEmailAndPassword(email, password)
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
-                                        Toast.makeText(
-                                            context,
-                                            "Inscription réussie",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        NavigationController.navigate("scan")
+                                        val uid = auth.currentUser?.uid
+                                        if(uid != null) {
+                                            // Store the name in the database
+                                            val userData = hashMapOf(
+                                                "name" to name,
+                                                "email" to email
+                                            )
+                                            dl.collection("users").document(uid)
+                                                .set(userData)
+                                                .addOnSuccessListener {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Inscription réussie",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                    NavigationController.navigate("scan")
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    // Handle the error
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Erreur lors de l'enregistrement des données : ${e.message}",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                        }
+
+
                                     } else {
                                         Toast.makeText(
                                             context,
