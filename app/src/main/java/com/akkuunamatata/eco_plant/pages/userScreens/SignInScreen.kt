@@ -39,7 +39,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun SignInScreen() {
+fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
 
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -51,58 +51,70 @@ fun SignInScreen() {
     var isChecked by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
+    var nameError by remember { mutableStateOf(false) }
+    var emailError by remember { mutableStateOf(false) }
+    var passwordError by remember { mutableStateOf(false) }
+    var confirmPasswordError by remember { mutableStateOf(false) }
+
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 20.dp)
-            .clickable(interactionSource = interactionSource, indication = null) {
-                keyboardController?.hide()
-            }
     ) {
         Column {
             Text(
                 text = stringResource(id = R.string.sign_in),
                 style = MaterialTheme.typography.displayLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = stringResource(id = R.string.create_an_account),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(20.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
+                // Champ Nom
                 OutlinedTextField(
                     shape = RoundedCornerShape(16.dp),
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                        nameError = false
+                    },
                     label = { Text(stringResource(id = R.string.name)) },
+                    isError = nameError,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
+                // Champ Email
                 OutlinedTextField(
+                    shape = RoundedCornerShape(16.dp),
                     value = email,
-                    onValueChange = { email = it },
-                    placeholder = { Text(stringResource(R.string.email_adress)) },
-                    label = { Text(stringResource(R.string.email_adress)) },
-                    shape = RoundedCornerShape(16.dp),
+                    onValueChange = {
+                        email = it
+                        emailError = false
+                    },
+                    label = { Text(stringResource(id = R.string.email_adress)) },
+                    isError = emailError,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
+                // Champ Mot de passe
                 OutlinedTextField(
+                    shape = RoundedCornerShape(16.dp),
                     value = password,
-                    onValueChange = { password = it },
-                    placeholder = { Text(stringResource(R.string.password)) },
-                    label = { Text(stringResource(R.string.password)) },
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth(),
+                    onValueChange = {
+                        password = it
+                        passwordError = false
+                    },
+                    label = { Text(stringResource(id = R.string.password)) },
+                    isError = passwordError,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image =
@@ -110,20 +122,24 @@ fun SignInScreen() {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 painter = painterResource(id = image),
-                                contentDescription = if (passwordVisible) "Masquer le mot de passe" else "Afficher le mot de passe"
+                                contentDescription = null
                             )
                         }
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
+                // Champ Confirmation Mot de passe
                 OutlinedTextField(
-                    value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
-                    placeholder = { Text(stringResource(R.string.confirm_password)) },
-                    label = { Text(stringResource(R.string.confirm_password)) },
                     shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth(),
+                    value = confirmPassword,
+                    onValueChange = {
+                        confirmPassword = it
+                        confirmPasswordError = false
+                    },
+                    label = { Text(stringResource(id = R.string.confirm_password)) },
+                    isError = confirmPasswordError,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image =
@@ -131,56 +147,121 @@ fun SignInScreen() {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 painter = painterResource(id = image),
-                                contentDescription = if (passwordVisible) "Masquer le mot de passe" else "Afficher le mot de passe"
+                                contentDescription = null
                             )
                         }
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
+                // Bouton Inscription
                 Button(
                     onClick = {
-                        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                            Toast.makeText(
-                                context,
-                                "Tous les champs doivent être remplis",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else if (password != confirmPassword) {
-                            Toast.makeText(
-                                context,
-                                "Les mots de passe ne correspondent pas",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
+                        var isValid = true
+
+                        if (!checkName(name)) {
+                            nameError = true
+                            isValid = false
+                        }
+                        if (!checkEmail(email)) {
+                            emailError = true
+                            isValid = false
+                        }
+                        if (!checkPassword(password)) {
+                            passwordError = true
+                            isValid = false
+                        }
+                        if (!checkConfirmPassword(password, confirmPassword)) {
+                            confirmPasswordError = true
+                            isValid = false
+                        }
+
+                        if (isValid) {
                             auth.createUserWithEmailAndPassword(email, password)
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
                                         Toast.makeText(
                                             context,
-                                            "Compte créé avec succès",
+                                            "Inscription réussie",
                                             Toast.LENGTH_SHORT
                                         ).show()
+                                        NavigationController.navigate("scan")
                                     } else {
                                         Toast.makeText(
                                             context,
-                                            "Erreur : ${task.exception?.message}",
+                                            "Inscription échouée : ${task.exception?.message}",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
                                 }
+                        } else {
+                            Toast.makeText(context, "Veuillez corriger les erreurs", Toast.LENGTH_SHORT).show()
                         }
                     },
-                    shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.sign_in),
-                        style = MaterialTheme.typography.labelLarge
-                    )
+                    Text(text = stringResource(id = R.string.sign_in))
                 }
             }
         }
     }
+}
+fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
+    if(confirmPassword.isEmpty()){
+        return false
+    }
+    if(password != confirmPassword){
+        return false
+    }
+    return true;
 
+}
+
+fun checkPassword(password: String): Boolean {
+    if(password.isEmpty()){
+        return false
+    }
+    if(password.length < 6){
+        return false
+    }
+    if(!password.any { it.isDigit() }){
+        return false
+    }
+    if(!password.any { it.isLetter() }){
+        return false
+    }
+    if(!password.any { it.isUpperCase() }){
+        return false
+    }
+    if(!password.any { it.isLowerCase() }){
+        return false
+    }
+    return true;
+
+}
+
+fun checkEmail(email: String): Boolean {
+    if(email.isEmpty()){
+        return false
+    }
+    if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+        return false
+    }
+    return true;
+
+}
+
+// Function to check if the name is valid
+fun checkName(name: String): Boolean {
+    if(name.isEmpty()){
+        return false
+    }
+    if(name.length < 3){
+        return false
+    }
+    if(!name.all { it.isLetter() || it.isWhitespace() }){
+        return false
+    }
+    return true;
 }

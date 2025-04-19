@@ -1,6 +1,7 @@
 package com.akkuunamatata.eco_plant
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -67,7 +68,7 @@ fun AppNavigation() {
         composable("history") { HistoryScreen() }
         composable("scan") { ScanScreen() }
         composable("settings") { SettingsScreen(navController) }
-        composable("sign_in") { SignInScreen() }
+        composable("sign_in") { SignInScreen(navController) }
     }
 
     MainScreen(navController)
@@ -160,7 +161,7 @@ fun MainScreen(navController: androidx.navigation.NavHostController) {
             composable("history") { HistoryScreen() }
             composable("scan") { ScanScreen() }
             composable("settings") { SettingsScreen(navController) }
-            composable("sign_in") { SignInScreen() }
+            composable("sign_in") { SignInScreen(navController) }
         }
     }
 }
