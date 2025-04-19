@@ -1,4 +1,5 @@
 package com.akkuunamatata.eco_plant.pages.userScreens
+import android.widget.Toast
 import com.akkuunamatata.eco_plant.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,14 +28,18 @@ import androidx.compose.runtime.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.KeyboardType
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -48,7 +53,7 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var showSnackbar by remember { mutableStateOf(false) }
-
+    val context = LocalContext.current
     Column(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
@@ -99,6 +104,7 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
 
                 // Email text field
                 OutlinedTextField(
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     value = email,
                     onValueChange = {
                         email = it
@@ -115,6 +121,8 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
 
                 // Password text field
                 OutlinedTextField(
+                    //type password
+                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     value = password,
                     onValueChange = {
                         password = it
@@ -157,7 +165,30 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                             auth.signInWithEmailAndPassword(email, password)
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
-                                        NavigationController.navigate("sign_in")
+                                        val user = auth.currentUser
+                                        val userEmail = user?.email
+
+                                        if (userEmail != null) {
+                                            // Vérifier si l'email existe dans Firestore
+                                            val db = FirebaseFirestore.getInstance()
+                                            db.collection("users")
+                                                .whereEqualTo("email", userEmail)
+                                                .get()
+                                                .addOnSuccessListener { documents ->
+                                                    if (documents.isEmpty) {
+                                                        // Email non trouvé dans Firestore
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Compte non activé. Veuillez vérifier votre email.",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    } else {
+                                                        // Naviguer si l'email est trouvé
+                                                        NavigationController.navigate("sign_in")
+                                                    }
+                                                }
+
+                                        }
                                     } else {
                                         emailError = true
                                         passwordError = true
