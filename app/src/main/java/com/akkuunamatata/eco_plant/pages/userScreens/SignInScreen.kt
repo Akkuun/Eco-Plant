@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,11 +28,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -50,7 +55,6 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -97,7 +101,8 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                         emailError = false
                     },
                     label = stringResource(id = R.string.email_adress),
-                    isError = emailError
+                    isError = emailError,
+                    keyboardType = KeyboardType.Email // Set the keyboard type to Email
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -112,7 +117,8 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                     isError = passwordError,
                     isPassword = true,
                     passwordVisible = passwordVisible,
-                    onPasswordToggle = { passwordVisible = !passwordVisible }
+                    onPasswordToggle = { passwordVisible = !passwordVisible },
+                    keyboardType = KeyboardType.Password // Set the keyboard type to Password
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -127,7 +133,8 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                     isError = confirmPasswordError,
                     isPassword = true,
                     passwordVisible = confirmPasswordVisible,
-                    onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible }
+                    onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible },
+                    keyboardType = KeyboardType.Password // Set the keyboard type to Password
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -154,24 +161,45 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                         }
 
                         if (isValid) {
-                            auth.createUserWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        Toast.makeText(
-                                            context,
-                                            "Inscription réussie",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        NavigationController.navigate("scan")
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Inscription échouée : ${task.exception?.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                    auth.createUserWithEmailAndPassword(email, password)
+                                        .addOnCompleteListener { task ->
+                                            if (task.isSuccessful) {
+                                                val user = auth.currentUser
+                                                val profileUpdates = userProfileChangeRequest {
+                                                    displayName = name
+                                                }
+                                                user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileTask ->
+                                                    if (profileTask.isSuccessful) {
+                                                        user.sendEmailVerification()
+                                                            ?.addOnCompleteListener { emailTask ->
+                                                                if (emailTask.isSuccessful) {
+                                                                    // Rediriger vers la page de vérification d'email
+                                                                    NavigationController.navigate("mailCheckup")
+                                                                } else {
+                                                                    Toast.makeText(
+                                                                        context,
+                                                                        "Erreur lors de l'envoi de l'email de confirmation : ${emailTask.exception?.message}",
+                                                                        Toast.LENGTH_SHORT
+                                                                    ).show()
+                                                                }
+                                                            }
+                                                    } else {
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Erreur lors de la mise à jour du profil : ${profileTask.exception?.message}",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
+                                                }
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Inscription échouée : ${task.exception?.message}",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
                                 }
-                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -181,11 +209,12 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
         }
     }
 }
+
 fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
-    if(confirmPassword.isEmpty()){
+    if (confirmPassword.isEmpty()) {
         return false
     }
-    if(password != confirmPassword){
+    if (password != confirmPassword) {
         return false
     }
     return true;
@@ -193,22 +222,22 @@ fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
 }
 
 fun checkPassword(password: String): Boolean {
-    if(password.isEmpty()){
+    if (password.isEmpty()) {
         return false
     }
-    if(password.length < 6){
+    if (password.length < 6) {
         return false
     }
-    if(!password.any { it.isDigit() }){
+    if (!password.any { it.isDigit() }) {
         return false
     }
-    if(!password.any { it.isLetter() }){
+    if (!password.any { it.isLetter() }) {
         return false
     }
-    if(!password.any { it.isUpperCase() }){
+    if (!password.any { it.isUpperCase() }) {
         return false
     }
-    if(!password.any { it.isLowerCase() }){
+    if (!password.any { it.isLowerCase() }) {
         return false
     }
     return true;
@@ -216,10 +245,10 @@ fun checkPassword(password: String): Boolean {
 }
 
 fun checkEmail(email: String): Boolean {
-    if(email.isEmpty()){
+    if (email.isEmpty()) {
         return false
     }
-    if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
         return false
     }
     return true;
@@ -228,13 +257,13 @@ fun checkEmail(email: String): Boolean {
 
 // Function to check if the name is valid
 fun checkName(name: String): Boolean {
-    if(name.isEmpty()){
+    if (name.isEmpty()) {
         return false
     }
-    if(name.length < 3){
+    if (name.length < 3) {
         return false
     }
-    if(!name.all { it.isLetter() || it.isWhitespace() }){
+    if (!name.all { it.isLetter() || it.isWhitespace() }) {
         return false
     }
     return true;
@@ -250,7 +279,8 @@ fun CustomTextField(
     modifier: Modifier = Modifier,
     isPassword: Boolean = false,
     passwordVisible: Boolean = false,
-    onPasswordToggle: (() -> Unit)? = null
+    onPasswordToggle: (() -> Unit)? = null,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
     OutlinedTextField(
         value = value,
@@ -262,7 +292,8 @@ fun CustomTextField(
         visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
         trailingIcon = if (isPassword) {
             {
-                val image = if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
+                val image =
+                    if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
                 IconButton(onClick = { onPasswordToggle?.invoke() }) {
                     Icon(
                         painter = painterResource(id = image),
@@ -270,6 +301,7 @@ fun CustomTextField(
                     )
                 }
             }
-        } else null
+        } else null,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType) // Set the keyboard type
     )
 }

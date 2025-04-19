@@ -15,7 +15,7 @@
     <string name="forgot_password">Mot de passe oublié?</string>
     <string name="email_adress">Adresse e-mail</string>
     <string name="not_a_member">Pas encore membre?</string>
-    <string name="register_now">Inscrivez-vous maintenant</string>
+    <string name="register_now">Inscrivez-vous</string>
     <!-- SignIn page -->
     <string name="sign_in">S\'inscrire</string>
     <string name="create_an_account">Créer un compte pour continuer</string>
@@ -33,5 +33,8 @@
     <string name="error_email">Veuillez entrer un e-mail valide</string>
     <string name="error_password">Veuillez entrer un mot de passe valide</string>
     <string name="error_confirm_password">Les mots de passe doivent correspondre</string>
-
+    <!-- Checkup page -->
+    <string name="back">Retour</string>
+    <string name="checkup">Veuillez vérifier votre e-mail pour activer votre compte.</string>
+    <string name="resend_email">Renvoyer l\'e-mail</string>
 </resources>
