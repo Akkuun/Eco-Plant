@@ -2,8 +2,10 @@ package com.akkuunamatata.eco_plant.pages.plantIdentificationScreens
 
 import android.Manifest
 import android.content.Context
+import android.graphics.Bitmap
 import android.location.Geocoder
 import android.location.Location
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
@@ -43,24 +45,52 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import java.io.File
+import java.io.FileOutputStream
 
 
 @Composable
 fun ScanScreen(navController: androidx.navigation.NavHostController) {
     var locationText by remember { mutableStateOf("Position") }
     var hasLocationPermission by remember { mutableStateOf(false) }
+    var latitude by remember { mutableStateOf<Double?>(null) }
+    var longitude by remember { mutableStateOf<Double?>(null) }
     val context = LocalContext.current
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+    val imageUri = remember { mutableStateOf<Uri?>(null) }
 
-    // Permission request launcher
+
+    // Gestion des permissions
     val requestPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         hasLocationPermission = granted
         if (granted) {
-            getLocationAndUpdateText(fusedLocationClient, context) { location ->
+            getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
                 locationText = location
+                latitude = lat
+                longitude = lon
             }
         } else {
             locationText = "Permission Denied"
+        }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
+        if (isSuccess) {
+            // Get the captured image URI and navigate
+            val uri = imageUri.value
+            if (uri != null) {
+                navController.navigateToOrganChoice(uri, latitude, longitude, hasLocationPermission)
+            }
+        }
+    }
+
+
+
+    // Lancer la galerie
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            navController.navigateToOrganChoice(it, latitude, longitude, hasLocationPermission)
         }
     }
 
@@ -69,8 +99,10 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
         when {
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
                 hasLocationPermission = true
-                getLocationAndUpdateText(fusedLocationClient, context) { location ->
+                getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
                     locationText = location
+                    latitude = lat
+                    longitude = lon
                 }
             }
             else -> {
@@ -134,8 +166,10 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                 Button(
                     onClick = {
                         if (hasLocationPermission) {
-                            getLocationAndUpdateText(fusedLocationClient, context) { location ->
+                            getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
                                 locationText = location
+                                latitude = lat
+                                longitude = lon
                             }
                         } else {
                             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -188,7 +222,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                             contentAlignment = Alignment.Center
                         ) {
                             Button(
-                                onClick = { /* Handle gallery click */ },
+                                onClick = { galleryLauncher.launch("image/*") },
                                 shape = CircleShape,
                                 contentPadding = PaddingValues(5.dp),
                                 modifier = Modifier
@@ -238,12 +272,31 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
     }
 }
 
+// Fonction pour sauvegarder un Bitmap dans le cache et obtenir un URI
+fun saveBitmapToCache(context: Context, bitmap: Bitmap): Uri {
+    val cachePath = File(context.cacheDir, "images").apply { mkdirs() }
+    val file = File(cachePath, "image.png")
+    FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    return FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+}
+
+
+// Extension pour naviguer vers OrganChoice
+fun androidx.navigation.NavHostController.navigateToOrganChoice(
+    imageUri: Uri,
+    latitude: Double?,
+    longitude: Double?,
+    hasValidLocation: Boolean
+) {
+    this.navigate("organ_choice?imageUri=${imageUri}&latitude=${latitude}&longitude=${longitude}&hasValidLocation=${hasValidLocation}")
+}
+
 // Function to get the location and update the text
 @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
 fun getLocationAndUpdateText(
     fusedLocationClient: FusedLocationProviderClient,
     context: Context,
-    onLocationUpdated: (String) -> Unit
+    onLocationUpdated: (String, Double?, Double?) -> Unit
 ) {
     fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
         if (location != null) {
@@ -251,12 +304,12 @@ fun getLocationAndUpdateText(
             val geocoder = Geocoder(context, Locale.getDefault())
             val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)
             if (address?.isNotEmpty() == true) {
-                onLocationUpdated(address[0].locality ?: "Unknown City")
+                onLocationUpdated(address[0].locality ?: "Unknown City", location.latitude, location.longitude)
             } else {
-                onLocationUpdated("Unknown Location")
+                onLocationUpdated("Unknown Location", location.latitude, location.longitude)
             }
         } else {
-            onLocationUpdated("Location not available")
+            onLocationUpdated("Location not available", null, null)
         }
     }
 }
