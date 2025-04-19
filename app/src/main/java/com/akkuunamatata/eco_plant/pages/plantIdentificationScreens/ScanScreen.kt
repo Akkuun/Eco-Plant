@@ -1,11 +1,14 @@
 package com.akkuunamatata.eco_plant.pages.plantIdentificationScreens
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.location.Geocoder
 import android.location.Location
+import android.os.Environment
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
@@ -54,12 +57,20 @@ import java.io.FileOutputStream
 fun ScanScreen(navController: androidx.navigation.NavHostController) {
     var locationText by remember { mutableStateOf("Position") }
     var hasLocationPermission by remember { mutableStateOf(false) }
+    var hasCameraPermission by remember { mutableStateOf(false) }
     var latitude by remember { mutableStateOf<Double?>(null) }
     var longitude by remember { mutableStateOf<Double?>(null) }
     val context = LocalContext.current
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val imageUri = remember { mutableStateOf<Uri?>(null) }
+    var bitmapImage by remember { mutableStateOf<Bitmap?>(null) }
 
+    // Function to create a file to save the image
+    fun createImageFile(): File {
+        val imageDir = context.cacheDir
+        val imageFile = File(imageDir, "photo_${System.currentTimeMillis()}.jpg")
+        return imageFile
+    }
 
     // Gestion des permissions
     val requestPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -75,17 +86,66 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
         }
     }
 
+
+
+    fun saveBitmapToEcoPlantFolder(context: Context, bitmap: Bitmap): Uri? {
+        // Prepare the content values to insert into the MediaStore
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "eco_plant_${System.currentTimeMillis()}.jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/EcoPlant")
+        }
+
+        // Insert the content values into MediaStore to get the URI
+        val contentResolver = context.contentResolver
+        val imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        // Write the bitmap to the URI if it's valid
+        imageUri?.let { uri ->
+            contentResolver.openOutputStream(uri)?.use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+            }
+        }
+
+        return imageUri
+    }
+
+
+    // Camera launcher
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
         if (isSuccess) {
-            // Get the captured image URI and navigate
+            // After image is captured, load the bitmap from the URI
             val uri = imageUri.value
             if (uri != null) {
-                navController.navigateToOrganChoice(uri, latitude, longitude, hasLocationPermission)
+                val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                bitmapImage = bitmap
+
+                val savedUri = saveBitmapToEcoPlantFolder(context, bitmap)
+
+                if (savedUri != null) {
+                    navController.navigateToOrganChoice(
+                        savedUri,
+                        latitude,
+                        longitude,
+                        hasLocationPermission
+                    )
+                }
             }
         }
     }
 
-
+    val requestCameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            val photoFile = createImageFile()
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                photoFile
+            )
+            imageUri.value = uri
+            cameraLauncher.launch(uri)
+        }
+    }
 
     // Lancer la galerie
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -93,6 +153,8 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
             navController.navigateToOrganChoice(it, latitude, longitude, hasLocationPermission)
         }
     }
+
+
 
     // Check permission on first launch
     LaunchedEffect(Unit) {
@@ -247,7 +309,22 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                             contentAlignment = Alignment.Center
                         ) {
                             Button(
-                                onClick = { /* Handle camera click */ },
+                                onClick = {
+                                    if (hasCameraPermission) {
+                                        // Create the file for the camera photo
+                                        val photoFile = createImageFile()
+                                        val uri = FileProvider.getUriForFile(
+                                            context,
+                                            "${context.packageName}.provider",
+                                            photoFile
+                                        )
+                                        imageUri.value = uri
+                                        cameraLauncher.launch(uri)
+                                    } else {
+                                        // Request camera permission
+                                        requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                    }
+                                },
                                 shape = CircleShape,
                                 contentPadding = PaddingValues(0.dp),
                                 modifier = Modifier
@@ -271,15 +348,6 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
         }
     }
 }
-
-// Fonction pour sauvegarder un Bitmap dans le cache et obtenir un URI
-fun saveBitmapToCache(context: Context, bitmap: Bitmap): Uri {
-    val cachePath = File(context.cacheDir, "images").apply { mkdirs() }
-    val file = File(cachePath, "image.png")
-    FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-    return FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-}
-
 
 // Extension pour naviguer vers OrganChoice
 fun androidx.navigation.NavHostController.navigateToOrganChoice(
