@@ -1,4 +1,4 @@
-package com.example.eco_plant
+package com.akkuunamatata.eco_plant
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -15,19 +15,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.eco_plant.pages.*
-import com.example.eco_plant.ui.theme.EcoPlantTheme
-import com.example.eco_plant.database.PlantDatabaseHelper
+import com.akkuunamatata.eco_plant.pages.*
+import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
+import com.akkuunamatata.eco_plant.database.plants.PlantDatabaseHelper
+import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
+import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this) ?: throw IllegalStateException("FirebaseApp n'a pas pu être initialisé.")
         enableEdgeToEdge()
 
         // Chargement async de la BDD

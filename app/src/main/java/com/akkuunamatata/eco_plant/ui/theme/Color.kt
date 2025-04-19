@@ -1,4 +1,4 @@
-package com.example.eco_plant.ui.theme
+package com.akkuunamatata.eco_plant.ui.theme
 
 
 import androidx.compose.ui.graphics.Color

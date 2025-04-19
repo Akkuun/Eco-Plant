@@ -1,4 +1,4 @@
-package com.example.eco_plant.pages
+package com.akkuunamatata.eco_plant.pages.userScreens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.eco_plant.R
+import com.akkuunamatata.eco_plant.R
 
 
 @Composable

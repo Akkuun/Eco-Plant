@@ -1,4 +1,4 @@
-package com.example.eco_plant.database
+package com.akkuunamatata.eco_plant.database.plants
 
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
