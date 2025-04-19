@@ -25,7 +25,10 @@ private val LightColorScheme = lightColorScheme(
     secondary = HighlightColors.Darkest, // Text des bouton
     tertiary = HighlightColors.Medium, // Text des bouton
     error = Support.Error.ErrorHigh,
-    surface = Neutral.Light.Lightest
+    surface = Neutral.Light.Lightest,
+    surfaceVariant = HighlightColors.Lightest,
+    inverseSurface = HighlightColors.Light,
+
 )
 
 @Composable

@@ -37,4 +37,6 @@
     <string name="back">Retour</string>
     <string name="checkup">Veuillez vérifier votre e-mail pour activer votre compte.</string>
     <string name="resend_email">Renvoyer l\'e-mail</string>
+    <!-- ScanScreen -->
+    <string name="scan_title">Identifier une plante</string>
 </resources>

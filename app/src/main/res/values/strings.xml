@@ -39,4 +39,6 @@
     <string name="back">Go back</string>
     <string name="checkup"> Please verify your email to activate your account.</string>
     <string name="resend_email">Resent the email</string>
+    <!-- ScanScreen -->
+    <string name="scan_title">Identify a plant</string>
 </resources>

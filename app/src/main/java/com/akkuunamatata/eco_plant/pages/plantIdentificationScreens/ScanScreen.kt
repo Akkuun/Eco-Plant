@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
@@ -40,42 +42,69 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "Scan",
-
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_map_filled),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    text = "Scan",
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    text = "Position",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(
+                        1f
+                    ),
+                    // set the text to be centered horizontally
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
-            }
-            Text(
-                text = "GPS POSITION",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "SCAN",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Button(
-                onClick = {
-
-                },
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(text = stringResource(id = R.string.resend_email))
+                Button(
+                    onClick = {
+                        // Handle button click
+                    },
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_refresh_unfilled),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.inverseSurface,
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(20.dp))
-            Button(
-                onClick = {
-
-                },
-                modifier = Modifier.padding(8.dp)
+            Text(
+                text = stringResource(id = R.string.scan_title),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(
+                modifier = Modifier
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text(text = stringResource(id = R.string.back))
+                Button(
+                    onClick = {
+
+                    },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_gallery_unfilled),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.inverseSurface,
+                    )
+                }
+                Button(
+                    onClick = {
+
+                    },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_camera_unfilled),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.inverseSurface,
+                    )
+                }
             }
         }
     }
