@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 
 
@@ -54,7 +55,6 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
-    val dl = FirebaseFirestore.getInstance()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -161,32 +161,45 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                         }
 
                         if (isValid) {
-                            auth.createUserWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        val user = auth.currentUser
-                                        user?.sendEmailVerification()
-                                            ?.addOnCompleteListener { emailTask ->
-                                                if (emailTask.isSuccessful) {
-                                                    // Rediriger vers la page de confirmation
-                                                    NavigationController.navigate("mailCheckup")
-                                                } else {
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Erreur lors de l'envoi de l'email de confirmation : ${emailTask.exception?.message}",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
+                                    auth.createUserWithEmailAndPassword(email, password)
+                                        .addOnCompleteListener { task ->
+                                            if (task.isSuccessful) {
+                                                val user = auth.currentUser
+                                                val profileUpdates = userProfileChangeRequest {
+                                                    displayName = name
                                                 }
+                                                user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileTask ->
+                                                    if (profileTask.isSuccessful) {
+                                                        user.sendEmailVerification()
+                                                            ?.addOnCompleteListener { emailTask ->
+                                                                if (emailTask.isSuccessful) {
+                                                                    // Rediriger vers la page de vérification d'email
+                                                                    NavigationController.navigate("mailCheckup")
+                                                                } else {
+                                                                    Toast.makeText(
+                                                                        context,
+                                                                        "Erreur lors de l'envoi de l'email de confirmation : ${emailTask.exception?.message}",
+                                                                        Toast.LENGTH_SHORT
+                                                                    ).show()
+                                                                }
+                                                            }
+                                                    } else {
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Erreur lors de la mise à jour du profil : ${profileTask.exception?.message}",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
+                                                }
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Inscription échouée : ${task.exception?.message}",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
                                             }
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Inscription échouée : ${task.exception?.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                        }
                                 }
-                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
