@@ -36,7 +36,6 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
-
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -52,7 +51,6 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -61,7 +59,7 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                 interactionSource = interactionSource,
                 indication = null
             ) {
-                keyboardController?.hide() // Masque le clavier
+                keyboardController?.hide()
             }
     ) {
         Column {
@@ -79,85 +77,61 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
             Spacer(modifier = Modifier.height(20.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Champ Nom
-                OutlinedTextField(
-                    shape = RoundedCornerShape(16.dp),
+                // Name field
+                CustomTextField(
                     value = name,
                     onValueChange = {
                         name = it
                         nameError = false
                     },
-                    label = { Text(stringResource(id = R.string.name)) },
-                    isError = nameError,
-                    modifier = Modifier.fillMaxWidth()
+                    label = stringResource(id = R.string.name),
+                    isError = nameError
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Champ Email
-                OutlinedTextField(
-                    shape = RoundedCornerShape(16.dp),
+                // Email field
+                CustomTextField(
                     value = email,
                     onValueChange = {
                         email = it
                         emailError = false
                     },
-                    label = { Text(stringResource(id = R.string.email_adress)) },
-                    isError = emailError,
-                    modifier = Modifier.fillMaxWidth()
+                    label = stringResource(id = R.string.email_adress),
+                    isError = emailError
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Champ Mot de passe
-                OutlinedTextField(
-                    shape = RoundedCornerShape(16.dp),
+                // Password field
+                CustomTextField(
                     value = password,
                     onValueChange = {
                         password = it
                         passwordError = false
                     },
-                    label = { Text(stringResource(id = R.string.password)) },
+                    label = stringResource(id = R.string.password),
                     isError = passwordError,
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        val image =
-                            if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                painter = painterResource(id = image),
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                    isPassword = true,
+                    passwordVisible = passwordVisible,
+                    onPasswordToggle = { passwordVisible = !passwordVisible }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Champ Confirmation Mot de passe
-                OutlinedTextField(
-                    shape = RoundedCornerShape(16.dp),
+                // Confirm Password field
+                CustomTextField(
                     value = confirmPassword,
                     onValueChange = {
                         confirmPassword = it
                         confirmPasswordError = false
                     },
-                    label = { Text(stringResource(id = R.string.confirm_password)) },
+                    label = stringResource(id = R.string.confirm_password),
                     isError = confirmPasswordError,
-                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        val image =
-                            if (confirmPasswordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
-                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                            Icon(
-                                painter = painterResource(id = image),
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                    isPassword = true,
+                    passwordVisible = confirmPasswordVisible,
+                    onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Bouton Inscription
+                // Sign Up button
                 Button(
                     onClick = {
                         var isValid = true
@@ -197,8 +171,6 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                                         ).show()
                                     }
                                 }
-                        } else {
-//                            Toast.makeText(context, "Veuillez corriger les erreurs", Toast.LENGTH_SHORT).show()
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -266,4 +238,38 @@ fun checkName(name: String): Boolean {
         return false
     }
     return true;
+}
+
+
+@Composable
+fun CustomTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isError: Boolean,
+    modifier: Modifier = Modifier,
+    isPassword: Boolean = false,
+    passwordVisible: Boolean = false,
+    onPasswordToggle: (() -> Unit)? = null
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        isError = isError,
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxWidth(),
+        visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+        trailingIcon = if (isPassword) {
+            {
+                val image = if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
+                IconButton(onClick = { onPasswordToggle?.invoke() }) {
+                    Icon(
+                        painter = painterResource(id = image),
+                        contentDescription = null
+                    )
+                }
+            }
+        } else null
+    )
 }
