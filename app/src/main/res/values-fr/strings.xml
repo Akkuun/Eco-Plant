@@ -29,4 +29,9 @@
     <string name="login_failed">Échec de la connexion</string>
     <string name="close">Fermer</string>
     <string name="welcome_back">Content de vous revoir </string>
+    <string name="error_name">Veuillez entrer un nom valide</string>
+    <string name="error_email">Veuillez entrer un e-mail valide</string>
+    <string name="error_password">Veuillez entrer un mot de passe valide</string>
+    <string name="error_confirm_password">Les mots de passe doivent correspondre</string>
+
 </resources>

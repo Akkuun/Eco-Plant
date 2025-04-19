@@ -1,12 +1,10 @@
 package com.akkuunamatata.eco_plant.pages.userScreens
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -46,9 +42,9 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val interactionSource = remember { MutableInteractionSource() }
-    var isChecked by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     var nameError by remember { mutableStateOf(false) }
@@ -61,6 +57,12 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 20.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                keyboardController?.hide() // Masque le clavier
+            }
     ) {
         Column {
             Text(
@@ -140,11 +142,11 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                     },
                     label = { Text(stringResource(id = R.string.confirm_password)) },
                     isError = confirmPasswordError,
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image =
-                            if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            if (confirmPasswordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
+                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                             Icon(
                                 painter = painterResource(id = image),
                                 contentDescription = null
@@ -196,7 +198,7 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                                     }
                                 }
                         } else {
-                            Toast.makeText(context, "Veuillez corriger les erreurs", Toast.LENGTH_SHORT).show()
+//                            Toast.makeText(context, "Veuillez corriger les erreurs", Toast.LENGTH_SHORT).show()
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
