@@ -39,4 +39,5 @@
     <string name="resend_email">Renvoyer l\'e-mail</string>
     <!-- ScanScreen -->
     <string name="scan_title">Identifier une plante</string>
+    <string name="gps_denied">Autorisation GPS refusée</string>
 </resources>
