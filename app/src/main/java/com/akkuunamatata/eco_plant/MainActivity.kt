@@ -21,12 +21,16 @@ import androidx.navigation.compose.rememberNavController
 import com.akkuunamatata.eco_plant.pages.*
 import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
 import com.akkuunamatata.eco_plant.database.plants.PlantDatabaseHelper
+import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
+import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this) ?: throw IllegalStateException("FirebaseApp n'a pas pu être initialisé.")
         enableEdgeToEdge()
 
         // Chargement async de la BDD

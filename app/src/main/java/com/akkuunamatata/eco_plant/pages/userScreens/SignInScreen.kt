@@ -1,4 +1,4 @@
-package com.akkuunamatata.eco_plant.pages
+package com.akkuunamatata.eco_plant.pages.userScreens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

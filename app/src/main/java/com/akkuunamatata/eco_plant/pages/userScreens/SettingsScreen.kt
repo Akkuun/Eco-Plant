@@ -1,4 +1,4 @@
-package com.akkuunamatata.eco_plant.pages
+package com.akkuunamatata.eco_plant.pages.userScreens
 import com.akkuunamatata.eco_plant.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,7 +31,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Snackbar
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
@@ -41,7 +43,7 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
     var passwordVisible by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current // to hide the keyboard
     val interactionSource = remember { MutableInteractionSource() } // to handle clicks
-
+    val auth = FirebaseAuth.getInstance()
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -141,7 +143,28 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { /* Action */ },
+                    onClick = {
+                        // Handle login click
+                        // Check if the name is not empty
+                        if(email.isNotEmpty() && password.isNotEmpty()) {
+                            auth.signInWithEmailAndPassword(email, password)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        // Login successful
+                                        NavigationController.navigate("sign_in")
+                                    } else {
+                                        // Login failed
+                                        // Handle error by showing a message and highlighting the wrong field
+
+                                    }
+                                }
+                        } else {
+                            // Show error message
+                        }
+
+
+
+                    },
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -179,4 +202,5 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
         }
     }
 }
+
 

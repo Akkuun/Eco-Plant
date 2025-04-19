@@ -24,4 +24,7 @@
     <string name="terms_and_conditions">Conditions générales</string>
     <string name="and_the">et la</string>
     <string name="privacy_policy">Politique de confidentialité</string>
+    <string name="retry">Réessayer</string>
+    <string name="error">Erreur</string>
+    <string name="login_failed">Échec de la connexion</string>
 </resources>

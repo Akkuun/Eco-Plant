@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "967253137549",
+    "project_id": "eco-plant-4cef7",
+    "storage_bucket": "eco-plant-4cef7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967253137549:android:5f61d81c4305f570606ac4",
+        "android_client_info": {
+          "package_name": "com.akkuunamatata.eco_plant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcz3d8VX7Gdewf6qAPkDnfYPaDh5vkUlw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
