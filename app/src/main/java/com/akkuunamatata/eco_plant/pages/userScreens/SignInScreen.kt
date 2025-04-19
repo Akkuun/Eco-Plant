@@ -168,31 +168,8 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                                         user?.sendEmailVerification()
                                             ?.addOnCompleteListener { emailTask ->
                                                 if (emailTask.isSuccessful) {
-                                                    val uid = user.uid
-                                                    if (uid != null) {
-                                                        // Enregistrer le nom dans la base de données
-                                                        val userData = hashMapOf(
-                                                            "name" to name,
-                                                            "email" to email
-                                                        )
-                                                        dl.collection("users").document(uid)
-                                                            .set(userData)
-                                                            .addOnSuccessListener {
-                                                                Toast.makeText(
-                                                                    context,
-                                                                    "Inscription réussie. Veuillez vérifier votre email pour confirmer votre compte.",
-                                                                    Toast.LENGTH_SHORT
-                                                                ).show()
-                                                                NavigationController.navigate("login") // Rediriger vers l'écran de connexion
-                                                            }
-                                                            .addOnFailureListener { e ->
-                                                                Toast.makeText(
-                                                                    context,
-                                                                    "Erreur lors de l'enregistrement des données : ${e.message}",
-                                                                    Toast.LENGTH_SHORT
-                                                                ).show()
-                                                            }
-                                                    }
+                                                    // Rediriger vers la page de confirmation
+                                                    NavigationController.navigate("mailCheckup")
                                                 } else {
                                                     Toast.makeText(
                                                         context,

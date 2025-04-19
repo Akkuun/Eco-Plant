@@ -1,84 +1,70 @@
 package com.akkuunamatata.eco_plant
 
-import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.akkuunamatata.eco_plant.pages.*
-import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
-import com.akkuunamatata.eco_plant.database.plants.PlantDatabaseHelper
-import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
-import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
-import com.google.firebase.FirebaseApp
-import kotlinx.coroutines.launch
+        import android.os.Bundle
+        import androidx.activity.ComponentActivity
+        import androidx.activity.compose.setContent
+        import androidx.activity.enableEdgeToEdge
+        import androidx.compose.foundation.layout.padding
+        import androidx.compose.material3.*
+        import androidx.compose.runtime.Composable
+        import androidx.compose.runtime.getValue
+        import androidx.compose.runtime.mutableStateOf
+        import androidx.compose.runtime.remember
+        import androidx.compose.runtime.setValue
+        import androidx.compose.ui.Modifier
+        import androidx.compose.ui.res.painterResource
+        import androidx.compose.ui.res.stringResource
+        import androidx.navigation.compose.NavHost
+        import androidx.navigation.compose.composable
+        import androidx.navigation.compose.rememberNavController
+        import com.akkuunamatata.eco_plant.pages.*
+        import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
+        import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
+        import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
+        import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
 
-class MainActivity : ComponentActivity() {
+        class MainActivity : ComponentActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // Firebase init in sync to help performances
-        lifecycleScope.launch {
-            FirebaseApp.initializeApp(this@MainActivity) ?: throw IllegalStateException("FirebaseApp n'a pas pu être initialisé.")
-        }
-        enableEdgeToEdge()
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                enableEdgeToEdge()
 
-        // Chargement async de la BDD
-        lifecycleScope.launch {
-            val db = PlantDatabaseHelper.getInstance(applicationContext)
-            db.plantSpecies.take(5).forEach {
-                println(it.name)
-                println("Services: ${it.services.take(3)}")
-                println("Reliabilities: ${it.reliabilities.take(3)}")
-                println("Cultural Conditions: ${it.culturalConditions.take(3)}")
+                setContent {
+                    EcoPlantTheme(dynamicColor = false) { // Utilisation du thème personnalisé
+                        AppNavigation()
+                    }
+                }
             }
         }
 
-        setContent {
-            EcoPlantTheme(dynamicColor = false) { // Use the custom theme
-                AppNavigation()
+        @Composable
+        fun AppNavigation() {
+            val navController = rememberNavController()
+
+            Scaffold(
+                bottomBar = {
+                    MainBottomBar(navController)
+                }
+            ) { innerPadding ->
+                NavHost(
+                    navController = navController,
+                    startDestination = "map",
+                    modifier = Modifier.padding(innerPadding)
+                ) {
+                    composable("map") { MapScreen() }
+                    composable("history") { HistoryScreen() }
+                    composable("scan") { ScanScreen() }
+                    composable("settings") { SettingsScreen(navController) }
+                    composable("sign_in") { SignInScreen(navController) }
+                    composable("mailCheckup") { EmailVerificationScreen(navController) }
+                }
             }
         }
-    }
-}
 
-@Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
+        @Composable
+        fun MainBottomBar(navController: androidx.navigation.NavHostController) {
+            var selectedItem by remember { mutableStateOf(0) }
 
-    NavHost(
-        navController = navController,
-        startDestination = "map"
-    ) {
-        composable("map") { MapScreen() }
-        composable("history") { HistoryScreen() }
-        composable("scan") { ScanScreen() }
-        composable("settings") { SettingsScreen(navController) }
-        composable("sign_in") { SignInScreen(navController) }
-    }
-
-    MainScreen(navController)
-}
-
-@Composable
-fun MainScreen(navController: androidx.navigation.NavHostController) {
-    var selectedItem by remember { mutableStateOf(0) }
-    Scaffold(
-        bottomBar = {
             NavigationBar {
                 NavigationBarItem(
                     icon = {
@@ -93,7 +79,9 @@ fun MainScreen(navController: androidx.navigation.NavHostController) {
                     selected = selectedItem == 0,
                     onClick = {
                         selectedItem = 0
-                        navController.navigate("map")
+                        navController.navigate("map") {
+                            popUpTo("map") { inclusive = true }
+                        }
                     }
                 )
 
@@ -110,7 +98,9 @@ fun MainScreen(navController: androidx.navigation.NavHostController) {
                     selected = selectedItem == 1,
                     onClick = {
                         selectedItem = 1
-                        navController.navigate("history")
+                        navController.navigate("history") {
+                            popUpTo("history") { inclusive = true }
+                        }
                     }
                 )
 
@@ -127,7 +117,9 @@ fun MainScreen(navController: androidx.navigation.NavHostController) {
                     selected = selectedItem == 2,
                     onClick = {
                         selectedItem = 2
-                        navController.navigate("scan")
+                        navController.navigate("scan") {
+                            popUpTo("scan") { inclusive = true }
+                        }
                     }
                 )
 
@@ -144,24 +136,10 @@ fun MainScreen(navController: androidx.navigation.NavHostController) {
                     selected = selectedItem == 3,
                     onClick = {
                         selectedItem = 3
-                        navController.navigate("settings")
+                        navController.navigate("settings") {
+                            popUpTo("settings") { inclusive = true }
+                        }
                     }
                 )
             }
         }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = "map",
-            modifier = Modifier.padding(innerPadding)
-        )
-        // routes definitions
-        {
-            composable("map") { MapScreen() }
-            composable("history") { HistoryScreen() }
-            composable("scan") { ScanScreen() }
-            composable("settings") { SettingsScreen(navController) }
-            composable("sign_in") { SignInScreen(navController) }
-        }
-    }
-}
