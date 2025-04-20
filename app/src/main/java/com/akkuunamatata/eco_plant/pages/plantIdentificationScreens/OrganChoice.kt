@@ -117,6 +117,7 @@ fun OrganChoice(
                     shape = RoundedCornerShape(12.dp)
                     clip = true
                 }
+                .align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(16.dp))
         // Title
