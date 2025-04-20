@@ -37,4 +37,15 @@
     <string name="back">Retour</string>
     <string name="checkup">Veuillez vérifier votre e-mail pour activer votre compte.</string>
     <string name="resend_email">Renvoyer l\'e-mail</string>
+    <!-- ScanScreen -->
+    <string name="scan_title">Identifier une plante</string>
+    <string name="gps_denied">Autorisation GPS refusée</string>
+    <!-- OrganChoice -->
+    <string name="organ_choice_title">Choisissez l\'organe associé</string>
+    <string name="leaf">Feuille</string>
+    <string name="flower">Fleur</string>
+    <string name="fruit">Fruit</string>
+    <string name="bark">Ecorce</string>
+    <string name="full_plant">Plante entière</string>
+    <string name="other">Autre</string>
 </resources>

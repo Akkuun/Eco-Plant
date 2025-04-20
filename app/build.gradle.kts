@@ -67,4 +67,6 @@ dependencies {
     implementation(libs.google.firebase.auth.ktx)
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.android.gms:play-services-location:18.0.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }
