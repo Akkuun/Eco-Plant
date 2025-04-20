@@ -1,6 +1,8 @@
 package com.akkuunamatata.eco_plant.pages
 
+import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
@@ -48,7 +52,7 @@ fun ButtonWithImage(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(9.dp))
             .clickable(
                 onClick = onClick,
                 indication = rememberRipple(bounded = true),
@@ -75,9 +79,9 @@ fun ButtonWithImage(
                 color = Color.White,
                 style = MaterialTheme.typography.bodyLarge.copy(
                     shadow = Shadow(
-                        color = Color.Black.copy(alpha = 0.9f),
-                        offset = Offset(3f, 3f),
-                        blurRadius = 50.0f
+                        color = Color.Black.copy(alpha = 1f),
+                        offset = Offset(4f, 4f),
+                        blurRadius = 8.0f
                     )
                 ),
                 modifier = Modifier
@@ -102,23 +106,35 @@ fun OrganChoice(
 ) {
     val context = LocalContext.current
     val screenHeight = context.resources.displayMetrics.heightPixels
-    val maxHeight = (screenHeight * 0.8).dp // 40% of the screen height
+    val maxHeight = (screenHeight * 0.15).dp // 40% of the screen height
 
     Column(modifier = Modifier.fillMaxSize().padding(0.dp)) {
         Image(
             painter = rememberAsyncImagePainter(imageUri),
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth().aspectRatio(1.0f).height(maxHeight)
+            modifier = Modifier.height(maxHeight)
                 .graphicsLayer {
                     shape = RoundedCornerShape(12.dp)
                     clip = true
                 }
         )
+        Spacer(modifier = Modifier.height(16.dp))
+        // Title
+        Text(
+            text = stringResource(id = R.string.organ_choice_title),
+            style = MaterialTheme.typography.displayLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth().padding(4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            ButtonWithImage(stringResource(R.string.leaf), onClick = { /* Handle Button leaf click */ },
+            ButtonWithImage(stringResource(R.string.leaf), onClick = {
+                // Handle Button leaf click
+                organChosen(context, "Leaf", imageUri, latitude, longitude, hasValidLocation)
+            },
                 icon = painterResource(id = R.drawable.leaf),
                 modifier = Modifier
                     .weight(1f)
@@ -126,7 +142,10 @@ fun OrganChoice(
                     .aspectRatio(1.0f)
             )
 
-            ButtonWithImage(stringResource(R.string.flower), onClick = { /* Handle Button flower click */ },
+            ButtonWithImage(stringResource(R.string.flower), onClick = {
+                // Handle Button flower click
+                organChosen(context, "Flower", imageUri, latitude, longitude, hasValidLocation)
+            },
                 icon = painterResource(id = R.drawable.flower),
                 modifier = Modifier
                     .weight(1f)
@@ -134,7 +153,10 @@ fun OrganChoice(
                     .aspectRatio(1.0f)
             )
 
-            ButtonWithImage(stringResource(R.string.fruit), onClick = { /* Handle Button fruit click */ },
+            ButtonWithImage(stringResource(R.string.fruit), onClick = {
+                // Handle Button fruit click
+                organChosen(context, "Fruit", imageUri, latitude, longitude, hasValidLocation)
+            },
                 icon = painterResource(id = R.drawable.fruit),
                 modifier = Modifier
                     .weight(1f)
@@ -147,7 +169,10 @@ fun OrganChoice(
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp).padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            ButtonWithImage(stringResource(R.string.bark), onClick = { /* Handle Button bark click */ },
+            ButtonWithImage(stringResource(R.string.bark), onClick = {
+                // Handle Button bark click
+                organChosen(context, "Bark", imageUri, latitude, longitude, hasValidLocation)
+            },
                 icon = painterResource(id = R.drawable.bark),
                 modifier = Modifier
                     .weight(1f)
@@ -155,7 +180,10 @@ fun OrganChoice(
                     .aspectRatio(1.0f)
             )
 
-            ButtonWithImage(stringResource(R.string.full_plant), onClick = { /* Handle Button full_plant click */ },
+            ButtonWithImage(stringResource(R.string.full_plant), onClick = {
+                // Handle Button full plant click
+                organChosen(context, "Full Plant", imageUri, latitude, longitude, hasValidLocation)
+            },
                 icon = painterResource(id = R.drawable.plant),
                 modifier = Modifier
                     .weight(1f)
@@ -163,7 +191,10 @@ fun OrganChoice(
                     .aspectRatio(1.0f)
             )
 
-            ButtonWithImage(stringResource(R.string.other), onClick = { /* Handle Button other click */ },
+            ButtonWithImage(stringResource(R.string.other), onClick = {
+                // Handle Button other click
+                organChosen(context, "Other", imageUri, latitude, longitude, hasValidLocation)
+            },
                 icon = painterResource(id = R.drawable.plant_other),
                 modifier = Modifier
                     .weight(1f)
@@ -171,19 +202,42 @@ fun OrganChoice(
                     .aspectRatio(1.0f)
             )
         }
-
+        Spacer(modifier = Modifier.height(16.dp))
         // Le beau temps
-        Button (
+        Button(
             onClick = {
-                // Handle Button retry click
+                navigateToPlantIdentification(
+                    navController
+                )
             },
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(36.dp),
             modifier = Modifier
-                .fillMaxWidth(0.3f)
+                .wrapContentWidth()
                 .padding(8.dp)
+                .align(Alignment.CenterHorizontally)
         ) {
             Text(stringResource(R.string.retry))
         }
     }
 }
 
+fun organChosen(
+    context: Context,
+    organ: String,
+    imageUri: Uri,
+    latitude: Double?,
+    longitude: Double?,
+    hasValidLocation: Boolean
+) {
+    Toast.makeText(
+        context,
+        "Organ chosen: $organ. To do : use PlantNet API",
+        Toast.LENGTH_SHORT
+    ).show()
+}
+
+fun navigateToPlantIdentification(
+    navController: androidx.navigation.NavHostController,
+) {
+    navController.navigate("scan")
+}
