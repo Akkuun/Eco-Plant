@@ -42,4 +42,12 @@
     <!-- ScanScreen -->
     <string name="scan_title">Identify a plant</string>
     <string name="gps_denied">Location permission denied</string>
+    <!-- OrganChoice -->
+    <string name="organ_choice_title">Choose associated organs</string>
+    <string name="leaf">Leaf</string>
+    <string name="flower">Flower</string>
+    <string name="fruit">Fruit</string>
+    <string name="bark">Bark</string>
+    <string name="full_plant">Full plant</string>
+    <string name="other">Other</string>
 </resources>
