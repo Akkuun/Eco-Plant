@@ -88,6 +88,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
 
 
 
+
     fun saveBitmapToEcoPlantFolder(context: Context, bitmap: Bitmap): Uri? {
         // Prepare the content values to insert into the MediaStore
         val contentValues = ContentValues().apply {
@@ -232,8 +233,10 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                                 locationText = location
                                 latitude = lat
                                 longitude = lon
+                                android.util.Log.d("ScanScreen", "Location updated: $locationText ($lat, $lon)")
                             }
                         } else {
+                            android.util.Log.d("ScanScreen", "Location permission not granted")
                             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                         }
                     },
