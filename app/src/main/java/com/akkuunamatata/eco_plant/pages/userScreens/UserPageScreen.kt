@@ -22,13 +22,9 @@ import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.ui.theme.InterTypography
 
-@Preview
 @Composable
-fun UserPageScreen() {
+fun UserInfoSection() {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Titre "Settings"
@@ -49,7 +45,7 @@ fun UserPageScreen() {
                     indication = rememberRipple(
                         bounded = false,
                         radius = 50.dp
-                    ) // Effet circulaire avec fondu
+                    )
                 ) {
                     // TODO: change icon from db
                 }
@@ -57,7 +53,7 @@ fun UserPageScreen() {
             Icon(
                 painter = painterResource(R.drawable.ic_edit_profile),
                 contentDescription = null,
-                modifier = Modifier.size(150.dp), // Taille de l'icône augmentée
+                modifier = Modifier.size(150.dp),
                 tint = Color.Unspecified
             )
         }
@@ -75,28 +71,44 @@ fun UserPageScreen() {
             style = InterTypography.labelLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
+    }
+}
 
+
+@Composable
+fun UserSettingsButtons() {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SettingsButton(label = stringResource(R.string.username))
+        HorizontalDivider()
+        SettingsButton(label = stringResource(R.string.email))
+        HorizontalDivider()
+        SettingsButton(label = stringResource(R.string.password))
+        HorizontalDivider()
+        SettingsButton(label = stringResource(R.string.language))
+        HorizontalDivider()
+        SettingsButton(label = stringResource(R.string.logout))
+        HorizontalDivider()
+        SettingsButton(label = stringResource(R.string.delete_account))
+        HorizontalDivider()
+        SettingsButton(label = stringResource(R.string.switch_mode))
+    }
+}
+
+@Preview
+@Composable
+fun UserPageScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        UserInfoSection()
         Spacer(modifier = Modifier.height(32.dp))
-
-        // Boutons empilés verticalement avec séparateurs
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            SettingsButton(label = stringResource(R.string.username))
-            HorizontalDivider()
-            SettingsButton(label = stringResource(R.string.email))
-            HorizontalDivider()
-            SettingsButton(label = stringResource(R.string.password))
-            HorizontalDivider()
-            SettingsButton(label = stringResource(R.string.language))
-            HorizontalDivider()
-            SettingsButton(label = stringResource(R.string.logout))
-            HorizontalDivider()
-            SettingsButton(label = stringResource(R.string.delete_account))
-            HorizontalDivider()
-            SettingsButton(label = stringResource(R.string.switch_mode))
-        }
+        UserSettingsButtons()
     }
 }
 
