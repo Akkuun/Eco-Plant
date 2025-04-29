@@ -20,6 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
+import com.akkuunamatata.eco_plant.ui.theme.InterTypography
+
 @Preview
 @Composable
 fun UserPageScreen() {
@@ -32,8 +34,8 @@ fun UserPageScreen() {
         // Titre "Settings"
         Text(
             text = stringResource(R.string.settings),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
+            style = InterTypography.displaySmall,
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -44,7 +46,10 @@ fun UserPageScreen() {
                 .size(100.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(bounded = false, radius = 50.dp) // Effet circulaire avec fondu
+                    indication = rememberRipple(
+                        bounded = false,
+                        radius = 50.dp
+                    ) // Effet circulaire avec fondu
                 ) {
                     // TODO: change icon from db
                 }
@@ -62,12 +67,12 @@ fun UserPageScreen() {
         // Nom et email
         Text(
             text = "name",
-            style = MaterialTheme.typography.bodyLarge,
+            style = InterTypography.displayMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
             text = "mail",
-            style = MaterialTheme.typography.bodyMedium,
+            style = InterTypography.labelLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
 
@@ -79,14 +84,18 @@ fun UserPageScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SettingsButton(label = stringResource(R.string.username))
-            Divider() // Ligne de séparation
+            HorizontalDivider()
             SettingsButton(label = stringResource(R.string.email))
-            Divider()
+            HorizontalDivider()
             SettingsButton(label = stringResource(R.string.password))
-            Divider()
+            HorizontalDivider()
             SettingsButton(label = stringResource(R.string.language))
-            Divider()
+            HorizontalDivider()
             SettingsButton(label = stringResource(R.string.logout))
+            HorizontalDivider()
+            SettingsButton(label = stringResource(R.string.delete_account))
+            HorizontalDivider()
+            SettingsButton(label = stringResource(R.string.switch_mode))
         }
     }
 }
@@ -102,10 +111,14 @@ fun SettingsButton(label: String, modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = label, style = MaterialTheme.typography.bodyLarge)
+            Text(text = label, style = InterTypography.labelLarge, color = MaterialTheme.colorScheme.onBackground)
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = null
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape), // Icône avec forme circulaire
+                tint = MaterialTheme.colorScheme.onBackground // Couleur de l'icône
             )
         }
     }

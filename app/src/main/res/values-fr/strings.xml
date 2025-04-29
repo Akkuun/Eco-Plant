@@ -54,4 +54,6 @@
     <string name="email">E-mail</string>
     <string name="language">Langue</string>
     <string name="log_out">Déconnexion</string>
+    <string name="delete_account">Supprimer le compte</string>
+    <string name="switch_mode">Changer de mode</string>
 </resources>
