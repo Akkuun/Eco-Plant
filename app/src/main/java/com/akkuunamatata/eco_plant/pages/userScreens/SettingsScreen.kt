@@ -37,6 +37,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -104,7 +105,7 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
 
                 // Email text field
                 OutlinedTextField(
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                     value = email,
                     onValueChange = {
                         email = it
@@ -122,7 +123,7 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                 // Password text field
                 OutlinedTextField(
                     //type password
-                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next ), // type password and to to next field and hide if clicked away
                     value = password,
                     onValueChange = {
                         password = it

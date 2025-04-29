@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -37,6 +38,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+
 
 
 @Composable
@@ -151,7 +153,7 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                             emailError = true
                             isValid = false
                         }
-                        if (!checkPassword(password)) {
+                        if (!checkPassword(password, context)) {
                             passwordError = true
                             isValid = false
                         }
@@ -221,27 +223,30 @@ fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
 
 }
 
-fun checkPassword(password: String): Boolean {
+fun checkPassword(password: String, context: android.content.Context): Boolean {
+    var isValid = true
     if (password.isEmpty()) {
-        return false
+        isValid = false
     }
     if (password.length < 6) {
-        return false
+        isValid = false
     }
     if (!password.any { it.isDigit() }) {
-        return false
+        isValid = false
     }
     if (!password.any { it.isLetter() }) {
-        return false
+        isValid = false
     }
     if (!password.any { it.isUpperCase() }) {
-        return false
+        isValid = false
     }
     if (!password.any { it.isLowerCase() }) {
-        return false
+        isValid = false
     }
-    return true;
-
+    if (!isValid) {
+        Toast.makeText(context, context.getString(R.string.error_password), Toast.LENGTH_SHORT).show()
+    }
+    return isValid
 }
 
 fun checkEmail(email: String): Boolean {
@@ -302,6 +307,7 @@ fun CustomTextField(
                 }
             }
         } else null,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType) // Set the keyboard type
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType,
+            imeAction = ImeAction.Next) // Set the keyboard type
     )
 }
