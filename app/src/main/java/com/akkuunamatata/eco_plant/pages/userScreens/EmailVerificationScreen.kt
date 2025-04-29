@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
 import com.google.firebase.auth.FirebaseAuth
@@ -36,7 +37,9 @@ fun EmailVerificationScreen(navController: androidx.navigation.NavHostController
                     val uid = user.uid
                     val userData = hashMapOf(
                         "name" to user.displayName,
-                        "email" to user.email
+                        "email" to user.email,
+                        //get langage from user system
+                        "lang" to  Locale.current.language
                     )
                     FirebaseFirestore.getInstance().collection("users").document(uid)
                         .set(userData)

@@ -185,7 +185,7 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                                                         ).show()
                                                     } else {
                                                         // Naviguer si l'email est trouvé
-                                                        NavigationController.navigate("sign_in")
+                                                        NavigationController.navigate("scan")
                                                     }
                                                 }
 

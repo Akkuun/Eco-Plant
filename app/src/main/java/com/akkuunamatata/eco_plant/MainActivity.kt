@@ -1,6 +1,5 @@
 package com.akkuunamatata.eco_plant
 
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,18 +14,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.akkuunamatata.eco_plant.navigation.AppNavHost
-import com.akkuunamatata.eco_plant.pages.*
-import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
 import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
-import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
-import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
-import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
+
 
 class MainActivity : ComponentActivity() {
 
