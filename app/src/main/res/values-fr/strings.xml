@@ -49,4 +49,9 @@
     <string name="bark">Ecorce</string>
     <string name="full_plant">Plante entière</string>
     <string name="other">Autre</string>
+    <!-- User Settings -->
+    <string name="username">Nom d\'utilisateur</string>
+    <string name="email">E-mail</string>
+    <string name="language">Langue</string>
+    <string name="log_out">Déconnexion</string>
 </resources>

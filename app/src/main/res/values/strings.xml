@@ -51,4 +51,9 @@
     <string name="bark">Bark</string>
     <string name="full_plant">Full plant</string>
     <string name="other">Other</string>
+    <!-- User Settings -->
+    <string name="username">Username</string>
+    <string name="email">E-mail</string>
+    <string name="language">Language</string>
+    <string name="log_out">Log out</string>
 </resources>
