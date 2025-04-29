@@ -33,6 +33,7 @@
     <string name="error_email">Veuillez entrer un e-mail valide</string>
     <string name="error_password">Veuillez entrer un mot de passe valide</string>
     <string name="error_confirm_password">Les mots de passe doivent correspondre</string>
+    <string name="passwordConditions">Les mots de passe doivent contenir au moins 3 caractères, dont 1 lettre majuscule, 1 lettre minuscule,1 chiffre et un charactère spécial</string>
     <!-- Checkup page -->
     <string name="back">Retour</string>
     <string name="checkup">Veuillez vérifier votre e-mail pour activer votre compte.</string>

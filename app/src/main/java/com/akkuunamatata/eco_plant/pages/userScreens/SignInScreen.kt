@@ -223,23 +223,27 @@ fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
 }
 
 fun checkPassword(password: String): Boolean {
+    var isValid = true
     if (password.isEmpty()) {
-        return false
+        isValid = false
     }
     if (password.length < 6) {
-        return false
+        isValid = false
     }
     if (!password.any { it.isDigit() }) {
-        return false
+        isValid = false
     }
     if (!password.any { it.isLetter() }) {
-        return false
+        isValid = false
     }
     if (!password.any { it.isUpperCase() }) {
-        return false
+        isValid = false
     }
     if (!password.any { it.isLowerCase() }) {
-        return false
+        isValid = false
+    }
+    if(!isValid){
+        Toast.makeText()
     }
     return true;
 

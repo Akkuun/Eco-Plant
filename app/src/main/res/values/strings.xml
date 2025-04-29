@@ -35,6 +35,7 @@
     <string name="error_email">Please enter a valid email</string>
     <string name="error_password">Please enter a valid password</string>
     <string name="error_confirm_password">Passwords must match</string>
+    <string name="passwordConditions">Passwords must contain at least 3 characters, including 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character</string>
     <!-- Checkup page -->
     <string name="back">Go back</string>
     <string name="checkup"> Please verify your email to activate your account.</string>
