@@ -57,5 +57,5 @@
     <string name="language">Language</string>
     <string name="log_out">Log out</string>
     <string name="delete_account">Delete account</string>
-    <string name="switch_mode">Switch mode</string>
+    <string name="switch_mode">Switch theme</string>
 </resources>

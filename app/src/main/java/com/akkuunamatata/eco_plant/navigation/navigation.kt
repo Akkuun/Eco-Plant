@@ -15,12 +15,14 @@ import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.UserPageScreen
 
 object Routes {
     const val MAP = "map"
     const val HISTORY = "history"
     const val SCAN = "scan"
     const val SETTINGS = "settings"
+    const val SETTINGS_LOGGED = "settingsLogged"
 }
 
 @Composable
@@ -37,6 +39,7 @@ fun AppNavHost(
         composable(Routes.HISTORY) { HistoryScreen() }
         composable(Routes.SCAN) { ScanScreen(navController) }
         composable(Routes.SETTINGS) { SettingsScreen(navController) }
+        composable(Routes.SETTINGS_LOGGED) { UserPageScreen(navController) }
         composable("sign_in") { SignInScreen(navController) }
         composable("mailCheckup") { EmailVerificationScreen(navController) }
         composable(
