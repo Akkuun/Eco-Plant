@@ -11,20 +11,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    background = Neutral.Dark.DarkHigh,
-    primary = HighlightColors.HighlightsLowLow,
+    background = Neutral.Dark.Darkest,
+    primary = HighlightColors.Lightest,
     secondary = Support.Sucess.SuccessMedium,
     tertiary = Support.Warning.WarningMedium,
     error = Support.Error.ErrorHigh,
+    surface = Neutral.Dark.Darkest,
+    surfaceVariant = Neutral.Dark.Dark,
+    inverseSurface = HighlightColors.Dark,
 )
 //Light Theme
 private val LightColorScheme = lightColorScheme(
-    background = Neutral.Light.LightHigh,
-    primary =  HighlightColors.HighlightsMedium, //
-    secondary = HighlightColors.HighlightsHigh, // Text des bouton
-    tertiary = HighlightColors.HighlightsMediumLow, // Text des bouton
+    background = Neutral.Light.Lightest,
+    primary =  HighlightColors.Dark, //
+    secondary = HighlightColors.Darkest, // Text des bouton
+    tertiary = HighlightColors.Medium, // Text des bouton
     error = Support.Error.ErrorHigh,
-
+    surface = Neutral.Light.Lightest,
+    surfaceVariant = HighlightColors.Lightest,
+    inverseSurface = HighlightColors.Light,
 
 )
 

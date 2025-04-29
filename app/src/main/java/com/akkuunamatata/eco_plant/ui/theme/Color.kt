@@ -4,29 +4,29 @@ package com.akkuunamatata.eco_plant.ui.theme
 import androidx.compose.ui.graphics.Color
 
 object HighlightColors {
-    val HighlightsHigh = Color(0xFF094212)
-    val HighlightsMedium = Color(0xFF125A1D)
-    val HighlightsMediumLow = Color(0xFF329241)
-    val HighlightsLow = Color(0xFF8FC898)
-    val HighlightsLowLow = Color(0xFFDBF0DE)
+    val Darkest = Color(0xFF094212)
+    val Dark = Color(0xFF125A1D)
+    val Medium = Color(0xFF329241)
+    val Light = Color(0xFF8FC898)
+    val Lightest = Color(0xFFDBF0DE)
 }
 
 object Neutral {
 
     object Light {
-        val LightHigh = Color(0xFFC5C6CC)
-        val LightMedium = Color(0xFFD4D6DD)
-        val LightMediumLow = Color(0xFFE8E9F1)
-        val LightLow = Color(0xFFF8F9FE)
-        val LightLowLow = Color(0xFFFFFFFF)
+        val Darkest = Color(0xFFC5C6CC)
+        val Dark = Color(0xFFD4D6DD)
+        val Medium = Color(0xFFE8E9F1)
+        val Light = Color(0xFFF8F9FE)
+        val Lightest = Color(0xFFF4FBF5)
     }
 
     object Dark {
-        val DarkHigh = Color(0xFF1F2024)
-        val DarkMedium = Color(0xFF2F3036)
-        val DarkMediumLow = Color(0xFF494A50)
-        val DarkLow = Color(0xFF71727A)
-        val DarkLowLow = Color(0xFF8F9098)
+        val Darkest = Color(0xFF1F2024)
+        val Dark = Color(0xFF2F3036)
+        val Medium = Color(0xFF494A50)
+        val Light = Color(0xFF71727A)
+        val Lightest = Color(0xFF8F9098)
     }
 }
 

@@ -1,8 +1,58 @@
 package com.akkuunamatata.eco_plant.navigation
 
+import android.net.Uri
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.akkuunamatata.eco_plant.pages.HistoryScreen
+import com.akkuunamatata.eco_plant.pages.MapScreen
+import com.akkuunamatata.eco_plant.pages.OrganChoice
+import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
+
 object Routes {
     const val MAP = "map"
     const val HISTORY = "history"
     const val SCAN = "scan"
     const val SETTINGS = "settings"
+}
+
+@Composable
+fun AppNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Routes.MAP,
+        modifier = modifier
+    ) {
+        composable(Routes.MAP) { MapScreen() }
+        composable(Routes.HISTORY) { HistoryScreen() }
+        composable(Routes.SCAN) { ScanScreen(navController) }
+        composable(Routes.SETTINGS) { SettingsScreen(navController) }
+        composable("sign_in") { SignInScreen(navController) }
+        composable("mailCheckup") { EmailVerificationScreen(navController) }
+        composable(
+            "organ_choice?imageUri={imageUri}&latitude={latitude}&longitude={longitude}&hasValidLocation={hasValidLocation}",
+            arguments = listOf(
+                navArgument("imageUri") { type = NavType.StringType },
+                navArgument("latitude") { type = NavType.StringType; nullable = true },
+                navArgument("longitude") { type = NavType.StringType; nullable = true },
+                navArgument("hasValidLocation") { type = NavType.BoolType }
+            )
+        ) { backStackEntry ->
+            val imageUri = Uri.parse(backStackEntry.arguments?.getString("imageUri"))
+            val latitude = backStackEntry.arguments?.getString("latitude")?.toDoubleOrNull()
+            val longitude = backStackEntry.arguments?.getString("longitude")?.toDoubleOrNull()
+            val hasValidLocation = backStackEntry.arguments?.getBoolean("hasValidLocation") ?: false
+            OrganChoice(navController, imageUri, latitude, longitude, hasValidLocation)
+        }
+    }
 }

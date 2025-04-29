@@ -40,6 +40,7 @@ import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 
 
+
 @Composable
 fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
     var name by remember { mutableStateOf("") }
@@ -152,7 +153,7 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                             emailError = true
                             isValid = false
                         }
-                        if (!checkPassword(password)) {
+                        if (!checkPassword(password, context)) {
                             passwordError = true
                             isValid = false
                         }
@@ -222,7 +223,7 @@ fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
 
 }
 
-fun checkPassword(password: String): Boolean {
+fun checkPassword(password: String, context: android.content.Context): Boolean {
     var isValid = true
     if (password.isEmpty()) {
         isValid = false
@@ -242,11 +243,10 @@ fun checkPassword(password: String): Boolean {
     if (!password.any { it.isLowerCase() }) {
         isValid = false
     }
-    if(!isValid){
-        Toast.makeText()
+    if (!isValid) {
+        Toast.makeText(context, context.getString(R.string.error_password), Toast.LENGTH_SHORT).show()
     }
-    return true;
-
+    return isValid
 }
 
 fun checkEmail(email: String): Boolean {
