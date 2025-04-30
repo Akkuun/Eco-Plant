@@ -62,11 +62,12 @@ fun AppNavHost(
         // Settings detail routes
         addSettingsDetailRoutes(navController)
 
-        // Email verification screen route
-        composable("emailVerification") { EmailVerificationScreen(navController) }
 
         // Sign-in screen route
         composable("sign_in") { SignInScreen(navController) }
+
+        // Mail verification screen route
+        composable("mailCheckup"){ EmailVerificationScreen(navController) }
 
         // Organ choice screen route with arguments
         composable(
