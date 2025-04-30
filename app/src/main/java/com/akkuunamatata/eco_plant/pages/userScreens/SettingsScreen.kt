@@ -1,4 +1,5 @@
 package com.akkuunamatata.eco_plant.pages.userScreens
+
 import android.widget.Toast
 import com.akkuunamatata.eco_plant.R
 import androidx.compose.foundation.Image
@@ -34,7 +35,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
@@ -55,9 +55,11 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
     var passwordError by remember { mutableStateOf(false) }
     var showSnackbar by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         // Upper part of the Form : background image
         Box(
             modifier = Modifier
@@ -69,7 +71,12 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
             Image(
                 painter = painterResource(id = R.drawable.login_background),
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize().clickable(interactionSource  = interactionSource, indication = null) { keyboardController?.hide() }, // On hide le clavier quand on touche l'image
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { keyboardController?.hide() }, // On hide le clavier quand on touche l'image
                 contentScale = ContentScale.Crop
             )
         }
@@ -86,7 +93,10 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                 text = stringResource(R.string.welcome),
                 style = MaterialTheme.typography.displayLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.clickable(interactionSource  = interactionSource, indication = null) { keyboardController?.hide() } // On hide le clavier quand on touche le texte
+                modifier = Modifier.clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) { keyboardController?.hide() } // On hide le clavier quand on touche le texte
             )
         }
 
@@ -94,22 +104,35 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 15.dp).clickable(interactionSource = interactionSource, indication = null) { keyboardController?.hide() }, // Plus de padding à gauche
+                .padding(horizontal = 24.dp, vertical = 15.dp)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) { keyboardController?.hide() }, // Plus de padding à gauche
             contentAlignment = Alignment.TopStart
         ) {
             Column(
                 horizontalAlignment = Alignment.Start,
-                modifier = Modifier.fillMaxWidth().clickable(interactionSource  = interactionSource, indication = null) { keyboardController?.hide() }, // Plus de padding à gauche
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { keyboardController?.hide() }, // Plus de padding à gauche
             ) {
                 Spacer(modifier = Modifier.height(50.dp))
 
                 // Email text field
                 OutlinedTextField(
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
                     value = email,
                     onValueChange = {
                         email = it
-                        emailError = false // Réinitialise l'erreur lorsque l'utilisateur modifie le champ
+                        emailError =
+                            false // Réinitialise l'erreur lorsque l'utilisateur modifie le champ
                     },
                     placeholder = { Text(stringResource(R.string.email_adress)) },
                     label = { Text(stringResource(R.string.email_adress)) },
@@ -123,11 +146,15 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                 // Password text field
                 OutlinedTextField(
                     //type password
-                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next ), // type password and to to next field and hide if clicked away
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Next
+                    ), // type password and to to next field and hide if clicked away
                     value = password,
                     onValueChange = {
                         password = it
-                        passwordError = false // Réinitialise l'erreur lorsque l'utilisateur modifie le champ
+                        passwordError =
+                            false // Réinitialise l'erreur lorsque l'utilisateur modifie le champ
                     },
                     placeholder = { Text(stringResource(R.string.password)) },
                     label = { Text(stringResource(R.string.password)) },
@@ -135,7 +162,8 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
-                        val image = if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
+                        val image =
+                            if (passwordVisible) R.drawable.ic_visibility_on else R.drawable.ic_visibility_off
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 painter = painterResource(id = image),
@@ -213,7 +241,9 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                             Text(
                                 text = stringResource(R.string.close),
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.clickable { showSnackbar = false } // Ferme le Snackbar
+                                modifier = Modifier.clickable {
+                                    showSnackbar = false
+                                } // Ferme le Snackbar
                             )
                         },
                         content = {

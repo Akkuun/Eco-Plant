@@ -38,7 +38,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
 
 
-
+/**
+ * Composable function for the Sign In screen.
+ *
+ * @param NavigationController The navigation controller for handling navigation.
+ */
 @Composable
 fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
     var name by remember { mutableStateOf("") }
@@ -161,45 +165,46 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                         }
 
                         if (isValid) {
-                                    auth.createUserWithEmailAndPassword(email, password)
-                                        .addOnCompleteListener { task ->
-                                            if (task.isSuccessful) {
-                                                val user = auth.currentUser
-                                                val profileUpdates = userProfileChangeRequest {
-                                                    displayName = name
-                                                }
-                                                user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileTask ->
-                                                    if (profileTask.isSuccessful) {
-                                                        user.sendEmailVerification()
-                                                            ?.addOnCompleteListener { emailTask ->
-                                                                if (emailTask.isSuccessful) {
-                                                                    // Rediriger vers la page de vérification d'email
-                                                                    NavigationController.navigate("mailCheckup")
-                                                                } else {
-                                                                    Toast.makeText(
-                                                                        context,
-                                                                        "Erreur lors de l'envoi de l'email de confirmation : ${emailTask.exception?.message}",
-                                                                        Toast.LENGTH_SHORT
-                                                                    ).show()
-                                                                }
-                                                            }
-                                                    } else {
-                                                        Toast.makeText(
-                                                            context,
-                                                            "Erreur lors de la mise à jour du profil : ${profileTask.exception?.message}",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                    }
-                                                }
-                                            } else {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Inscription échouée : ${task.exception?.message}",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            }
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        val user = auth.currentUser
+                                        val profileUpdates = userProfileChangeRequest {
+                                            displayName = name
                                         }
+                                        user?.updateProfile(profileUpdates)
+                                            ?.addOnCompleteListener { profileTask ->
+                                                if (profileTask.isSuccessful) {
+                                                    user.sendEmailVerification()
+                                                        ?.addOnCompleteListener { emailTask ->
+                                                            if (emailTask.isSuccessful) {
+                                                                // Rediriger vers la page de vérification d'email
+                                                                NavigationController.navigate("mailCheckup")
+                                                            } else {
+                                                                Toast.makeText(
+                                                                    context,
+                                                                    "Erreur lors de l'envoi de l'email de confirmation : ${emailTask.exception?.message}",
+                                                                    Toast.LENGTH_SHORT
+                                                                ).show()
+                                                            }
+                                                        }
+                                                } else {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Erreur lors de la mise à jour du profil : ${profileTask.exception?.message}",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                            }
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Inscription échouée : ${task.exception?.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
+                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -210,6 +215,11 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
     }
 }
 
+/**
+ * Check if the confirm password matches the original password.
+ *
+ * A valid confirm password must not be empty and must match the original password.
+ */
 fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
     if (confirmPassword.isEmpty()) {
         return false
@@ -221,6 +231,11 @@ fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
 
 }
 
+/**
+ * Check if the password is valid.
+ *
+ * A valid password must not be empty, must be at least 6 characters long, with at least one digit,
+ */
 fun checkPassword(password: String, context: android.content.Context): Boolean {
     var isValid = true
     if (password.isEmpty()) {
@@ -242,11 +257,17 @@ fun checkPassword(password: String, context: android.content.Context): Boolean {
         isValid = false
     }
     if (!isValid) {
-        Toast.makeText(context, context.getString(R.string.error_password), Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.error_password), Toast.LENGTH_SHORT)
+            .show()
     }
     return isValid
 }
 
+/**
+ * Check if the email is valid.
+ *
+ * A valid email must not be empty and must match the standard email pattern.
+ */
 fun checkEmail(email: String): Boolean {
     if (email.isEmpty()) {
         return false
@@ -258,7 +279,11 @@ fun checkEmail(email: String): Boolean {
 
 }
 
-// Function to check if the name is valid
+/**
+ * Check if the name is valid.
+ *
+ * A valid name must be at least 3 characters long and contain only letters and spaces.
+ */
 fun checkName(name: String): Boolean {
     if (name.isEmpty()) {
         return false
@@ -272,7 +297,20 @@ fun checkName(name: String): Boolean {
     return true;
 }
 
-
+/**
+ * Custom TextField Composable
+ *
+ * @param value The current text value of the TextField.
+ * @param onValueChange Callback to be invoked when the text value changes.
+ * @param label The label to display above the TextField.
+ * @param isError Indicates if the TextField is in an error state.
+ * @param modifier Modifier to be applied to the TextField.
+ * @param isPassword Indicates if the TextField is for password input.
+ * @param passwordVisible Indicates if the password is visible.
+ * @param onPasswordToggle Callback to be invoked when the password visibility is toggled.
+ * @param keyboardType The type of keyboard to be displayed.
+ *
+ */
 @Composable
 fun CustomTextField(
     value: String,
@@ -305,7 +343,9 @@ fun CustomTextField(
                 }
             }
         } else null,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType,
-            imeAction = ImeAction.Next) // Set the keyboard type
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType,
+            imeAction = ImeAction.Next
+        ) // Set the keyboard type
     )
 }
