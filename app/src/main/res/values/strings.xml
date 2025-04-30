@@ -51,4 +51,20 @@
     <string name="bark">Bark</string>
     <string name="full_plant">Full plant</string>
     <string name="other">Other</string>
+    <!-- User Settings -->
+    <string name="username">Username</string>
+    <string name="email">E-mail</string>
+    <string name="language">Language</string>
+    <string name="log_out">Log out</string>
+    <string name="delete_account">Delete account</string>
+    <string name="switch_mode">Switch theme</string>
+    <string name="new_password">New password</string>
+    <string name="change_password">Change password</string>
+    <string name="update_username">Update username</string>
+    <string name="update_email">Update email</string>
+    <string name="update_language">Update language</string>
+    <string name="are_you_sure_to_logout"> Are you sure to logout</string>
+    <string name="are_you_sure_to_delete_account">Are you sure to delete your account</string>
+    <string name="im_sure"> I\'m sure</string>
+    <string name="cancel">Cancel</string>
 </resources>

@@ -49,4 +49,20 @@
     <string name="bark">Ecorce</string>
     <string name="full_plant">Plante entière</string>
     <string name="other">Autre</string>
+    <!-- User Settings -->
+    <string name="username">Nom d\'utilisateur</string>
+    <string name="email">E-mail</string>
+    <string name="language">Langue</string>
+    <string name="log_out">Déconnexion</string>
+    <string name="delete_account">Supprimer le compte</string>
+    <string name="switch_mode">Changer de thème</string>
+    <string name="new_password">Nouveau mot de passe</string>
+    <string name="change_password">Changer le mot de passe</string>
+    <string name="update_username">Mettre à jour le nom d\'utilisateur</string>
+    <string name="update_email">Mettre à jour l\'e-mail</string>
+    <string name="update_language">Mettre à jour la langue</string>
+    <string name="are_you_sure_to_logout"> Êtes-vous sûr de vouloir vous déconnecter</string>
+    <string name="are_you_sure_to_delete_account">Êtes-vous sûr de vouloir supprimer votre compte ?</string>
+    <string name="im_sure">  Je suis sûr</string>
+    <string name="cancel">Anuler</string>
 </resources>
