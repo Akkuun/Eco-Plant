@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -87,9 +88,9 @@ fun UserSettingsButtons(onSettingSelected: (String) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SettingsButton(label = stringResource(R.string.username), onClick = { onSettingSelected("basic") })
+        SettingsButton(label = stringResource(R.string.username), onClick = { onSettingSelected("username") })
         HorizontalDivider()
-        SettingsButton(label = stringResource(R.string.email), onClick = { onSettingSelected("basic") })
+        SettingsButton(label = stringResource(R.string.email), onClick = { onSettingSelected("email") })
         HorizontalDivider()
         SettingsButton(label = stringResource(R.string.password), onClick = { onSettingSelected("pwd") })
         HorizontalDivider()
@@ -104,20 +105,21 @@ fun UserSettingsButtons(onSettingSelected: (String) -> Unit) {
 }
 
 @Composable
-fun ChangeSelectedUserSettings(selectedItem: String) {
+fun ChangeSelectedUserSettings(selectedItem: String, navController: androidx.navigation.NavHostController) {
     when (selectedItem) {
-        "pwd" -> PasswordSettings()
-        "basic" -> BasicSettings()
-        "mode" -> ModeSettings()
-        "lang" -> LanguageSettings()
-        "logout" -> LogoutSettings()
-        "delete" -> DeleteAccountSettings()
-        "switch" -> SwitchModeSettings()
+        "pwd" -> PasswordSettings(navController)
+        "username" -> UsernameSettings(navController)
+        "email" -> EmailSettings(navController)
+        "mode" -> ModeSettings(navController)
+        "lang" -> LanguageSettings(navController)
+        "logout" -> LogoutSettings(navController)
+        "delete" -> DeleteAccountSettings(navController)
+        "switch" -> SwitchModeSettings(navController)
         else -> DefaultSettings(selectedItem)
     }
 }
 @Composable
-fun PasswordSettings() {
+fun PasswordSettings(navController: NavHostController) {
 
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -174,7 +176,7 @@ fun PasswordSettings() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
-                onClick = { /* TODO: Handle back action */ },
+                onClick = { navController.popBackStack() },
                 modifier = Modifier.weight(1f)
             ) {
                 Text(text = stringResource(R.string.back))
@@ -200,37 +202,90 @@ fun PasswordSettings() {
 }
 
 @Composable
-fun BasicSettings() {
-    // Contenu pour changer le nom ou l'email
-    Text(text = "Changer le nom ou l'email")
+fun EmailSettings(navController: NavHostController) {
+    var email by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        UserInfoSection()
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Champ pour l'email
+        CustomTextField(
+            value = email,
+            onValueChange = {
+                email = it
+                emailError = false
+            },
+            label = stringResource(R.string.email_adress),
+            isError = emailError,
+            keyboardType = KeyboardType.Email
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Boutons côte à côte
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = stringResource(R.string.back))
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Button(
+                onClick = {
+                    emailError = email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
+                    if (!emailError) {
+                        // TODO: Handle email update action
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+//                Text(text = stringResource(R.string.update_email))
+                Text("Update Email")
+            }
+        }
+    }
 }
 
 @Composable
-fun ModeSettings() {
+fun ModeSettings(navController: NavHostController) {
     // Contenu pour changer le mode
     Text(text = "Changer le mode")
 }
 
 @Composable
-fun LanguageSettings() {
+fun LanguageSettings(navController: NavHostController) {
     // Contenu pour changer la langue
     Text(text = "Changer la langue")
 }
 
 @Composable
-fun LogoutSettings() {
+fun LogoutSettings(navController: NavHostController) {
     // Contenu pour se déconnecter
     Text(text = "Se déconnecter")
 }
 
 @Composable
-fun DeleteAccountSettings() {
+fun DeleteAccountSettings(navController: NavHostController) {
     // Contenu pour supprimer le compte
     Text(text = "Supprimer le compte")
 }
 
 @Composable
-fun SwitchModeSettings() {
+fun SwitchModeSettings(navController: NavHostController) {
     // Contenu pour changer de mode
     Text(text = "Changer de mode")
 }
@@ -294,7 +349,7 @@ fun UserPageScreen(navController: androidx.navigation.NavHostController) {
         Spacer(modifier = Modifier.height(32.dp))
 
         // Section dynamique : Contenu basé sur la sélection
-        ChangeSelectedUserSettings(selectedItem = selectedSettingsToChange)
+        ChangeSelectedUserSettings(selectedItem = selectedSettingsToChange, navController = navController)
     }
 }
 
@@ -312,7 +367,7 @@ fun SettingsDetailScreen(selectedSetting: String, navController: androidx.naviga
         Spacer(modifier = Modifier.height(16.dp))
 
         // Affichage du contenu spécifique
-        ChangeSelectedUserSettings(selectedItem = selectedSetting)
+        ChangeSelectedUserSettings(selectedItem = selectedSetting, navController = navController)
     }
 }
 @Preview
@@ -327,6 +382,63 @@ fun AppNavigation() {
         composable("settingsDetail/{selectedSetting}") { backStackEntry ->
             val selectedSetting = backStackEntry.arguments?.getString("selectedSetting") ?: ""
             SettingsDetailScreen(selectedSetting = selectedSetting, navController = navController)
+        }
+    }
+}
+@Composable
+fun UsernameSettings(navController: NavHostController) {
+    var username by remember { mutableStateOf("") }
+    var usernameError by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        UserInfoSection()
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Champ pour le nom d'utilisateur
+        CustomTextField(
+            value = username,
+            onValueChange = {
+                username = it
+                usernameError = false
+            },
+            label = stringResource(R.string.username),
+            isError = usernameError
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Boutons côte à côte
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = stringResource(R.string.back))
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Button(
+                onClick = {
+                    usernameError = username.isEmpty() || username.length < 3
+
+                    if (!usernameError) {
+                        // TODO: Handle username update action
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                //Text(text = stringResource(R.string.update_username))
+                Text("Update Username")
+            }
         }
     }
 }
