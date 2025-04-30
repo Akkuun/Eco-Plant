@@ -1,0 +1,68 @@
+<resources>
+    <!-- Nav bar -->
+    <string name="map">Carte</string>
+    <string name="history">Historique</string>
+    <string name="scan">Scanner</string>
+    <string name="settings">Paramètres</string>
+    <string name="login">Connexion</string>
+    <!-- User page -->
+    <string name="register">S\'inscrire</string>
+    <string name="logout">Déconnexion</string>
+    <string name="mail">Courriel</string>
+    <string name="password">Mot de passe</string>
+    <string name="confirm_password">Confirmer le mot de passe</string>
+    <string name="welcome">Bienvenue !</string>
+    <string name="forgot_password">Mot de passe oublié?</string>
+    <string name="email_adress">Adresse e-mail</string>
+    <string name="not_a_member">Pas encore membre?</string>
+    <string name="register_now">Inscrivez-vous</string>
+    <!-- SignIn page -->
+    <string name="sign_in">S\'inscrire</string>
+    <string name="create_an_account">Créer un compte pour continuer</string>
+    <string name="name">Nom</string>
+    <string name="accept_term">J\'ai lu et j\'accepte les</string>
+    <string name="terms_and_conditions">Conditions générales</string>
+    <string name="and_the">et la</string>
+    <string name="privacy_policy">Politique de confidentialité</string>
+    <string name="retry">Réessayer</string>
+    <string name="error">Erreur</string>
+    <string name="login_failed">Échec de la connexion</string>
+    <string name="close">Fermer</string>
+    <string name="welcome_back">Content de vous revoir </string>
+    <string name="error_name">Veuillez entrer un nom valide</string>
+    <string name="error_email">Veuillez entrer un e-mail valide</string>
+    <string name="error_password">Veuillez entrer un mot de passe valide</string>
+    <string name="error_confirm_password">Les mots de passe doivent correspondre</string>
+    <string name="passwordConditions">Les mots de passe doivent contenir au moins 3 caractères, dont 1 lettre majuscule, 1 lettre minuscule,1 chiffre et un charactère spécial</string>
+    <!-- Checkup page -->
+    <string name="back">Retour</string>
+    <string name="checkup">Veuillez vérifier votre e-mail pour activer votre compte.</string>
+    <string name="resend_email">Renvoyer l\'e-mail</string>
+    <!-- ScanScreen -->
+    <string name="scan_title">Identifier une plante</string>
+    <string name="gps_denied">Autorisation GPS refusée</string>
+    <!-- OrganChoice -->
+    <string name="organ_choice_title">Choisissez l\'organe associé</string>
+    <string name="leaf">Feuille</string>
+    <string name="flower">Fleur</string>
+    <string name="fruit">Fruit</string>
+    <string name="bark">Ecorce</string>
+    <string name="full_plant">Plante entière</string>
+    <string name="other">Autre</string>
+    <!-- User Settings -->
+    <string name="username">Nom d\'utilisateur</string>
+    <string name="email">E-mail</string>
+    <string name="language">Langue</string>
+    <string name="log_out">Déconnexion</string>
+    <string name="delete_account">Supprimer le compte</string>
+    <string name="switch_mode">Changer de thème</string>
+    <string name="new_password">Nouveau mot de passe</string>
+    <string name="change_password">Changer le mot de passe</string>
+    <string name="update_username">Mettre à jour le nom d\'utilisateur</string>
+    <string name="update_email">Mettre à jour l\'e-mail</string>
+    <string name="update_language">Mettre à jour la langue</string>
+    <string name="are_you_sure_to_logout"> Êtes-vous sûr de vouloir vous déconnecter</string>
+    <string name="are_you_sure_to_delete_account">Êtes-vous sûr de vouloir supprimer votre compte ?</string>
+    <string name="im_sure">  Je suis sûr</string>
+    <string name="cancel">Anuler</string>
+</resources>
