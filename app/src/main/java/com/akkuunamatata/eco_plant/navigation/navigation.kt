@@ -60,7 +60,7 @@ fun AppNavHost(
         composable("settingsDetail/logout") { LogoutSettings(navController) }
         composable("settingsDetail/delete"){ DeleteAccountSettings(navController) }
         composable("emailVerification") { EmailVerificationScreen(navController) }
-
+        composable("sign_in"){ SignInScreen(navController) }
         composable(
             "organ_choice?imageUri={imageUri}&latitude={latitude}&longitude={longitude}&hasValidLocation={hasValidLocation}",
             arguments = listOf(
