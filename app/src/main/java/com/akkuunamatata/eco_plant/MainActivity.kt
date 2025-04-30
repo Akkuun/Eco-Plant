@@ -11,51 +11,60 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.akkuunamatata.eco_plant.navigation.AppNavHost
 import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
 
-
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Set the content view using Jetpack Compose
         setContent {
-            EcoPlantTheme(dynamicColor = false) { // Utilisation du thème personnalisé
-                AppNavigation()
+            EcoPlantTheme(dynamicColor = false) {
+                AppNavigation() // Initialize the navigation system
             }
         }
     }
 }
 
+/**
+ * Main composable function that sets up the navigation and scaffold layout.
+ */
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
 
     Scaffold(
         bottomBar = {
-            MainBottomBar(navController)
+            MainBottomBar(navController) // Define the bottom navigation bar
         }
     ) { innerPadding ->
         AppNavHost(
             navController = navController,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding) // Apply padding from the scaffold
         )
     }
 }
 
+/**
+ * Composable function for the bottom navigation bar with 4 navigation items.
+ */
 @Composable
-fun MainBottomBar(navController: androidx.navigation.NavHostController) {
+fun MainBottomBar(navController: NavHostController) {
     val selectedItem = remember { mutableStateOf(0) }
-    val currentDestination by navController.currentBackStackEntryFlow.collectAsState(initial = navController.currentBackStackEntry)
+
+    // Observe the current destination to update the selected item
+    val currentDestination by navController.currentBackStackEntryFlow
+        .collectAsState(initial = navController.currentBackStackEntry)
 
     NavigationBar {
+        // Map navigation item
         NavigationBarItem(
             icon = {
                 Icon(
@@ -70,11 +79,12 @@ fun MainBottomBar(navController: androidx.navigation.NavHostController) {
             onClick = {
                 selectedItem.value = 0
                 navController.navigate("map") {
-                    popUpTo("map") { inclusive = true }
+                    popUpTo("map") { inclusive = true } // Prevent multiple instances
                 }
             }
         )
 
+        // History navigation item
         NavigationBarItem(
             icon = {
                 Icon(
@@ -94,6 +104,7 @@ fun MainBottomBar(navController: androidx.navigation.NavHostController) {
             }
         )
 
+        // Scan navigation item
         NavigationBarItem(
             icon = {
                 Icon(
@@ -113,6 +124,7 @@ fun MainBottomBar(navController: androidx.navigation.NavHostController) {
             }
         )
 
+        // Settings navigation item
         NavigationBarItem(
             icon = {
                 Icon(
