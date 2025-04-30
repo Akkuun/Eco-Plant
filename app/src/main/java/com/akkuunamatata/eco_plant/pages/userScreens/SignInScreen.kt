@@ -41,10 +41,10 @@ import com.google.firebase.auth.userProfileChangeRequest
 /**
  * Composable function for the Sign In screen.
  *
- * @param NavigationController The navigation controller for handling navigation.
+ * @param navigationController The navigation controller for handling navigation.
  */
 @Composable
-fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
+fun SignInScreen(navigationController: androidx.navigation.NavHostController) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -176,10 +176,10 @@ fun SignInScreen(NavigationController: androidx.navigation.NavHostController) {
                                             ?.addOnCompleteListener { profileTask ->
                                                 if (profileTask.isSuccessful) {
                                                     user.sendEmailVerification()
-                                                        ?.addOnCompleteListener { emailTask ->
+                                                        .addOnCompleteListener { emailTask ->
                                                             if (emailTask.isSuccessful) {
                                                                 // Rediriger vers la page de vérification d'email
-                                                                NavigationController.navigate("mailCheckup")
+                                                                navigationController.navigate("mailCheckup")
                                                             } else {
                                                                 Toast.makeText(
                                                                     context,
@@ -227,7 +227,7 @@ fun checkConfirmPassword(password: String, confirmPassword: String): Boolean {
     if (password != confirmPassword) {
         return false
     }
-    return true;
+    return true
 
 }
 
@@ -275,7 +275,7 @@ fun checkEmail(email: String): Boolean {
     if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
         return false
     }
-    return true;
+    return true
 
 }
 
@@ -294,7 +294,7 @@ fun checkName(name: String): Boolean {
     if (!name.all { it.isLetter() || it.isWhitespace() }) {
         return false
     }
-    return true;
+    return true
 }
 
 /**

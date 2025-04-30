@@ -56,7 +56,7 @@ private suspend fun checkEmailVerification(
     while (true) {
         val user = auth.currentUser
         user?.reload()?.addOnCompleteListener {
-            if (user?.isEmailVerified == true) {
+            if (user.isEmailVerified) {
                 saveUserDataToFirestore(user, context, navController)
             }
         }

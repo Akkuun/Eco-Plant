@@ -26,7 +26,7 @@ import com.akkuunamatata.eco_plant.pages.userScreens.CustomTextField
 import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
 
 @Composable
-fun changeEmailSettingsScreen(navController: NavHostController) {
+fun ChangeEmailSettingsScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf(false) }
 

@@ -25,7 +25,7 @@ import com.akkuunamatata.eco_plant.pages.userScreens.CustomTextField
 import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
 
 @Composable
-fun changeUsernameSettingsScreen(navController: NavHostController) {
+fun ChangeUsernameSettingsScreen(navController: NavHostController) {
     var username by remember { mutableStateOf("") }
     var usernameError by remember { mutableStateOf(false) }
     Column(

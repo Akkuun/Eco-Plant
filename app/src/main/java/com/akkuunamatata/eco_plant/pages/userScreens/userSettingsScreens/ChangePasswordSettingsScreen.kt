@@ -26,7 +26,7 @@ import com.akkuunamatata.eco_plant.pages.userScreens.CustomTextField
 import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
 
 @Composable
-fun changePasswordSettingsScreen(navController: NavHostController) {
+fun ChangePasswordSettingsScreen(navController: NavHostController) {
 
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }

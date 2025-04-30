@@ -26,7 +26,7 @@ import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
 import com.akkuunamatata.eco_plant.ui.theme.InterTypography
 
 @Composable
-fun changeLangageSettingsScreen(navController: NavHostController) {
+fun ChangeLangageSettingsScreen(navController: NavHostController) {
     var selectedLanguage by remember { mutableStateOf("fr") }
 
     Column(
