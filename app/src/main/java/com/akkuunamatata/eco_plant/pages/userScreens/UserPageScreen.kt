@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
@@ -115,11 +116,87 @@ fun ChangeSelectedUserSettings(selectedItem: String) {
         else -> DefaultSettings(selectedItem)
     }
 }
-
 @Composable
 fun PasswordSettings() {
-    // Contenu pour changer le mot de passe
-    Text(text = "Changer le mot de passe")
+
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var newPasswordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var newPasswordError by remember { mutableStateOf(false) }
+    var confirmPasswordError by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        UserInfoSection();
+        Spacer(modifier = Modifier.height(32.dp))
+        // Champ pour le nouveau mot de passe
+        CustomTextField(
+            value = newPassword,
+            onValueChange = {
+                newPassword = it
+                newPasswordError = false
+            },
+            label = stringResource(R.string.new_password),
+            isError = newPasswordError,
+            isPassword = true,
+            passwordVisible = newPasswordVisible,
+            onPasswordToggle = { newPasswordVisible = !newPasswordVisible },
+            keyboardType = KeyboardType.Password
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Champ pour confirmer le mot de passe
+        CustomTextField(
+            value = confirmPassword,
+            onValueChange = {
+                confirmPassword = it
+                confirmPasswordError = false
+            },
+            label = stringResource(R.string.confirm_password),
+            isError = confirmPasswordError,
+            isPassword = true,
+            passwordVisible = confirmPasswordVisible,
+            onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible },
+            keyboardType = KeyboardType.Password
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Boutons côte à côte
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(
+                onClick = { /* TODO: Handle back action */ },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = stringResource(R.string.back))
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Button(
+                onClick = {
+                    newPasswordError = newPassword.isEmpty()
+                    confirmPasswordError = confirmPassword.isEmpty() || newPassword != confirmPassword
+
+                    if (!newPasswordError && !confirmPasswordError) {
+                        // TODO: Handle change password action
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = stringResource(R.string.change_password))
+            }
+        }
+    }
 }
 
 @Composable
@@ -230,10 +307,7 @@ fun SettingsDetailScreen(selectedSetting: String, navController: androidx.naviga
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Bouton pour revenir en arrière
-        Button(onClick = { navController.popBackStack() }) {
-            Text(text = "Retour")
-        }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -241,7 +315,6 @@ fun SettingsDetailScreen(selectedSetting: String, navController: androidx.naviga
         ChangeSelectedUserSettings(selectedItem = selectedSetting)
     }
 }
-
 @Preview
 @Composable
 fun AppNavigation() {
