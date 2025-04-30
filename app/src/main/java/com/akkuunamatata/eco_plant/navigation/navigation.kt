@@ -12,8 +12,11 @@ import com.akkuunamatata.eco_plant.pages.HistoryScreen
 import com.akkuunamatata.eco_plant.pages.MapScreen
 import com.akkuunamatata.eco_plant.pages.OrganChoice
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.DeleteAccountSettings
 import com.akkuunamatata.eco_plant.pages.userScreens.EmailSettings
 import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.LanguageSettings
+import com.akkuunamatata.eco_plant.pages.userScreens.LogoutSettings
 import com.akkuunamatata.eco_plant.pages.userScreens.PasswordSettings
 import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
@@ -50,9 +53,12 @@ fun AppNavHost(
             }
         }
 
-        composable("ChangeUsername") { UsernameSettings(navController) }
-        composable("ChangePassword") { PasswordSettings( navController) }
-        composable("ChangeEmail") { EmailSettings(navController) }
+        composable("settingsDetail/ChangeUsername") { UsernameSettings(navController) }
+        composable("settingsDetail/ChangePassword") { PasswordSettings( navController) }
+        composable("settingsDetail/ChangeEmail") { EmailSettings(navController) }
+        composable("settingsDetail/lang") { LanguageSettings(navController) }
+        composable("settingsDetail/logout") { LogoutSettings(navController) }
+        composable("settingsDetail/delete"){ DeleteAccountSettings(navController) }
         composable("emailVerification") { EmailVerificationScreen(navController) }
 
         composable(

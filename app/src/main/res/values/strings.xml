@@ -60,4 +60,6 @@
     <string name="switch_mode">Switch theme</string>
     <string name="new_password">New password</string>
     <string name="change_password">Change password</string>
+    <string name="update_username">Update username</string>
+    <string name="update_email">Update email</string>
 </resources>

@@ -240,8 +240,7 @@ fun EmailSettings(navController: NavHostController) {
                 },
                 modifier = Modifier.weight(1f)
             ) {
-//                Text(text = stringResource(R.string.update_email))
-                Text("Update Email")
+                Text(text = stringResource(R.string.update_email))
             }
         }
     }
@@ -255,8 +254,64 @@ fun ModeSettings(navController: NavHostController) {
 
 @Composable
 fun LanguageSettings(navController: NavHostController) {
-    // Contenu pour changer la langue
-    Text(text = "Changer la langue")
+    var selectedLanguage by remember { mutableStateOf("fr") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        UserInfoSection()
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Radio buttons for language selection
+        Text(text = stringResource(R.string.language), style = InterTypography.displayMedium)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            RadioButton(
+                selected = selectedLanguage == "fr",
+                onClick = { selectedLanguage = "fr" }
+            )
+            Text(text = "Français 🇫🇷", style = InterTypography.labelLarge)
+
+            RadioButton(
+                selected = selectedLanguage == "en",
+                onClick = { selectedLanguage = "en" }
+            )
+            Text(text = "English 🇬🇧", style = InterTypography.labelLarge)
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Buttons for actions
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = stringResource(R.string.back))
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Button(
+                onClick = {
+                    // TODO: Handle language update action
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = stringResource(R.string.update_email)) // Replace with appropriate string resource
+            }
+        }
+    }
 }
 
 @Composable
@@ -329,9 +384,9 @@ fun UserPageScreen( navController: NavHostController) {
         // Section des boutons
         UserSettingsButtons(onSettingSelected = { selectedRoute ->
             when (selectedRoute) {
-                "username" -> navController.navigate("ChangeUsername")
-                "email" -> navController.navigate("ChangeEmail")
-                "pwd" -> navController.navigate("ChangePassword")
+                "username" -> navController.navigate("settingsDetail/ChangeUsername")
+                "email" -> navController.navigate("settingsDetail/ChangeEmail")
+                "pwd" -> navController.navigate("settingsDetail/ChangePassword")
                 "lang" -> navController.navigate("settingsDetail/lang")
                 "logout" -> navController.navigate("settingsDetail/logout")
                 "delete" -> navController.navigate("settingsDetail/delete")
@@ -409,8 +464,7 @@ fun UsernameSettings(navController: NavHostController) {
                 },
                 modifier = Modifier.weight(1f)
             ) {
-                //Text(text = stringResource(R.string.update_username))
-                Text("Update Username")
+                Text(text = stringResource(R.string.update_username))
             }
         }
     }
