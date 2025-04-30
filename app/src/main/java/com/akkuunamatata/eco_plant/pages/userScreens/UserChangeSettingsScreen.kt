@@ -64,7 +64,7 @@ fun UserInfoSection() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Titre "Settings"
+
         Text(
             text = stringResource(R.string.settings),
             style = InterTypography.displaySmall,
