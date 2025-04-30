@@ -60,4 +60,9 @@
     <string name="change_password">Changer le mot de passe</string>
     <string name="update_username">Mettre à jour le nom d\'utilisateur</string>
     <string name="update_email">Mettre à jour l\'e-mail</string>
+    <string name="update_language">Mettre à jour la langue</string>
+    <string name="are_you_sure_to_logout"> Êtes-vous sûr de vouloir vous déconnecter</string>
+    <string name="are_you_sure_to_delete_account">Êtes-vous sûr de vouloir supprimer votre compte ?</string>
+    <string name="im_sure">  Je suis sûr</string>
+    <string name="cancel">Anuler</string>
 </resources>

@@ -28,6 +28,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.ui.theme.InterTypography
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
@@ -308,7 +309,7 @@ fun LanguageSettings(navController: NavHostController) {
                 },
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = stringResource(R.string.update_email)) // Replace with appropriate string resource
+                Text(text = stringResource(R.string.update_language)) // Replace with appropriate string resource
             }
         }
     }
@@ -316,10 +317,34 @@ fun LanguageSettings(navController: NavHostController) {
 
 @Composable
 fun LogoutSettings(navController: NavHostController) {
-    // Contenu pour se déconnecter
-    Text(text = "Se déconnecter")
-}
+    var showDialog by remember { mutableStateOf(false) }
+    showDialog = true;
 
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = stringResource(R.string.logout)) },
+            text = { Text(text = stringResource(R.string.are_you_sure_to_logout)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                   // deconnexion de firebase
+                     FirebaseAuth.getInstance().signOut()
+                    navController.navigate("settings") {
+                        popUpTo("settings") { inclusive = true }
+                    }
+                }) {
+                    Text(text = stringResource(R.string.im_sure))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { navController.popBackStack() }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+
+
+}
 @Composable
 fun DeleteAccountSettings(navController: NavHostController) {
     // Contenu pour supprimer le compte

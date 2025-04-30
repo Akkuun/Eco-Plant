@@ -62,4 +62,9 @@
     <string name="change_password">Change password</string>
     <string name="update_username">Update username</string>
     <string name="update_email">Update email</string>
+    <string name="update_language">Update language</string>
+    <string name="are_you_sure_to_logout"> Are you sure to logout</string>
+    <string name="are_you_sure_to_delete_account">Are you sure to delete your account</string>
+    <string name="im_sure"> I\'m sure</string>
+    <string name="cancel">Cancel</string>
 </resources>
