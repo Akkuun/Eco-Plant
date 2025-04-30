@@ -12,10 +12,14 @@ import com.akkuunamatata.eco_plant.pages.HistoryScreen
 import com.akkuunamatata.eco_plant.pages.MapScreen
 import com.akkuunamatata.eco_plant.pages.OrganChoice
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.EmailSettings
 import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.PasswordSettings
 import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.UserPageScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.UsernameSettings
+import com.google.firebase.auth.FirebaseAuth
 
 object Routes {
     const val MAP = "map"
@@ -38,10 +42,19 @@ fun AppNavHost(
         composable(Routes.MAP) { MapScreen() }
         composable(Routes.HISTORY) { HistoryScreen() }
         composable(Routes.SCAN) { ScanScreen(navController) }
-        composable(Routes.SETTINGS) { SettingsScreen(navController) }
-        composable(Routes.SETTINGS_LOGGED) { UserPageScreen(navController) }
-        composable("sign_in") { SignInScreen(navController) }
-        composable("mailCheckup") { EmailVerificationScreen(navController) }
+        composable(Routes.SETTINGS) {
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                UserPageScreen(navController)
+            } else {
+                SettingsScreen(navController)
+            }
+        }
+
+        composable("ChangeUsername") { UsernameSettings(navController) }
+        composable("ChangePassword") { PasswordSettings( navController) }
+        composable("ChangeEmail") { EmailSettings(navController) }
+        composable("emailVerification") { EmailVerificationScreen(navController) }
+
         composable(
             "organ_choice?imageUri={imageUri}&latitude={latitude}&longitude={longitude}&hasValidLocation={hasValidLocation}",
             arguments = listOf(

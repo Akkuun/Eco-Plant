@@ -104,20 +104,7 @@ fun UserSettingsButtons(onSettingSelected: (String) -> Unit) {
     }
 }
 
-@Composable
-fun ChangeSelectedUserSettings(selectedItem: String, navController: androidx.navigation.NavHostController) {
-    when (selectedItem) {
-        "pwd" -> PasswordSettings(navController)
-        "username" -> UsernameSettings(navController)
-        "email" -> EmailSettings(navController)
-        "mode" -> ModeSettings(navController)
-        "lang" -> LanguageSettings(navController)
-        "logout" -> LogoutSettings(navController)
-        "delete" -> DeleteAccountSettings(navController)
-        "switch" -> SwitchModeSettings(navController)
-        else -> DefaultSettings(selectedItem)
-    }
-}
+
 @Composable
 fun PasswordSettings(navController: NavHostController) {
 
@@ -327,9 +314,7 @@ fun SettingsButton(label: String, onClick: () -> Unit, modifier: Modifier = Modi
 
 
 @Composable
-fun UserPageScreen(navController: androidx.navigation.NavHostController) {
-    var selectedSettingsToChange by remember { mutableStateOf("") }
-
+fun UserPageScreen( navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -342,20 +327,24 @@ fun UserPageScreen(navController: androidx.navigation.NavHostController) {
         Spacer(modifier = Modifier.height(32.dp))
 
         // Section des boutons
-        UserSettingsButtons(onSettingSelected = { selectedSettingsToChange ->
-            navController.navigate("settingsDetail/$selectedSettingsToChange")
+        UserSettingsButtons(onSettingSelected = { selectedRoute ->
+            when (selectedRoute) {
+                "username" -> navController.navigate("ChangeUsername")
+                "email" -> navController.navigate("ChangeEmail")
+                "pwd" -> navController.navigate("ChangePassword")
+                "lang" -> navController.navigate("settingsDetail/lang")
+                "logout" -> navController.navigate("settingsDetail/logout")
+                "delete" -> navController.navigate("settingsDetail/delete")
+                "switch" -> navController.navigate("settingsDetail/switch")
+                else -> Unit
+            }
         })
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Section dynamique : Contenu basé sur la sélection
-        ChangeSelectedUserSettings(selectedItem = selectedSettingsToChange, navController = navController)
     }
 }
 
 
 @Composable
-fun SettingsDetailScreen(selectedSetting: String, navController: androidx.navigation.NavHostController) {
+fun SettingsDetailScreen(selectedSetting: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -366,30 +355,14 @@ fun SettingsDetailScreen(selectedSetting: String, navController: androidx.naviga
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Affichage du contenu spécifique
-        ChangeSelectedUserSettings(selectedItem = selectedSetting, navController = navController)
-    }
-}
-@Preview
-@Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "settings") {
-        composable("settings") {
-            UserPageScreen(navController = navController)
-        }
-        composable("settingsDetail/{selectedSetting}") { backStackEntry ->
-            val selectedSetting = backStackEntry.arguments?.getString("selectedSetting") ?: ""
-            SettingsDetailScreen(selectedSetting = selectedSetting, navController = navController)
-        }
     }
 }
+
 @Composable
 fun UsernameSettings(navController: NavHostController) {
     var username by remember { mutableStateOf("") }
     var usernameError by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
