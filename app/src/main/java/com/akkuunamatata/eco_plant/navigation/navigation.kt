@@ -11,6 +11,12 @@ import androidx.navigation.navArgument
 import com.akkuunamatata.eco_plant.pages.*
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.*
+import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.DeleteAccountSettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.LogoutSettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.changeEmailSettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.changeLangageSettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.changePasswordSettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.changeUsernameSettingsScreen
 import com.google.firebase.auth.FirebaseAuth
 
 /**
@@ -53,7 +59,7 @@ fun AppNavHost(
         // Settings screen route with conditional navigation
         composable(Routes.SETTINGS) {
             if (FirebaseAuth.getInstance().currentUser != null) {
-                UserPageScreen(navController)
+                UserChangeSettingsScreen(navController)
             } else {
                 SettingsScreen(navController)
             }
@@ -94,10 +100,10 @@ fun AppNavHost(
  * @param navController The navigation controller to manage navigation.
  */
 private fun androidx.navigation.NavGraphBuilder.addSettingsDetailRoutes(navController: NavHostController) {
-    composable("settingsDetail/ChangeUsername") { UsernameSettings(navController) }
-    composable("settingsDetail/ChangePassword") { PasswordSettings(navController) }
-    composable("settingsDetail/ChangeEmail") { EmailSettings(navController) }
-    composable("settingsDetail/lang") { LanguageSettings(navController) }
-    composable("settingsDetail/logout") { LogoutSettings(navController) }
-    composable("settingsDetail/delete") { DeleteAccountSettings(navController) }
+    composable("settingsDetail/ChangeUsername") { changeUsernameSettingsScreen(navController) }
+    composable("settingsDetail/ChangePassword") { changePasswordSettingsScreen(navController) }
+    composable("settingsDetail/ChangeEmail") { changeEmailSettingsScreen(navController) }
+    composable("settingsDetail/lang") { changeLangageSettingsScreen(navController) }
+    composable("settingsDetail/logout") { LogoutSettingsScreen(navController) }
+    composable("settingsDetail/delete") { DeleteAccountSettingsScreen(navController) }
 }
