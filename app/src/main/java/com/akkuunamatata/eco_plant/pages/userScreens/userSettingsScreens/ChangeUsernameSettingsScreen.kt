@@ -23,6 +23,9 @@ import androidx.navigation.NavHostController
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.pages.userScreens.CustomTextField
 import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.auth.userProfileChangeRequest
 
 @Composable
 fun ChangeUsernameSettingsScreen(navController: NavHostController) {
@@ -68,9 +71,18 @@ fun ChangeUsernameSettingsScreen(navController: NavHostController) {
                 onClick = {
                     usernameError = username.isEmpty() || username.length < 3
 
-                    if (!usernameError) {
-                        // TODO: Handle username update action
-                    }
+                   if (!usernameError) {
+                       val user = FirebaseAuth.getInstance().currentUser
+                       user?.updateProfile(userProfileChangeRequest {
+                           displayName = username
+                       })?.addOnCompleteListener { task ->
+                           if (task.isSuccessful) {
+                               navController.popBackStack()
+                           } else {
+                               usernameError = true
+                           }
+                       }
+                   }
                 },
                 modifier = Modifier.weight(1f)
             ) {
