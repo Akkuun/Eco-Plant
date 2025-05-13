@@ -1,5 +1,6 @@
 package com.akkuunamatata.eco_plant
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,9 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -18,12 +17,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.akkuunamatata.eco_plant.navigation.AppNavHost
 import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
+        setAppLanguage()
         // Set the content view using Jetpack Compose
         setContent {
             EcoPlantTheme(dynamicColor = false) {
@@ -31,6 +33,24 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun setAppLanguage() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val db = FirebaseFirestore.getInstance()
+
+        userId?.let {
+            db.collection("users").document(it).get().addOnSuccessListener { document ->
+                val language = document.getString("lang") ?: "fr" // Default to French if not set
+                val locale = Locale(language)
+                Locale.setDefault(locale)
+
+                val config = Configuration()
+                config.setLocale(locale)
+                resources.updateConfiguration(config, resources.displayMetrics)
+            }
+        }
+    }
+
 }
 
 /**
@@ -57,11 +77,9 @@ fun AppNavigation() {
  */
 @Composable
 fun MainBottomBar(navController: NavHostController) {
-    val selectedItem = remember { mutableStateOf(0) }
+    val selectedItem = remember { mutableIntStateOf(0) }
 
-    // Observe the current destination to update the selected item
-    val currentDestination by navController.currentBackStackEntryFlow
-        .collectAsState(initial = navController.currentBackStackEntry)
+
 
     NavigationBar {
         // Map navigation item
@@ -69,15 +87,15 @@ fun MainBottomBar(navController: NavHostController) {
             icon = {
                 Icon(
                     painterResource(
-                        if (selectedItem.value == 0) R.drawable.ic_map_filled else R.drawable.ic_map_unfilled
+                        if (selectedItem.intValue == 0) R.drawable.ic_map_filled else R.drawable.ic_map_unfilled
                     ),
                     contentDescription = stringResource(id = R.string.map)
                 )
             },
             label = { Text(stringResource(id = R.string.map)) },
-            selected = selectedItem.value == 0,
+            selected = selectedItem.intValue == 0,
             onClick = {
-                selectedItem.value = 0
+                selectedItem.intValue = 0
                 navController.navigate("map") {
                     popUpTo("map") { inclusive = true } // Prevent multiple instances
                 }
@@ -89,15 +107,15 @@ fun MainBottomBar(navController: NavHostController) {
             icon = {
                 Icon(
                     painterResource(
-                        if (selectedItem.value == 1) R.drawable.ic_history_filled else R.drawable.ic_history_unfilled
+                        if (selectedItem.intValue == 1) R.drawable.ic_history_filled else R.drawable.ic_history_unfilled
                     ),
                     contentDescription = stringResource(id = R.string.history)
                 )
             },
             label = { Text(stringResource(id = R.string.history)) },
-            selected = selectedItem.value == 1,
+            selected = selectedItem.intValue == 1,
             onClick = {
-                selectedItem.value = 1
+                selectedItem.intValue = 1
                 navController.navigate("history") {
                     popUpTo("history") { inclusive = true }
                 }
@@ -109,15 +127,15 @@ fun MainBottomBar(navController: NavHostController) {
             icon = {
                 Icon(
                     painterResource(
-                        if (selectedItem.value == 2) R.drawable.ic_plant_filled else R.drawable.ic_plant_unfilled
+                        if (selectedItem.intValue == 2) R.drawable.ic_plant_filled else R.drawable.ic_plant_unfilled
                     ),
                     contentDescription = stringResource(id = R.string.scan)
                 )
             },
             label = { Text(stringResource(id = R.string.scan)) },
-            selected = selectedItem.value == 2,
+            selected = selectedItem.intValue == 2,
             onClick = {
-                selectedItem.value = 2
+                selectedItem.intValue = 2
                 navController.navigate("scan") {
                     popUpTo("scan") { inclusive = true }
                 }
@@ -129,15 +147,15 @@ fun MainBottomBar(navController: NavHostController) {
             icon = {
                 Icon(
                     painterResource(
-                        if (selectedItem.value == 3) R.drawable.ic_settings_filled else R.drawable.ic_settings_unfilled
+                        if (selectedItem.intValue == 3) R.drawable.ic_settings_filled else R.drawable.ic_settings_unfilled
                     ),
                     contentDescription = stringResource(id = R.string.settings)
                 )
             },
             label = { Text(stringResource(id = R.string.settings)) },
-            selected = selectedItem.value == 3,
+            selected = selectedItem.intValue == 3,
             onClick = {
-                selectedItem.value = 3
+                selectedItem.intValue = 3
                 navController.navigate("settings") {
                     popUpTo("settings") { inclusive = true }
                 }

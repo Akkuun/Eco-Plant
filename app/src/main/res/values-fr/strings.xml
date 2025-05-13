@@ -65,4 +65,7 @@
     <string name="are_you_sure_to_delete_account">Êtes-vous sûr de vouloir supprimer votre compte ?</string>
     <string name="im_sure">  Je suis sûr</string>
     <string name="cancel">Anuler</string>
+    <string name="confirm_delete_title">Supprimer son compte</string>
+    <string name="confirm_delete_message">Êtes-vous sûr de vouloir supprimer votre compte ?</string>
+
 </resources>

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.ui.theme.InterTypography
+import com.google.firebase.auth.FirebaseAuth
 
 
 /**
@@ -64,6 +65,10 @@ fun UserInfoSection() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // get the current user information from firebase
+        val user = FirebaseAuth.getInstance().currentUser
+        val name = user?.displayName ?: "Unknown"
+        val email = user?.email ?: "Unknown"
 
         Text(
             text = stringResource(R.string.settings),
@@ -99,12 +104,12 @@ fun UserInfoSection() {
 
         // Nom et email
         Text(
-            text = "name",
+            text = name,
             style = InterTypography.displayMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
-            text = "mail",
+            text = email,
             style = InterTypography.labelLarge,
             color = MaterialTheme.colorScheme.onBackground
         )

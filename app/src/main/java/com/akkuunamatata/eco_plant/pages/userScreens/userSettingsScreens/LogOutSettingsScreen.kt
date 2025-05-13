@@ -16,7 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun LogoutSettingsScreen(navController: NavHostController) {
     var showDialog by remember { mutableStateOf(false) }
-    showDialog = true;
+    showDialog = true
 
     AlertDialog(
         onDismissRequest = { showDialog = false },

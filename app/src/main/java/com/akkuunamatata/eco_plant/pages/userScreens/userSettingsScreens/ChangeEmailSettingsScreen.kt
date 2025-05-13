@@ -1,5 +1,6 @@
 package com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,9 +25,10 @@ import androidx.navigation.NavHostController
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.pages.userScreens.CustomTextField
 import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun changeEmailSettingsScreen(navController: NavHostController) {
+fun ChangeEmailSettingsScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf(false) }
 
@@ -69,10 +71,30 @@ fun changeEmailSettingsScreen(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    emailError = email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-
-                    if (!emailError) {
-                        // TODO: Handle email update action
+                    emailError =
+                        email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email)
+                            .matches()
+                    // log email
+                    Toast.makeText(
+                        navController.context,
+                        "Email: $email",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                   val currentUser = FirebaseAuth.getInstance().currentUser
+                    currentUser?.updateEmail(email)?.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(
+                                navController.context,
+                                "Email updated successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                navController.context,
+                                "Failed to update email",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 },
                 modifier = Modifier.weight(1f)

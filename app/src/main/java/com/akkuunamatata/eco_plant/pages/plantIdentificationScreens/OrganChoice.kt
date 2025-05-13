@@ -1,4 +1,4 @@
-package com.akkuunamatata.eco_plant.pages
+package com.akkuunamatata.eco_plant.pages.plantIdentificationScreens
 
 import android.content.Context
 import android.net.Uri

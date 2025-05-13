@@ -50,14 +50,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import java.io.File
-import java.io.FileOutputStream
-
 
 @Composable
 fun ScanScreen(navController: androidx.navigation.NavHostController) {
     var locationText by remember { mutableStateOf("Position") }
     var hasLocationPermission by remember { mutableStateOf(false) }
-    var hasCameraPermission by remember { mutableStateOf(false) }
+    val hasCameraPermission by remember { mutableStateOf(false) }
     var latitude by remember { mutableStateOf<Double?>(null) }
     var longitude by remember { mutableStateOf<Double?>(null) }
     val context = LocalContext.current
