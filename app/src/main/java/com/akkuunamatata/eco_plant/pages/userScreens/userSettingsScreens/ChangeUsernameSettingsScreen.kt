@@ -26,6 +26,7 @@ import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun ChangeUsernameSettingsScreen(navController: NavHostController) {
@@ -72,19 +73,32 @@ fun ChangeUsernameSettingsScreen(navController: NavHostController) {
                     usernameError = username.isEmpty() || username.length < 3
 
                    if (!usernameError) {
-                       val user = FirebaseAuth.getInstance().currentUser
-                       user?.updateProfile(userProfileChangeRequest {
-                           displayName = username
-                       })?.addOnCompleteListener { task ->
-                           if (task.isSuccessful) {
-                               navController.popBackStack()
-                           } else {
-                               usernameError = true
-                           }
-                       }
-                   }
+                    val user = FirebaseAuth.getInstance().currentUser
+                    val db = FirebaseFirestore.getInstance()
+                    val userId = user?.uid
+
+                    user?.updateProfile(userProfileChangeRequest {
+                        displayName = username
+                    })?.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            userId?.let {
+                                db.collection("users").document(it)
+                                    .update("username", username)
+                                    .addOnCompleteListener { updateTask ->
+                                        if (updateTask.isSuccessful) {
+                                            navController.popBackStack()
+                                        } else {
+                                            usernameError = true
+                                        }
+                                    }
+                            }
+                        } else {
+                            usernameError = true
+                        }
+                    }
+                     }
                 },
-                modifier = Modifier.weight(1f)
+
             ) {
                 Text(text = stringResource(R.string.update_username))
             }
