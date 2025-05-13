@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.pages.userScreens.CustomTextField
 import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ChangePasswordSettingsScreen(navController: NavHostController) {
@@ -96,9 +97,17 @@ fun ChangePasswordSettingsScreen(navController: NavHostController) {
                     newPasswordError = newPassword.isEmpty()
                     confirmPasswordError = confirmPassword.isEmpty() || newPassword != confirmPassword
 
-                    if (!newPasswordError && !confirmPasswordError) {
-                        // TODO: Handle change password action
-                    }
+                   if (!newPasswordError && !confirmPasswordError) {
+                       val user = FirebaseAuth.getInstance().currentUser
+                       user?.updatePassword(newPassword)?.addOnCompleteListener { task ->
+                           if (task.isSuccessful) {
+                               // Password updated successfully
+                               navController.popBackStack()
+                           } else {
+                               // Handle error (e.g., show a message to the user)
+                           }
+                       }
+                   }
                 },
                 modifier = Modifier.weight(1f)
             ) {
