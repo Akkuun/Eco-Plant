@@ -1,5 +1,6 @@
 package com.akkuunamatata.eco_plant
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,12 +17,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.akkuunamatata.eco_plant.navigation.AppNavHost
 import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
+        setAppLanguage()
         // Set the content view using Jetpack Compose
         setContent {
             EcoPlantTheme(dynamicColor = false) {
@@ -29,6 +33,24 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun setAppLanguage() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val db = FirebaseFirestore.getInstance()
+
+        userId?.let {
+            db.collection("users").document(it).get().addOnSuccessListener { document ->
+                val language = document.getString("lang") ?: "fr" // Default to French if not set
+                val locale = Locale(language)
+                Locale.setDefault(locale)
+
+                val config = Configuration()
+                config.setLocale(locale)
+                resources.updateConfiguration(config, resources.displayMetrics)
+            }
+        }
+    }
+
 }
 
 /**

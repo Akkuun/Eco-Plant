@@ -24,6 +24,9 @@ import androidx.navigation.NavHostController
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
 import com.akkuunamatata.eco_plant.ui.theme.InterTypography
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import java.util.Locale
 
 @Composable
 fun ChangeLangageSettingsScreen(navController: NavHostController) {
@@ -76,9 +79,29 @@ fun ChangeLangageSettingsScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.width(16.dp))
 
             Button(
-                onClick = {
-                    // TODO: Handle language update action
-                },
+        onClick = {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid
+            val db = FirebaseFirestore.getInstance()
+
+            userId?.let {
+                db.collection("users").document(it)
+                    .update("lang", selectedLanguage)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // Change app language
+                            val locale = Locale(selectedLanguage)
+                            Locale.setDefault(locale)
+                            val config = navController.context.resources.configuration
+                            config.setLocale(locale)
+                            navController.context.resources.updateConfiguration(config, navController.context.resources.displayMetrics)
+
+                            navController.popBackStack()
+                        } else {
+                            // Handle error (e.g., show a Toast or log the error)
+                        }
+                    }
+            }
+        },
                 modifier = Modifier.weight(1f)
             ) {
                 Text(text = stringResource(R.string.update_language)) // Replace with appropriate string resource
