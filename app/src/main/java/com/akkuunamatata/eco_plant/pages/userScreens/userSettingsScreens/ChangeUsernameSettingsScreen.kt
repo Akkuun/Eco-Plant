@@ -23,9 +23,13 @@ import androidx.navigation.NavHostController
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.pages.userScreens.CustomTextField
 import com.akkuunamatata.eco_plant.pages.userScreens.UserInfoSection
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun changeUsernameSettingsScreen(navController: NavHostController) {
+fun ChangeUsernameSettingsScreen(navController: NavHostController) {
     var username by remember { mutableStateOf("") }
     var usernameError by remember { mutableStateOf(false) }
     Column(
@@ -68,11 +72,33 @@ fun changeUsernameSettingsScreen(navController: NavHostController) {
                 onClick = {
                     usernameError = username.isEmpty() || username.length < 3
 
-                    if (!usernameError) {
-                        // TODO: Handle username update action
+                   if (!usernameError) {
+                    val user = FirebaseAuth.getInstance().currentUser
+                    val db = FirebaseFirestore.getInstance()
+                    val userId = user?.uid
+
+                    user?.updateProfile(userProfileChangeRequest {
+                        displayName = username
+                    })?.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            userId?.let {
+                                db.collection("users").document(it)
+                                    .update("username", username)
+                                    .addOnCompleteListener { updateTask ->
+                                        if (updateTask.isSuccessful) {
+                                            navController.popBackStack()
+                                        } else {
+                                            usernameError = true
+                                        }
+                                    }
+                            }
+                        } else {
+                            usernameError = true
+                        }
                     }
+                     }
                 },
-                modifier = Modifier.weight(1f)
+
             ) {
                 Text(text = stringResource(R.string.update_username))
             }

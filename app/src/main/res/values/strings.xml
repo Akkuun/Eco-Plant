@@ -67,4 +67,7 @@
     <string name="are_you_sure_to_delete_account">Are you sure to delete your account</string>
     <string name="im_sure"> I\'m sure</string>
     <string name="cancel">Cancel</string>
+    <string name="confirm_delete_title">Delete account</string>
+    <string name="confirm_delete_message">Are you sure you want to delete your account? This action is irreversible.</string>
+
 </resources>

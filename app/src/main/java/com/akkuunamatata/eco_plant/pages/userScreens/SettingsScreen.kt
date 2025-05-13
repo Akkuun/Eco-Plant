@@ -44,7 +44,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
-fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) {
+fun SettingsScreen(navigationController: androidx.navigation.NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -213,7 +213,7 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                                                         ).show()
                                                     } else {
                                                         // Naviguer si l'email est trouvé
-                                                        NavigationController.navigate("scan")
+                                                        navigationController.navigate("scan")
                                                     }
                                                 }
 
@@ -269,7 +269,7 @@ fun SettingsScreen(NavigationController: androidx.navigation.NavHostController) 
                         fontSize = MaterialTheme.typography.displaySmall.fontSize,
                         modifier = Modifier.clickable {
                             // Handle register now click
-                            NavigationController.navigate("sign_in")
+                            navigationController.navigate("sign_in")
 
 
                         }
