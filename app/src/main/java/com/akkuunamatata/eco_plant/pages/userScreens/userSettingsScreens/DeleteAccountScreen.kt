@@ -38,12 +38,28 @@ fun DeleteAccountSettingsScreen(navController: NavHostController) {
             text = { Text(text = stringResource(R.string.confirm_delete_message)) },
             confirmButton = {
                 Button(
-                    onClick = {
-                       showDialog = false
-//                       val user = FirebaseAuth.getInstance().currentUser
-//                       val firestore = FirebaseFirestore.getInstance()
-//                        // Delete user from Firestore Auth
-                    }
+                 onClick = {
+                     FirebaseAuth.getInstance().currentUser?.delete()?.addOnCompleteListener { task ->
+                         if (task.isSuccessful) {
+                          // Suppression de l'utilisateur de Firestore
+                             val userId = FirebaseAuth.getInstance().currentUser?.uid
+                             val db = FirebaseFirestore.getInstance()
+                             if (userId != null) {
+                                 db.collection("users").document(userId).delete()
+                                     .addOnSuccessListener {
+                                         // L'utilisateur a été supprimé avec succès
+                                         navController.popBackStack()
+                                     }
+                                     .addOnFailureListener { e ->
+                                         // Gérer les erreurs, par exemple afficher un message d'erreur
+                                     }
+                             }
+                         } else {
+                             // Gérer les erreurs, par exemple afficher un message d'erreur
+                         }
+                     }
+                     showDialog = false
+                 }
                 ) {
                     Text(text = stringResource(R.string.confirm_delete_title))
                 }
