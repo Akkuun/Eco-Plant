@@ -63,41 +63,43 @@ fun SwitchAccountTheme(navController: NavHostController) {
             )
             Text(text = stringResource(R.string.light_mode), style = InterTypography.labelLarge)
         }
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Button(
-            onClick = {
-                val userId = FirebaseAuth.getInstance().currentUser?.uid
-                val db = FirebaseFirestore.getInstance()
-
-                userId?.let {
-                    db.collection("users").document(it)
-                        .update("theme", selectedTheme)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                if(selectedTheme=="dark"){
-
-                                } else {
-                                    // Set the app theme to light
-                                }
-
-
-                                navController.popBackStack()
-                            } else {
-                                // Handle error (e.g., show a Toast or log the error)
-                                // Log.e("Firestore", "Error updating theme: ${task.exception}")
-                            }
-                        }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+        Spacer(modifier = Modifier.height(16.dp)) // Ajustement de l'espacement
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = stringResource(R.string.update_theme))
+            Button(
+                onClick = {
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid
+                    val db = FirebaseFirestore.getInstance()
 
+                    userId?.let {
+                        db.collection("users").document(it)
+                            .update("theme", selectedTheme)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    navController.popBackStack()
+                                } else {
+                                    // Gérer l'erreur
+                                }
+                            }
+                    }
+                },
+                modifier = Modifier.weight(1f) // Utilisation de weight pour équilibrer les boutons
+            ) {
+                Text(text = stringResource(R.string.update_theme))
+            }
+            Button(
+                onClick = {
+                    navController.popBackStack()
+                },
+                modifier = Modifier.weight(1f) // Utilisation de weight pour équilibrer les boutons
+            ) {
+                Text(text = stringResource(R.string.back))
+            }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            navController.popBackStack()
-        }) { Text(text = stringResource(R.string.back)) }
+
     }
+
+
 }

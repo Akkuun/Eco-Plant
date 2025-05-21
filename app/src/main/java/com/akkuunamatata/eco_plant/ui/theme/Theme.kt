@@ -30,12 +30,11 @@ private val LightColorScheme = lightColorScheme(
     surface = Neutral.Light.Lightest,
     surfaceVariant = HighlightColors.Lightest,
     inverseSurface = HighlightColors.Light,
-
 )
 
 @Composable
 fun EcoPlantTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(), // Note pour plus tard faire || option.darkTheme==true
+    darkTheme: Boolean = isSystemInDarkTheme(), // Now accepts user's theme preference
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {

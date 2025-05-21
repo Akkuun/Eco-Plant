@@ -135,9 +135,10 @@ fun UserSettingsButtons(onSettingSelected: (String) -> Unit) {
         HorizontalDivider()
         SettingsButton(label = stringResource(R.string.logout), onClick = { onSettingSelected("logout") })
         HorizontalDivider()
+        SettingsButton(label = stringResource(R.string.switch_mode), onClick = { onSettingSelected("switch") })
+        HorizontalDivider()
         SettingsButton(label = stringResource(R.string.delete_account), onClick = { onSettingSelected("delete") })
         HorizontalDivider()
-       // SettingsButton(label = stringResource(R.string.switch_mode), onClick = { onSettingSelected("switch") }) TODO ADD LATER
     }
 }
 

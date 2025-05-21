@@ -23,18 +23,25 @@ import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private var languageListenerRegistration: ListenerRegistration? = null
+    private var themeListenerRegistration: ListenerRegistration? = null
     private val languageState = mutableStateOf("fr") // Default language
+    private val themeState = mutableStateOf("dark") // Default theme
     private var isInitialLoad = true // Flag to track initial load
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setupLanguageListener()
+        setupFirestoreListeners()
 
         setContent {
             val currentLanguage by languageState
+            val currentTheme by themeState
 
-            EcoPlantTheme(dynamicColor = false) {
+            // Pass the theme preference to EcoPlantTheme
+            EcoPlantTheme(
+                darkTheme = currentTheme == "dark",
+                dynamicColor = false
+            ) {
                 // Using key parameter with language to force recomposition when language changes
                 key(currentLanguage) {
                     AppNavigation() // Initialize the navigation system
@@ -43,16 +50,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun setupLanguageListener() {
+    private fun setupFirestoreListeners() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val db = FirebaseFirestore.getInstance()
+        val userDocRef = db.collection("users").document(userId)
 
         // Set up a real-time listener for language changes
-        languageListenerRegistration = db.collection("users").document(userId)
+        languageListenerRegistration = userDocRef
             .addSnapshotListener { documentSnapshot, error ->
                 if (error != null || documentSnapshot == null) return@addSnapshotListener
 
                 val language = documentSnapshot.getString("lang") ?: "fr"
+                val theme = documentSnapshot.getString("theme") ?: "dark"
+
+                // Update theme state
+                themeState.value = theme
 
                 if (isInitialLoad) {
                     // Only update the state on initial load without recreation
@@ -95,8 +107,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Clean up the Firestore listener
+        // Clean up the Firestore listeners
         languageListenerRegistration?.remove()
+        themeListenerRegistration?.remove()
     }
 }
 
