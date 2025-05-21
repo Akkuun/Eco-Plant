@@ -10,15 +10,13 @@ import androidx.navigation.navArgument
 import com.akkuunamatata.eco_plant.pages.*
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.OrganChoice
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
-import com.akkuunamatata.eco_plant.pages.userScreens.*
-import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.DeleteAccountSettingsScreen
-import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.LogoutSettingsScreen
-import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.ChangeEmailSettingsScreen
-import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.ChangeLangageSettingsScreen
-import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.ChangePasswordSettingsScreen
-import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.ChangeUsernameSettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.*
 import com.google.firebase.auth.FirebaseAuth
 import androidx.core.net.toUri
+import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
+import com.akkuunamatata.eco_plant.pages.userScreens.UserChangeSettingsScreen
 
 /**
  * Object containing all route constants for navigation.
@@ -108,4 +106,5 @@ private fun androidx.navigation.NavGraphBuilder.addSettingsDetailRoutes(navContr
     composable("settingsDetail/lang") { ChangeLangageSettingsScreen(navController) }
     composable("settingsDetail/logout") { LogoutSettingsScreen(navController) }
     composable("settingsDetail/delete") { DeleteAccountSettingsScreen(navController) }
+    composable("settingsDetail/switch") { SwitchAccountTheme(navController) }
 }

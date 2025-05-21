@@ -67,5 +67,9 @@
     <string name="cancel">Anuler</string>
     <string name="confirm_delete_title">Supprimer son compte</string>
     <string name="confirm_delete_message">Êtes-vous sûr de vouloir supprimer votre compte ?</string>
+    <string name="change_theme">Changer de thème</string>
+    <string name="dark_mode">Mode sombre</string>
+    <string name="light_mode">Mode clair</string>
+    <string name="update_theme">Mettre à jour le thème</string>
 
 </resources>
