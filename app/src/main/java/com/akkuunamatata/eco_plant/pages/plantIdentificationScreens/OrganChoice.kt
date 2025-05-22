@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import com.akkuunamatata.eco_plant.utils.PlantNetKey
 
 @Composable
 fun ButtonWithImage(
@@ -230,6 +231,13 @@ fun organChosen(
     longitude: Double?,
     hasValidLocation: Boolean
 ) {
+    // TODO : Use the PlantNet API to identify the plant based on the chosen organ
+
+
+    PlantNetKey.getApiKey()
+
+    println("Key : ${PlantNetKey.getApiKey()}")
+
     Toast.makeText(
         context,
         "Organ chosen: $organ. To do : use PlantNet API",
