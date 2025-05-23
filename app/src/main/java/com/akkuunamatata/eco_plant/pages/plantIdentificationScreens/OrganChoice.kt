@@ -114,10 +114,7 @@ fun ButtonWithImage(
 @Composable
 fun OrganChoice(
     navController: androidx.navigation.NavHostController,
-    imageUri: Uri,
-    latitude: Double?,
-    longitude: Double?,
-    hasValidLocation: Boolean
+    imageUri: Uri
 ) {
     val context = LocalContext.current
     val screenHeight = context.resources.displayMetrics.heightPixels
@@ -149,7 +146,7 @@ fun OrganChoice(
         ) {
             ButtonWithImage(stringResource(R.string.leaf), onClick = {
                 // Handle Button leaf click
-                organChosen(context, "leaf", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "leaf", imageUri)
             },
                 icon = painterResource(id = R.drawable.leaf),
                 modifier = Modifier
@@ -160,7 +157,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.flower), onClick = {
                 // Handle Button flower click
-                organChosen(context, "flower", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "flower", imageUri)
             },
                 icon = painterResource(id = R.drawable.flower),
                 modifier = Modifier
@@ -171,7 +168,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.fruit), onClick = {
                 // Handle Button fruit click
-                organChosen(context, "fruit", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "fruit", imageUri)
             },
                 icon = painterResource(id = R.drawable.fruit),
                 modifier = Modifier
@@ -187,7 +184,7 @@ fun OrganChoice(
         ) {
             ButtonWithImage(stringResource(R.string.bark), onClick = {
                 // Handle Button bark click
-                organChosen(context, "bark", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "bark", imageUri)
             },
                 icon = painterResource(id = R.drawable.bark),
                 modifier = Modifier
@@ -198,7 +195,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.full_plant), onClick = {
                 // Handle Button full plant click
-                organChosen(context, "auto", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "auto", imageUri)
             },
                 icon = painterResource(id = R.drawable.plant),
                 modifier = Modifier
@@ -209,7 +206,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.other), onClick = {
                 // Handle Button other click
-                organChosen(context, "Other", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "Other", imageUri)
             },
                 icon = painterResource(id = R.drawable.plant_other),
                 modifier = Modifier
@@ -241,9 +238,6 @@ fun organChosen(
     context: Context,
     organ: String,
     imageUri: Uri,
-    latitude: Double?,
-    longitude: Double?,
-    hasValidLocation: Boolean
 ) {
     val key = PlantNetKey.getApiKey()
     val client = OkHttpClient()

@@ -123,10 +123,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
 
                 if (savedUri != null) {
                     navController.navigateToOrganChoice(
-                        savedUri,
-                        latitude,
-                        longitude,
-                        hasLocationPermission
+                        savedUri
                     )
                 }
             }
@@ -149,7 +146,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
     // Lancer la galerie
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
-            navController.navigateToOrganChoice(it, latitude, longitude, hasLocationPermission)
+            navController.navigateToOrganChoice(it)
         }
     }
 
@@ -353,11 +350,8 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
 // Extension pour naviguer vers OrganChoice
 fun androidx.navigation.NavHostController.navigateToOrganChoice(
     imageUri: Uri,
-    latitude: Double?,
-    longitude: Double?,
-    hasValidLocation: Boolean
 ) {
-    this.navigate("organ_choice?imageUri=${imageUri}&latitude=${latitude}&longitude=${longitude}&hasValidLocation=${hasValidLocation}")
+    this.navigate("organ_choice?imageUri=${imageUri}")
 }
 
 // Function to get the location and update the text

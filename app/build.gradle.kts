@@ -70,4 +70,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:18.0.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
 }

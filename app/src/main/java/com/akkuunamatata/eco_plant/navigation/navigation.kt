@@ -88,7 +88,7 @@ fun AppNavHost(
             val longitude = backStackEntry.arguments?.getString("longitude")?.toDoubleOrNull()
             val hasValidLocation = backStackEntry.arguments?.getBoolean("hasValidLocation") ?: false
             if (imageUri != null) {
-                OrganChoice(navController, imageUri, latitude, longitude, hasValidLocation)
+                OrganChoice(navController, imageUri)
             }
         }
     }
