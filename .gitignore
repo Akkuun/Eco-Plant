@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+app/src/main/java/com/akkuunamatata/eco_plant/utils/PlantNetConfig.kt
+.idea/deploymentTargetSelector.xml

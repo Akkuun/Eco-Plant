@@ -123,10 +123,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
 
                 if (savedUri != null) {
                     navController.navigateToOrganChoice(
-                        savedUri,
-                        latitude,
-                        longitude,
-                        hasLocationPermission
+                        savedUri
                     )
                 }
             }
@@ -149,7 +146,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
     // Lancer la galerie
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
-            navController.navigateToOrganChoice(it, latitude, longitude, hasLocationPermission)
+            navController.navigateToOrganChoice(it)
         }
     }
 
@@ -187,7 +184,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                     .fillMaxWidth()
                     .padding(16.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.tertiary,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .padding(horizontal = 10.dp, vertical = 6.dp),
@@ -215,7 +212,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                 // Position text
                 Text(
                     text = locationText,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onTertiary,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -247,7 +244,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_refresh_unfilled),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.inverseSurface,
+                        tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.fillMaxSize(0.6f)
                     )
                 }
@@ -295,7 +292,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_gallery_unfilled),
                                     contentDescription = "Open Gallery",
-                                    tint = MaterialTheme.colorScheme.inverseSurface,
+                                    tint = MaterialTheme.colorScheme.secondary,
                                     modifier = Modifier.fillMaxSize(0.6f)
                                 )
                             }
@@ -335,7 +332,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_camera_unfilled),
                                     contentDescription = "Open Camera",
-                                    tint = MaterialTheme.colorScheme.inverseSurface,
+                                    tint = MaterialTheme.colorScheme.secondary,
                                     modifier = Modifier.fillMaxSize(0.6f)
                                 )
                             }
@@ -353,11 +350,8 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
 // Extension pour naviguer vers OrganChoice
 fun androidx.navigation.NavHostController.navigateToOrganChoice(
     imageUri: Uri,
-    latitude: Double?,
-    longitude: Double?,
-    hasValidLocation: Boolean
 ) {
-    this.navigate("organ_choice?imageUri=${imageUri}&latitude=${latitude}&longitude=${longitude}&hasValidLocation=${hasValidLocation}")
+    this.navigate("organ_choice?imageUri=${imageUri}")
 }
 
 // Function to get the location and update the text
