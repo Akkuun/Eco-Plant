@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import com.akkuunamatata.eco_plant.navigation.Routes
 import com.akkuunamatata.eco_plant.utils.PlantNetKey
 import okhttp3.Call
 import okhttp3.Callback
@@ -57,6 +58,7 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
+import kotlin.toString
 
 @Composable
 fun ButtonWithImage(
@@ -146,7 +148,7 @@ fun OrganChoice(
         ) {
             ButtonWithImage(stringResource(R.string.leaf), onClick = {
                 // Handle Button leaf click
-                organChosen(context, "leaf", imageUri)
+                organChosen(context, "leaf", imageUri, navController)
             },
                 icon = painterResource(id = R.drawable.leaf),
                 modifier = Modifier
@@ -157,7 +159,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.flower), onClick = {
                 // Handle Button flower click
-                organChosen(context, "flower", imageUri)
+                organChosen(context, "flower", imageUri, navController)
             },
                 icon = painterResource(id = R.drawable.flower),
                 modifier = Modifier
@@ -168,7 +170,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.fruit), onClick = {
                 // Handle Button fruit click
-                organChosen(context, "fruit", imageUri)
+                organChosen(context, "fruit", imageUri, navController)
             },
                 icon = painterResource(id = R.drawable.fruit),
                 modifier = Modifier
@@ -184,7 +186,7 @@ fun OrganChoice(
         ) {
             ButtonWithImage(stringResource(R.string.bark), onClick = {
                 // Handle Button bark click
-                organChosen(context, "bark", imageUri)
+                organChosen(context, "bark", imageUri, navController)
             },
                 icon = painterResource(id = R.drawable.bark),
                 modifier = Modifier
@@ -195,7 +197,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.full_plant), onClick = {
                 // Handle Button full plant click
-                organChosen(context, "auto", imageUri)
+                organChosen(context, "auto", imageUri, navController)
             },
                 icon = painterResource(id = R.drawable.plant),
                 modifier = Modifier
@@ -206,7 +208,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.other), onClick = {
                 // Handle Button other click
-                organChosen(context, "Other", imageUri)
+                organChosen(context, "Other", imageUri, navController)
             },
                 icon = painterResource(id = R.drawable.plant_other),
                 modifier = Modifier
@@ -238,6 +240,7 @@ fun organChosen(
     context: Context,
     organ: String,
     imageUri: Uri,
+    navController: androidx.navigation.NavHostController,
 ) {
     val key = PlantNetKey.getApiKey()
     val client = OkHttpClient()
@@ -300,10 +303,19 @@ fun organChosen(
                         val scientificName = species.optString("scientificNameWithoutAuthor", "Inconnu")
                         val score = topResult.optDouble("score", 0.0)
 
+                        val encodedUri = Uri.encode(imageUri.toString())
+                        val encodedPlantName = Uri.encode(scientificName)
+                        val encodedScientificName = Uri.encode(scientificName)
+
                         println("Meilleure correspondance: $scientificName (score: ${(score * 100).toInt()}%)")
 
+//                        (context as? android.app.Activity)?.runOnUiThread {
+//                            Toast.makeText(context, "Plante identifiée: $scientificName", Toast.LENGTH_LONG).show()
+//                        }
+                        val navigationRoute = "${Routes.IDENTIFIED_PLANT}?imageUri=${encodedUri}&plantName=${encodedPlantName}&scientificName=${encodedScientificName}"
+
                         (context as? android.app.Activity)?.runOnUiThread {
-                            Toast.makeText(context, "Plante identifiée: $scientificName", Toast.LENGTH_LONG).show()
+                            navController.navigate(navigationRoute)
                         }
                     } else {
                         println("Erreur: Code ${response.code} - Corps: $responseData")
