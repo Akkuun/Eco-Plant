@@ -1,7 +1,10 @@
 package com.akkuunamatata.eco_plant.pages.plantIdentificationScreens
 
+
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +46,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import com.akkuunamatata.eco_plant.utils.PlantNetKey
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.Response
+import org.json.JSONObject
+import java.io.File
+import java.io.IOException
 
 @Composable
 fun ButtonWithImage(
@@ -135,7 +149,7 @@ fun OrganChoice(
         ) {
             ButtonWithImage(stringResource(R.string.leaf), onClick = {
                 // Handle Button leaf click
-                organChosen(context, "Leaf", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "leaf", imageUri, latitude, longitude, hasValidLocation)
             },
                 icon = painterResource(id = R.drawable.leaf),
                 modifier = Modifier
@@ -146,7 +160,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.flower), onClick = {
                 // Handle Button flower click
-                organChosen(context, "Flower", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "flower", imageUri, latitude, longitude, hasValidLocation)
             },
                 icon = painterResource(id = R.drawable.flower),
                 modifier = Modifier
@@ -157,7 +171,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.fruit), onClick = {
                 // Handle Button fruit click
-                organChosen(context, "Fruit", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "fruit", imageUri, latitude, longitude, hasValidLocation)
             },
                 icon = painterResource(id = R.drawable.fruit),
                 modifier = Modifier
@@ -173,7 +187,7 @@ fun OrganChoice(
         ) {
             ButtonWithImage(stringResource(R.string.bark), onClick = {
                 // Handle Button bark click
-                organChosen(context, "Bark", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "bark", imageUri, latitude, longitude, hasValidLocation)
             },
                 icon = painterResource(id = R.drawable.bark),
                 modifier = Modifier
@@ -184,7 +198,7 @@ fun OrganChoice(
 
             ButtonWithImage(stringResource(R.string.full_plant), onClick = {
                 // Handle Button full plant click
-                organChosen(context, "Full Plant", imageUri, latitude, longitude, hasValidLocation)
+                organChosen(context, "auto", imageUri, latitude, longitude, hasValidLocation)
             },
                 icon = painterResource(id = R.drawable.plant),
                 modifier = Modifier
@@ -231,18 +245,97 @@ fun organChosen(
     longitude: Double?,
     hasValidLocation: Boolean
 ) {
-    // TODO : Use the PlantNet API to identify the plant based on the chosen organ
+    val key = PlantNetKey.getApiKey()
+    val client = OkHttpClient()
 
+    try {
+        val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
+        val tempFile = File(context.cacheDir, "plant_image.jpg")
 
-    PlantNetKey.getApiKey()
+        tempFile.outputStream().use { outputStream ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+        }
 
-    println("Key : ${PlantNetKey.getApiKey()}")
+        println("Taille du fichier: ${tempFile.length()} octets")
 
-    Toast.makeText(
-        context,
-        "Organ chosen: $organ. To do : use PlantNet API",
-        Toast.LENGTH_SHORT
-    ).show()
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart(
+                "images",
+                "plant_image.jpg",
+                tempFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            )
+            .addFormDataPart("organs", organ)
+            .build()
+
+        val request = Request.Builder()
+            .url("https://my-api.plantnet.org/v2/identify/all?api-key=$key")
+            .post(requestBody)
+            .build()
+
+        println("Envoi de la requête à PlantNet...")
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                (context as? android.app.Activity)?.runOnUiThread {
+                    Toast.makeText(context, "Erreur: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+                tempFile.delete()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                try {
+                    val responseData = response.body?.string()
+                    if (response.isSuccessful && responseData != null) {
+                        val jsonResponse = JSONObject(responseData)
+                        val resultsArray = jsonResponse.getJSONArray("results")
+
+                        if (resultsArray.length() == 0) {
+                            println("Aucun résultat trouvé")
+                            (context as? android.app.Activity)?.runOnUiThread {
+                                Toast.makeText(context, "Aucun résultat trouvé", Toast.LENGTH_LONG).show()
+                            }
+                            return
+                        }
+
+                        val topResult = resultsArray.getJSONObject(0)
+
+                        val species = topResult.getJSONObject("species")
+                        val scientificName = species.optString("scientificNameWithoutAuthor", "Inconnu")
+                        val score = topResult.optDouble("score", 0.0)
+
+                        println("Meilleure correspondance: $scientificName (score: ${(score * 100).toInt()}%)")
+
+                        (context as? android.app.Activity)?.runOnUiThread {
+                            Toast.makeText(context, "Plante identifiée: $scientificName", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        println("Erreur: Code ${response.code} - Corps: $responseData")
+                        (context as? android.app.Activity)?.runOnUiThread {
+                            if (response.code == 404) {
+                                Toast.makeText(
+                                    context,
+                                    "Aucune plante détectée. Veuillez prendre une meilleure photo.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                Toast.makeText(context, "Échec API: ${response.code}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    tempFile.delete()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    println("Erreur lors de la lecture de la réponse: ${e.message}")
+                }
+
+            }
+        })
+    } catch (e: Exception) {
+        e.printStackTrace()
+        Toast.makeText(context, "Erreur de traitement d'image: ${e.message}", Toast.LENGTH_SHORT).show()
+    }
 }
 
 fun navigateToPlantIdentification(
