@@ -286,7 +286,8 @@ fun organChosen(
 
             override fun onResponse(call: Call, response: Response) {
                 try {
-                    val responseData = response.body?.string()
+                    var responseBody = response.body
+                    val responseData = responseBody?.string()
                     if (response.isSuccessful && responseData != null) {
                         val jsonResponse = JSONObject(responseData)
                         val resultsArray = jsonResponse.getJSONArray("results")
@@ -328,6 +329,8 @@ fun organChosen(
                 } catch (e: Exception) {
                     e.printStackTrace()
                     println("Erreur lors de la lecture de la réponse: ${e.message}")
+                } finally {
+                    tempFile.delete()
                 }
 
             }
