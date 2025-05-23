@@ -69,4 +69,11 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.android.gms:play-services-location:18.0.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.androidx.fragment)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.animation.core.lint)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
+    implementation("org.osmdroid:osmdroid-android:6.1.17")
+    implementation("org.osmdroid:osmdroid-mapsforge:6.1.17")
 }
