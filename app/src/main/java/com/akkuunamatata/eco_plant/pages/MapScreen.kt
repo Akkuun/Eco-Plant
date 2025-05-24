@@ -1,21 +1,31 @@
 package com.akkuunamatata.eco_plant.pages
 
+import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
-import android.preference.PreferenceManager
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
+
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -23,9 +33,9 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import org.osmdroid.views.overlay.Marker
-
 @Composable
 fun MapScreen() {
+
 
 
     // Exemple data
@@ -73,7 +83,7 @@ fun MapScreen() {
     // Configurer osmdroid
     DisposableEffect(Unit) {
         Configuration.getInstance()
-            .load(context, PreferenceManager.getDefaultSharedPreferences(context))
+            .load(context, androidx.preference.PreferenceManager.getDefaultSharedPreferences(context))
         onDispose { }
     }
 
@@ -113,9 +123,16 @@ fun MapScreen() {
             // Centrer initialement la carte sur la position par défaut
             map.controller.setCenter(startPoint)
 
-            // Ajouter un overlay de localisation
-            val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map)
-            locationOverlay.enableMyLocation()
+            // Personnaliser l'icône de localisation
+            val locationIcon: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_map_filled)
+
+            // Ajouter un overlay de localisation avec l'icône personnalisée
+            val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map).apply {
+                if (locationIcon != null) {
+                   // setPersonIcon(locationIcon)
+                }
+                enableMyLocation()
+            }
             map.overlays.add(locationOverlay)
 
             // Utiliser le Handler du thread principal pour l'animation
@@ -124,7 +141,8 @@ fun MapScreen() {
                     map.controller.animateTo(locationOverlay.myLocation)
                 }
             }
-            //for each ParcelleData, add a marker to the map
+
+            // Pour chaque ParcelleData, ajouter un marqueur à la carte
             exampleData.forEach { parcelle ->
                 val marker = Marker(map)
                 marker.position = GeoPoint(parcelle.lat, parcelle.long)
@@ -133,7 +151,27 @@ fun MapScreen() {
                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 map.overlays.add(marker)
             }
+        }
 
+        // Bouton de recentrage sur la position de l'utilisateur
+        FloatingActionButton(
+            onClick = {
+                val locationOverlay = mapView.overlays
+                    .filterIsInstance<MyLocationNewOverlay>()
+                    .firstOrNull()
+
+                locationOverlay?.myLocation?.let { location ->
+                    mapView.controller.animateTo(location)
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = "Recentrer sur ma position"
+            )
         }
     }
 }
