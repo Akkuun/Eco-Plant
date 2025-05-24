@@ -13,6 +13,7 @@ import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.*
 import com.google.firebase.auth.FirebaseAuth
 import androidx.core.net.toUri
+import com.akkuunamatata.eco_plant.pages.mapsScreens.MapScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
