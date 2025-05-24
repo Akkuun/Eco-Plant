@@ -46,7 +46,7 @@ fun AppNavHost(
         modifier = modifier
     ) {
         // Map screen route
-        composable(Routes.MAP) { MapScreen() }
+        composable(Routes.MAP) { MapScreen(navController) }
 
         // History screen route
         composable(Routes.HISTORY) { HistoryScreen() }
