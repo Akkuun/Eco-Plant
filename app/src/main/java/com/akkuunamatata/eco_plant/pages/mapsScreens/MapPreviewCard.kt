@@ -29,7 +29,11 @@ fun MapPreviewCard(
             .fillMaxWidth()
             .padding(16.dp),
         shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiary
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             // Close button in the top-right corner
