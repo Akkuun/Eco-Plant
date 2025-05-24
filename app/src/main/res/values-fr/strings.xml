@@ -72,4 +72,10 @@
     <string name="light_mode">Mode clair</string>
     <string name="update_theme">Mettre à jour le thème</string>
 
+    <!-- Identified plant -->
+    <string name="search_plot">Rechercher une parcelle</string>
+    <string name="new_plot">Nouvelle parcelle</string>
+    <string name="add_to_plot">Ajouter à la parcelle selectionnée</string>
+    <string name="take_another_picture">Prendre une autre photo</string>
+    <string name="last_edited">Dernière modification: %1$s</string>
 </resources>

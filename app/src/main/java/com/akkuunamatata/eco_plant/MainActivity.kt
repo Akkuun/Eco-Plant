@@ -7,11 +7,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
+import androidx.compose.material3.NavigationBarDefaults.containerColor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.akkuunamatata.eco_plant.navigation.AppNavHost
@@ -139,7 +141,10 @@ fun AppNavigation() {
 fun MainBottomBar(navController: NavHostController) {
     val selectedItem = remember { mutableIntStateOf(0) }
 
-    NavigationBar {
+    NavigationBar (
+        containerColor = MaterialTheme.colorScheme.background,
+        tonalElevation = 0.dp
+    ) {
         // Map navigation item
         NavigationBarItem(
             icon = {
@@ -157,7 +162,14 @@ fun MainBottomBar(navController: NavHostController) {
                 navController.navigate("map") {
                     popUpTo("map") { inclusive = true }
                 }
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.scrim,
+                unselectedTextColor = MaterialTheme.colorScheme.scrim,
+                indicatorColor = MaterialTheme.colorScheme.tertiary
+            )
         )
 
         // History navigation item
@@ -177,7 +189,14 @@ fun MainBottomBar(navController: NavHostController) {
                 navController.navigate("history") {
                     popUpTo("history") { inclusive = true }
                 }
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.scrim,
+                unselectedTextColor = MaterialTheme.colorScheme.scrim,
+                indicatorColor = MaterialTheme.colorScheme.tertiary
+            )
         )
 
         // Scan navigation item
@@ -197,7 +216,14 @@ fun MainBottomBar(navController: NavHostController) {
                 navController.navigate("scan") {
                     popUpTo("scan") { inclusive = true }
                 }
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.scrim,
+                unselectedTextColor = MaterialTheme.colorScheme.scrim,
+                indicatorColor = MaterialTheme.colorScheme.tertiary
+            )
         )
 
         // Settings navigation item
@@ -217,7 +243,14 @@ fun MainBottomBar(navController: NavHostController) {
                 navController.navigate("settings") {
                     popUpTo("settings") { inclusive = true }
                 }
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.scrim,
+                unselectedTextColor = MaterialTheme.colorScheme.scrim,
+                indicatorColor = MaterialTheme.colorScheme.tertiary
+            )
         )
     }
 }

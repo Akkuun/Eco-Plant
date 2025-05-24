@@ -77,4 +77,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation("org.osmdroid:osmdroid-android:6.1.17")
     implementation("org.osmdroid:osmdroid-mapsforge:6.1.17")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
 }
