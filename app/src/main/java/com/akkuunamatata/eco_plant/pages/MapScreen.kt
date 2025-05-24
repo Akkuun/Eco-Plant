@@ -3,40 +3,54 @@ package com.akkuunamatata.eco_plant.pages
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.preference.PreferenceManager
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
-
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import org.osmdroid.views.overlay.Marker
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen() {
-
-
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
 
     // Exemple data
     val exampleData = listOf(
@@ -76,14 +90,20 @@ fun MapScreen() {
         )
     )
 
+    // Selected marker state
+    var selectedParcelleData by remember { mutableStateOf<ParcelleData?>(null) }
 
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
+    // Bottom sheet state
+    val sheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    // Search query state
+    var searchQuery by remember { mutableStateOf("") }
 
     // Configurer osmdroid
     DisposableEffect(Unit) {
         Configuration.getInstance()
-            .load(context, androidx.preference.PreferenceManager.getDefaultSharedPreferences(context))
+            .load(context, PreferenceManager.getDefaultSharedPreferences(context))
         onDispose { }
     }
 
@@ -113,6 +133,7 @@ fun MapScreen() {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        // Map view
         AndroidView(
             factory = { mapView },
             modifier = Modifier.fillMaxSize()
@@ -123,14 +144,8 @@ fun MapScreen() {
             // Centrer initialement la carte sur la position par défaut
             map.controller.setCenter(startPoint)
 
-            // Personnaliser l'icône de localisation
-            val locationIcon: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_map_filled)
-
-            // Ajouter un overlay de localisation avec l'icône personnalisée
+            // Ajouter un overlay de localisation
             val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map).apply {
-                if (locationIcon != null) {
-                   // setPersonIcon(locationIcon)
-                }
                 enableMyLocation()
             }
             map.overlays.add(locationOverlay)
@@ -142,36 +157,269 @@ fun MapScreen() {
                 }
             }
 
+            // Clear existing markers (to prevent duplicates on recomposition)
+            map.overlays.removeAll { it is Marker }
+
+            // Add location overlay
+            map.overlays.add(locationOverlay)
+
             // Pour chaque ParcelleData, ajouter un marqueur à la carte
             exampleData.forEach { parcelle ->
                 val marker = Marker(map)
                 marker.position = GeoPoint(parcelle.lat, parcelle.long)
                 marker.title = "Parcelle de ${parcelle.idAuthor}"
-                marker.snippet = parcelle.plants.joinToString("\n") { it.name }
+                marker.snippet = parcelle.plants.joinToString(", ") { it.name }
                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+                // Custom marker icon (use a Material Design marker)
+                ContextCompat.getDrawable(context, R.drawable.ic_map_filled)?.let {
+                    marker.icon = it
+                }
+
+                // Handle marker click
+                marker.setOnMarkerClickListener { clickedMarker, _ ->
+                    selectedParcelleData = parcelle
+                    true
+                }
+
                 map.overlays.add(marker)
             }
         }
 
-        // Bouton de recentrage sur la position de l'utilisateur
-        FloatingActionButton(
-            onClick = {
-                val locationOverlay = mapView.overlays
-                    .filterIsInstance<MyLocationNewOverlay>()
-                    .firstOrNull()
+        // Search bar at top
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .align(Alignment.TopCenter)
+        ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.surface),
+                placeholder = { Text("Rechercher une plante ou un lieu") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.Transparent
+                ),
+                singleLine = true,
+                shape = RoundedCornerShape(24.dp)
+            )
+        }
 
-                locationOverlay?.myLocation?.let { location ->
-                    mapView.controller.animateTo(location)
-                }
-            },
+        // FABs at bottom-right
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.LocationOn,
-                contentDescription = "Recentrer sur ma position"
-            )
+            // Add new location FAB
+            SmallFloatingActionButton(
+                onClick = { /* Add new location */ },
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Ajouter une parcelle"
+                )
+            }
+
+            // My location FAB
+            FloatingActionButton(
+                onClick = {
+                    val locationOverlay = mapView.overlays
+                        .filterIsInstance<MyLocationNewOverlay>()
+                        .firstOrNull()
+
+                    locationOverlay?.myLocation?.let { location ->
+                        mapView.controller.animateTo(location)
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "Ma position"
+                )
+            }
+        }
+
+        // Preview card for selected marker
+        AnimatedVisibility(
+            visible = selectedParcelleData != null && !showBottomSheet,
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it }),
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            selectedParcelleData?.let { parcelle ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Parcelle de ${parcelle.idAuthor}",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            IconButton(
+                                onClick = { showBottomSheet = true },
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                    .size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowUp,
+                                    contentDescription = "Plus de détails",
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.LocationOn,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Lat: ${parcelle.lat}, Long: ${parcelle.long}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Plantes: ${parcelle.plants.joinToString(", ") { it.name }}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+        }
+
+        // Full modal bottom sheet
+        if (showBottomSheet && selectedParcelleData != null) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = sheetState
+            ) {
+                selectedParcelleData?.let { parcelle ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .padding(bottom = 32.dp)
+                    ) {
+                        Text(
+                            text = "Parcelle de ${parcelle.idAuthor}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "Coordonnées",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            text = "Latitude: ${parcelle.lat}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Text(
+                            text = "Longitude: ${parcelle.long}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "Plantes",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        parcelle.plants.forEach { plant ->
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = plant.name,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Text(
+                                        text = "Conditions de culture:",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+
+                                    plant.culturalConditions.forEach { condition ->
+                                        Text(
+                                            text = "• $condition",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
