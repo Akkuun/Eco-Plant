@@ -69,5 +69,15 @@
     <string name="cancel">Cancel</string>
     <string name="confirm_delete_title">Delete account</string>
     <string name="confirm_delete_message">Are you sure you want to delete your account? This action is irreversible.</string>
+    <string name="change_theme">Change theme</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="light_mode">Light mode</string>
+    <string name="update_theme">Update theme</string>
 
+    <!-- Identified plant -->
+    <string name="search_plot">Search a plot</string>
+    <string name="new_plot">New plot</string>
+    <string name="add_to_plot">Add to slected plot</string>
+    <string name="take_another_picture">Take another picture</string>
+    <string name="last_edited">Last edited: %1$s</string>
 </resources>

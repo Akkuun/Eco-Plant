@@ -127,17 +127,18 @@ fun UserSettingsButtons(onSettingSelected: (String) -> Unit) {
     ) {
         SettingsButton(label = stringResource(R.string.username), onClick = { onSettingSelected("username") })
         HorizontalDivider()
-        SettingsButton(label = stringResource(R.string.email), onClick = { onSettingSelected("email") })
-        HorizontalDivider()
+//        SettingsButton(label = stringResource(R.string.email), onClick = { onSettingSelected("email") })
+//        HorizontalDivider() TODO put bqck when working
         SettingsButton(label = stringResource(R.string.password), onClick = { onSettingSelected("pwd") })
         HorizontalDivider()
         SettingsButton(label = stringResource(R.string.language), onClick = { onSettingSelected("lang") })
         HorizontalDivider()
         SettingsButton(label = stringResource(R.string.logout), onClick = { onSettingSelected("logout") })
         HorizontalDivider()
+        SettingsButton(label = stringResource(R.string.switch_mode), onClick = { onSettingSelected("switch") })
+        HorizontalDivider()
         SettingsButton(label = stringResource(R.string.delete_account), onClick = { onSettingSelected("delete") })
         HorizontalDivider()
-        SettingsButton(label = stringResource(R.string.switch_mode), onClick = { onSettingSelected("switch") })
     }
 }
 

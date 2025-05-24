@@ -7,50 +7,112 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.NavigationBarDefaults.containerColor
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.akkuunamatata.eco_plant.navigation.AppNavHost
 import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
+    private var languageListenerRegistration: ListenerRegistration? = null
+    private var themeListenerRegistration: ListenerRegistration? = null
+    private val languageState = mutableStateOf("fr") // Default language
+    private val themeState = mutableStateOf("dark") // Default theme
+    private var isInitialLoad = true // Flag to track initial load
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setAppLanguage()
-        // Set the content view using Jetpack Compose
+        setupFirestoreListeners()
+
         setContent {
-            EcoPlantTheme(dynamicColor = false) {
-                AppNavigation() // Initialize the navigation system
+            val currentLanguage by languageState
+            val currentTheme by themeState
+
+            // Pass the theme preference to EcoPlantTheme
+            EcoPlantTheme(
+                darkTheme = currentTheme == "dark",
+                dynamicColor = false
+            ) {
+                // Using key parameter with language to force recomposition when language changes
+                key(currentLanguage) {
+                    AppNavigation() // Initialize the navigation system
+                }
             }
         }
     }
 
-    private fun setAppLanguage() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
+    private fun setupFirestoreListeners() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val db = FirebaseFirestore.getInstance()
+        val userDocRef = db.collection("users").document(userId)
 
-        userId?.let {
-            db.collection("users").document(it).get().addOnSuccessListener { document ->
-                val language = document.getString("lang") ?: "fr" // Default to French if not set
-                val locale = Locale(language)
-                Locale.setDefault(locale)
+        // Set up a real-time listener for language changes
+        languageListenerRegistration = userDocRef
+            .addSnapshotListener { documentSnapshot, error ->
+                if (error != null || documentSnapshot == null) return@addSnapshotListener
 
-                val config = Configuration()
-                config.setLocale(locale)
-                resources.updateConfiguration(config, resources.displayMetrics)
+                val language = documentSnapshot.getString("lang") ?: "fr"
+                val theme = documentSnapshot.getString("theme") ?: "dark"
+
+                // Update theme state
+                themeState.value = theme
+
+                if (isInitialLoad) {
+                    // Only update the state on initial load without recreation
+                    languageState.value = language
+                    applyLanguageChange(language, false)
+                    isInitialLoad = false
+                } else if (language != languageState.value) {
+                    // Only update and recreate if the language has actually changed
+                    languageState.value = language
+                    applyLanguageChange(language, true)
+                }
             }
+    }
+
+    private fun applyLanguageChange(language: String, shouldRecreate: Boolean) {
+        val locale = Locale(language)
+        Locale.setDefault(locale)
+
+        val config = Configuration(resources.configuration)
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Only recreate if needed and explicitly requested
+        if (shouldRecreate) {
+            // Use a flag in intent to prevent multiple recreations
+            val intent = intent
+            intent.putExtra("language_just_changed", true)
+            finish()
+            startActivity(intent)
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Reset the flag when coming from a recreation due to language change
+        if (intent.getBooleanExtra("language_just_changed", false)) {
+            intent.removeExtra("language_just_changed")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up the Firestore listeners
+        languageListenerRegistration?.remove()
+        themeListenerRegistration?.remove()
+    }
 }
 
 /**
@@ -79,9 +141,10 @@ fun AppNavigation() {
 fun MainBottomBar(navController: NavHostController) {
     val selectedItem = remember { mutableIntStateOf(0) }
 
-
-
-    NavigationBar {
+    NavigationBar (
+        containerColor = MaterialTheme.colorScheme.background,
+        tonalElevation = 0.dp
+    ) {
         // Map navigation item
         NavigationBarItem(
             icon = {
@@ -97,9 +160,16 @@ fun MainBottomBar(navController: NavHostController) {
             onClick = {
                 selectedItem.intValue = 0
                 navController.navigate("map") {
-                    popUpTo("map") { inclusive = true } // Prevent multiple instances
+                    popUpTo("map") { inclusive = true }
                 }
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.scrim,
+                unselectedTextColor = MaterialTheme.colorScheme.scrim,
+                indicatorColor = MaterialTheme.colorScheme.tertiary
+            )
         )
 
         // History navigation item
@@ -119,7 +189,14 @@ fun MainBottomBar(navController: NavHostController) {
                 navController.navigate("history") {
                     popUpTo("history") { inclusive = true }
                 }
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.scrim,
+                unselectedTextColor = MaterialTheme.colorScheme.scrim,
+                indicatorColor = MaterialTheme.colorScheme.tertiary
+            )
         )
 
         // Scan navigation item
@@ -139,7 +216,14 @@ fun MainBottomBar(navController: NavHostController) {
                 navController.navigate("scan") {
                     popUpTo("scan") { inclusive = true }
                 }
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.scrim,
+                unselectedTextColor = MaterialTheme.colorScheme.scrim,
+                indicatorColor = MaterialTheme.colorScheme.tertiary
+            )
         )
 
         // Settings navigation item
@@ -159,7 +243,14 @@ fun MainBottomBar(navController: NavHostController) {
                 navController.navigate("settings") {
                     popUpTo("settings") { inclusive = true }
                 }
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.scrim,
+                unselectedTextColor = MaterialTheme.colorScheme.scrim,
+                indicatorColor = MaterialTheme.colorScheme.tertiary
+            )
         )
     }
 }
