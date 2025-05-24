@@ -119,3 +119,32 @@ class PlantSpecies {
         return result
     }
 }
+
+class ParcelleData(
+    val lat: Double,
+    val long: Double,
+    val idAuthor: String,
+    val plants: List<PlantSpecies>
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ParcelleData
+
+        if (lat != other.lat) return false
+        if (long != other.long) return false
+        if (idAuthor != other.idAuthor) return false
+        if (plants != other.plants) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = lat.hashCode()
+        result = 31 * result + long.hashCode()
+        result = 31 * result + idAuthor.hashCode()
+        result = 31 * result + plants.hashCode()
+        return result
+    }
+}
