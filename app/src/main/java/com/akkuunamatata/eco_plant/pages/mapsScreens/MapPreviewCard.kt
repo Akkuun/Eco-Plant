@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 
@@ -44,12 +45,12 @@ fun MapPreviewCard(
                     .padding(4.dp)
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
+                    .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f))
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Fermer",
-                    tint = MaterialTheme.colorScheme.tertiary,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -73,14 +74,14 @@ fun MapPreviewCard(
                     Icon(
                         imageVector = Icons.Outlined.LocationOn,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Lat: ${parcelle.lat}, Long: ${parcelle.long}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.tertiary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -112,7 +113,7 @@ fun MapPreviewCard(
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowUp,
                             contentDescription = "Plus de détails",
-                            tint = MaterialTheme.colorScheme.tertiary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
