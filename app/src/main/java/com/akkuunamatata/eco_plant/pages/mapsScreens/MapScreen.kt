@@ -205,17 +205,17 @@ fun MapScreen(navController: NavHostController) {
                     .fillMaxWidth()
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp))
                     .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surface),
+                    .background(MaterialTheme.colorScheme.tertiary),
                 placeholder = { Text("Rechercher une plante ou un lieu") },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedBorderColor = MaterialTheme.colorScheme.tertiary,
                     unfocusedBorderColor = Color.Transparent
                 ),
                 singleLine = true,

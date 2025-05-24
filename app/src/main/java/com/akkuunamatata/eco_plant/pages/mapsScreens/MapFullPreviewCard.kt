@@ -63,7 +63,7 @@ private fun PlantCard(plant: PlantSpecies) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.tertiary
         )
     ) {
         Column(
