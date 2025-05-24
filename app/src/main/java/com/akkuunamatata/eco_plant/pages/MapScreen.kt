@@ -46,9 +46,10 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(navigationController: androidx.navigation.NavHostController) {
+fun MapScreen(navController: androidx.navigation.NavHostController) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
@@ -228,11 +229,7 @@ fun MapScreen(navigationController: androidx.navigation.NavHostController) {
         ) {
             // Add new location FAB
             SmallFloatingActionButton(
-                onClick = {
-                    // go to scan page
-                    navigationController.navigate("scan")
-
-                },
+                onClick = { navController.navigate("scan") },
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             ) {
@@ -302,33 +299,11 @@ fun MapScreen(navigationController: androidx.navigation.NavHostController) {
                                 .fillMaxWidth()
                                 .padding(16.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Parcelle de ${parcelle.idAuthor}",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-
-                                Spacer(modifier = Modifier.width(48.dp)) // Space for the close button
-
-                                IconButton(
-                                    onClick = { showBottomSheet = true },
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primaryContainer)
-                                        .size(36.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowUp,
-                                        contentDescription = "Plus de détails",
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                }
-                            }
+                            Text(
+                                text = "Parcelle de ${parcelle.idAuthor}",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
 
                             Spacer(modifier = Modifier.height(8.dp))
 
@@ -357,6 +332,30 @@ fun MapScreen(navigationController: androidx.navigation.NavHostController) {
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Moved the expand button to the bottom-center
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                IconButton(
+                                    onClick = { showBottomSheet = true },
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primaryContainer)
+                                        .size(40.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.KeyboardArrowUp,
+                                        contentDescription = "Plus de détails",
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+                            }
                         }
                     }
                 }
