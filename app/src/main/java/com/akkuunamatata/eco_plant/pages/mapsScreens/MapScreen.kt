@@ -64,6 +64,16 @@ fun MapScreen(navController: NavHostController) {
                         "Résistant à la sécheresse"
                     )
                 ),
+                PlantSpecies(
+                    name = "Thym",
+                    services = floatArrayOf(0.85f, 0.75f, 0.65f),
+                    reliabilities = floatArrayOf(0.9f, 0.88f, 0.85f),
+                    culturalConditions = arrayOf(
+                        "Soleil",
+                        "Sol bien drainé",
+                        "Résistant à la sécheresse"
+                    )
+                )
             )
         ),
         ParcelleData(
