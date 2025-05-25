@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.core.net.toUri
 import com.akkuunamatata.eco_plant.pages.mapsScreens.MapScreen
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.IdentifiedPlant
+import com.akkuunamatata.eco_plant.pages.plotScreens.NewPlotScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
@@ -30,6 +31,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val ORGAN_CHOICE = "organ_choice"
     const val IDENTIFIED_PLANT = "identified_plant"
+    const val NEW_PLOT = "new_plot"
 }
 
 /**
@@ -104,6 +106,10 @@ fun AppNavHost(
             if (imageUri != null) {
                 IdentifiedPlant(navController, imageUri, plantName, scientificName)
             }
+        }
+
+        composable(Routes.NEW_PLOT) {
+            NewPlotScreen(navController = navController)
         }
     }
 }

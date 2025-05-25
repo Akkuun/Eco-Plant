@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.akkuunamatata.eco_plant.R
+import com.akkuunamatata.eco_plant.navigation.Routes
 import com.akkuunamatata.eco_plant.ui.theme.HighlightColors
 import java.text.SimpleDateFormat
 import java.util.*
@@ -134,7 +135,7 @@ fun IdentifiedPlant(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
-                        .clickable { /* Créer une nouvelle parcelle */ },
+                        .clickable { navController.navigate(Routes.NEW_PLOT) },
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = HighlightColors.Medium

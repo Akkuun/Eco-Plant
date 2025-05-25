@@ -78,4 +78,9 @@
     <string name="add_to_plot">Ajouter à la parcelle selectionnée</string>
     <string name="take_another_picture">Prendre une autre photo</string>
     <string name="last_edited">Dernière modification: %1$s</string>
+
+    <!-- New plot -->
+    <string name="plot_name">Nom de la parcelle</string>
+    <string name="personal_notes">Notes personnelles</string>
+    <string name="create">Créer</string>
 </resources>
