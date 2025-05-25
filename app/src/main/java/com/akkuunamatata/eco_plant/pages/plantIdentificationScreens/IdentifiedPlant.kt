@@ -1,6 +1,7 @@
 package com.akkuunamatata.eco_plant.pages.plantIdentificationScreens
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +37,9 @@ import kotlinx.coroutines.tasks.await
 import com.akkuunamatata.eco_plant.ui.theme.Support
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.firestore.Query
+import com.akkuunamatata.eco_plant.database.plants.PlantDatabaseHelper
+import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
+import kotlinx.coroutines.launch
 
 data class Plot(
     val id: String,
@@ -59,12 +63,39 @@ fun IdentifiedPlant(
     var plots by remember { mutableStateOf<List<Plot>>(emptyList()) }
     var successMessage by remember { mutableStateOf<String?>(null) }
 
+    // Ajout d'un état pour stocker les données de l'espèce de plante
+    var plantSpecies by remember { mutableStateOf<PlantSpecies?>(null) }
+
+    // Contexte pour instancier le PlantDatabaseHelper
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     // Firebase
     val db = FirebaseFirestore.getInstance()
     val storage = FirebaseStorage.getInstance()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
-    // Récupération des parcelles depuis Firestore (code existant conservé)
+    // Chargement des données de plante depuis la base de données
+    LaunchedEffect(scientificName) {
+        try {
+            val databaseHelper = PlantDatabaseHelper.getInstance(context)
+            plantSpecies = databaseHelper.getPlantSpeciesByScientificName(scientificName)
+
+            // Ajout de logs pour vérifier les valeurs chargées
+            if (plantSpecies != null) {
+                Log.d("IdentifiedPlant", "Données de la plante chargées: ${plantSpecies?.name}")
+                Log.d("IdentifiedPlant", "Services: ${plantSpecies?.services?.joinToString()}")
+                Log.d("IdentifiedPlant", "Fiabilités: ${plantSpecies?.reliabilities?.joinToString()}")
+            } else {
+                Log.d("IdentifiedPlant", "Données non trouvées: $scientificName")
+            }
+        } catch (e: Exception) {
+            errorMessage = "Erreur de recherche: ${e.message}"
+            print("Erreur lors du chargement des données de la plante: ${e.message}")
+        }
+    }
+
+    // Récupération des parcelles depuis Firestore
     LaunchedEffect(currentUser) {
         if (currentUser != null) {
             try {
@@ -103,17 +134,22 @@ fun IdentifiedPlant(
         isAddingPlant = true
 
         try {
-            // Document plante sans image
+            // Récupérer les valeurs de service, fiabilité et conditions culturales
+            val serviceValues = plantSpecies?.services?.toList() ?: listOf(-1f, -1f, -1f)
+            val reliabilityValues = plantSpecies?.reliabilities?.toList() ?: listOf(-1f, -1f, -1f)
+            val culturalConditions = plantSpecies?.culturalConditions?.toList() ?: listOf("", "", "")
+
             val plantMap = hashMapOf(
                 "commonName" to plantName,
                 "scientificName" to scientificName,
-                "imageUrl" to "", // URL vide pour éviter le téléchargement d'image
-                "serviceValues" to listOf(-1f, -1f, -1f),
-                "reliabilityValues" to listOf(-1f, -1f, -1f),
+                "imageUrl" to "",
+                "serviceValues" to serviceValues,
+                "reliabilityValues" to reliabilityValues,
+                "culturalConditions" to culturalConditions,
                 "addedAt" to com.google.firebase.Timestamp.now()
             )
 
-            // Ajout à Firestore sans téléchargement d'image
+            // Ajout à Firestore
             db.collection("users")
                 .document(currentUser.uid)
                 .collection("plots")
