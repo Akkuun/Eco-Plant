@@ -80,4 +80,5 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
 }

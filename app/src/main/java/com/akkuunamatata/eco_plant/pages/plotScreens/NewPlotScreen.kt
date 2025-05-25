@@ -241,7 +241,7 @@ fun NewPlotScreen(navController: NavHostController) {
                             "latitude" to latitude,
                             "longitude" to longitude,
                             "createdAt" to com.google.firebase.Timestamp.now(),
-                            "lastEdited" to com.google.firebase.Timestamp.now()
+                            "lastEdited" to com.google.firebase.Timestamp.now(),
                         )
 
                         // Sauvegarde dans Firestore
