@@ -1,4 +1,4 @@
-package com.akkuunamatata.eco_plant.pages.mapsScreens
+package com.akkuunamatata.eco_plant.pages
 
 import android.os.Handler
 import android.os.Looper
@@ -31,6 +31,8 @@ import androidx.preference.PreferenceManager
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
+import com.akkuunamatata.eco_plant.pages.mapsScreens.MapFullPreviewCard
+import com.akkuunamatata.eco_plant.pages.mapsScreens.MapPreviewCard
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -64,16 +66,6 @@ fun MapScreen(navController: NavHostController) {
                         "Résistant à la sécheresse"
                     )
                 ),
-                PlantSpecies(
-                    name = "Thym",
-                    services = floatArrayOf(0.85f, 0.75f, 0.65f),
-                    reliabilities = floatArrayOf(0.9f, 0.88f, 0.85f),
-                    culturalConditions = arrayOf(
-                        "Soleil",
-                        "Sol bien drainé",
-                        "Résistant à la sécheresse"
-                    )
-                )
             )
         ),
         ParcelleData(
@@ -149,21 +141,14 @@ fun MapScreen(navController: NavHostController) {
             // Centrer initialement la carte sur la position par défaut
             map.controller.setCenter(startPoint)
 
-            // Ajouter un overlay de localisation
+            // Ajouter un overlay de localisation sans recentrage automatique
             val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map).apply {
                 enableMyLocation()
-            }
-            map.overlays.add(locationOverlay)
-
-            // Utiliser le Handler du thread principal pour l'animation
-            locationOverlay.runOnFirstFix {
-                Handler(Looper.getMainLooper()).post {
-                    map.controller.animateTo(locationOverlay.myLocation)
-                }
+                // Removed automatic recentering on first fix
             }
 
-            // Clear existing markers (to prevent duplicates on recomposition)
-            map.overlays.removeAll { it is Marker }
+            // Clear existing overlays (to prevent duplicates on recomposition)
+            map.overlays.clear()
 
             // Add location overlay
             map.overlays.add(locationOverlay)
@@ -176,7 +161,7 @@ fun MapScreen(navController: NavHostController) {
                 marker.snippet = parcelle.plants.joinToString(", ") { it.name }
                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
 
-                // Custom marker icon (use a Material Design marker)
+                // Custom marker icon
                 ContextCompat.getDrawable(context, R.drawable.ic_map_filled)?.let {
                     marker.icon = it
                 }
@@ -205,17 +190,17 @@ fun MapScreen(navController: NavHostController) {
                     .fillMaxWidth()
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp))
                     .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.tertiary),
+                    .background(MaterialTheme.colorScheme.surface),
                 placeholder = { Text("Rechercher une plante ou un lieu") },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = Color.Transparent
                 ),
                 singleLine = true,
@@ -242,7 +227,7 @@ fun MapScreen(navController: NavHostController) {
                 )
             }
 
-            // My location FAB
+            // My location FAB - Manual centering on user's location
             FloatingActionButton(
                 onClick = {
                     val locationOverlay = mapView.overlays
