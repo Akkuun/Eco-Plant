@@ -83,4 +83,19 @@
     <string name="plot_name">Nom de la parcelle</string>
     <string name="personal_notes">Notes personnelles</string>
     <string name="create">Créer</string>
+
+    <!-- PlotList Screen -->
+    <string name="your_plots">Vos parcelles</string>
+    <string name="no_plots_found">Aucune parcelle trouvée</string>
+    <string name="login_required">Vous devez être connecté pour voir vos parcelles</string>
+    <string name="error_loading">Erreur: %1$s</string>
+
+    <!-- PlotDetail Screen -->
+    <string name="plot_not_found">Parcelle introuvable</string>
+    <string name="nitrogen_fixation">Fixation d\'azote dans le sol</string>
+    <string name="soil_structure">Amélioration de la structure du sol</string>
+    <string name="water_retention">Capacité à retenir l\'eau dans le sol</string>
+    <string name="no_notes">Aucune note</string>
+    <string name="view_plants">Voir les plantes</string>
+    <string name="add_plant">Ajouter une plante</string>
 </resources>

@@ -14,7 +14,7 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="welcome">Welcome !</string>
     <string name="forgot_password">Forgot Password?</string>
-    <string name="email_adress">Email adress</string>
+    <string name="email_adress">Email address</string>
     <string name="not_a_member">Not a member?</string>
     <string name="register_now">Register now</string>
 
@@ -85,4 +85,19 @@
     <string name="plot_name">Plot name</string>
     <string name="personal_notes">Personal notes</string>
     <string name="create">Create</string>
+
+    <!-- PlotList Screen -->
+    <string name="your_plots">Your plots</string>
+    <string name="no_plots_found">No plot found</string>
+    <string name="login_required">Login required to see plots</string>
+    <string name="error_loading">Error: %1$s</string>
+
+    <!-- PlotDetail Screen -->
+    <string name="plot_not_found">Plot not found</string>
+    <string name="nitrogen_fixation">Nitrogen fixation in soil</string>
+    <string name="soil_structure">Soil structure improvement</string>
+    <string name="water_retention">Ability to retain water in the soil</string>
+    <string name="no_notes">No notes</string>
+    <string name="view_plants">See plants</string>
+    <string name="add_plant">Add a plant</string>
 </resources>
