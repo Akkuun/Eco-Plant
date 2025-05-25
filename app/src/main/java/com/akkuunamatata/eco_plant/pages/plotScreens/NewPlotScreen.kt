@@ -47,22 +47,6 @@ fun NewPlotScreen(navController: NavHostController) {
     val db = FirebaseFirestore.getInstance()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
-    errorMessage?.let {
-        LaunchedEffect(errorMessage) {
-            errorMessage = null
-        }
-        Snackbar(
-            modifier = Modifier.padding(16.dp),
-            action = {
-                TextButton(onClick = { errorMessage = null }) {
-                    Text("OK")
-                }
-            }
-        ) {
-            Text(it)
-        }
-    }
-
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -194,6 +178,40 @@ fun NewPlotScreen(navController: NavHostController) {
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 0.dp)
+        ) {
+            errorMessage?.let {
+                Snackbar(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    content = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = it,
+                                modifier = Modifier.weight(1f)
+                            )
+                            TextButton(
+                                onClick = { errorMessage = null },
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text("OK")
+                            }
+                        }
+                    }
+                )
+            }
+        }
 
         Row(
             modifier = Modifier
