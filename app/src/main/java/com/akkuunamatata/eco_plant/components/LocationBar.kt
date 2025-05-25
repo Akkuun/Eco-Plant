@@ -1,12 +1,8 @@
 package com.akkuunamatata.eco_plant.components
 
 import android.Manifest
-import android.content.Context
-import android.location.Geocoder
-import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,9 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.utils.getLocationAndUpdateText
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import java.util.*
 
 @Composable
 fun LocationBar(
