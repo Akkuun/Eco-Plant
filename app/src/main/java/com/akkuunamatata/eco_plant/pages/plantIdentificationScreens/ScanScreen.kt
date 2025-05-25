@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.akkuunamatata.eco_plant.components.LocationBar
 import java.io.File
 
 @Composable
@@ -179,76 +180,14 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // GPS Position row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.tertiary,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                // Position icon
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.15f)
-                        .aspectRatio(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_map_filled),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.fillMaxSize(0.6f)
-                            .graphicsLayer {
-                                scaleX = 1.5f
-                                scaleY = 1.5f
-                            }
-                    )
-                }
-
-                // Position text
-                Text(
-                    text = locationText,
-                    color = MaterialTheme.colorScheme.onTertiary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                )
-
-                // Refresh button
-                Button(
-                    onClick = {
-                        if (hasLocationPermission) {
-                            getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
-                                locationText = location
-                                latitude = lat
-                                longitude = lon
-                                android.util.Log.d("ScanScreen", "Location updated: $locationText ($lat, $lon)")
-                            }
-                        } else {
-                            android.util.Log.d("ScanScreen", "Location permission not granted")
-                            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                        }
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    modifier = Modifier
-                        .fillMaxWidth(0.15f)
-                        .aspectRatio(1f)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_refresh_unfilled),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.fillMaxSize(0.6f)
-                    )
-                }
-            }
+            LocationBar(
+                onLocationUpdated = { location, lat, lon ->
+                    locationText = location
+                    latitude = lat
+                    longitude = lon
+                },
+                modifier = Modifier.padding(16.dp)
+            )
 
             // Centered elements
             Box(
