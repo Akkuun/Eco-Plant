@@ -13,17 +13,17 @@ import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     background = Neutral.Dark.Darkest,
-    primary = HighlightColors.Lightest, // Primary button (Default for Button !) TODO Fix
-    onPrimary = HighlightColors.Dark, // Primary button text (Default for Button !) TODO Fix
-    secondary = HighlightColors.Light, // Secondary button TODO Fix
+    primary = HighlightColors.Light, // Primary button (Default for Button !) TODO Fix
+    onPrimary = HighlightColors.Darkest, // Primary button text (Default for Button !) TODO Fix
+    secondary = HighlightColors.Darkest, // Secondary button TODO Fix
     onSecondary = Neutral.Dark.Darkest, // Secondary button text TODO Fix
-    tertiary = HighlightColors.Lightest, // Tertiary button TODO Fix
-    onTertiary = HighlightColors.Darkest, // Tertiary button text TODO Fix
-    scrim = Neutral.Dark.Darkest, // Gray inactive TODO Fix
+    tertiary = Neutral.Dark.Medium, // Tertiary button TODO Fix
+    onTertiary = HighlightColors.Lightest, // Tertiary button text TODO Fix
+    scrim = Neutral.Dark.Lightest, // Gray inactive TODO Fix
     error = Support.Error.ErrorHigh,
     surface = Neutral.Dark.Darkest, // Surface color TODO Fix
     surfaceVariant = Neutral.Dark.Dark,
-    inverseSurface = HighlightColors.Dark,
+    inverseSurface = Support.Error.ErrorMedium, // Inverse surface color
 )
 
 //Light Theme
@@ -45,7 +45,7 @@ private val LightColorScheme = lightColorScheme(
     error = Color(0xFFFF0000), // Error color
     // surface = Color(0xFF00FF00), // Surface color
     surfaceVariant = Color(0xFF0000FF), // Surface variant color
-    inverseSurface = Color(0xFFFFFF00), // Inverse surface color
+    inverseSurface = Support.Error.ErrorHigh, // Inverse surface color
 )
 
 @Composable

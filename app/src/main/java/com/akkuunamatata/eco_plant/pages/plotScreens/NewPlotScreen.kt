@@ -26,7 +26,9 @@ import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.getLocationAndUpdateText
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,8 +39,29 @@ fun NewPlotScreen(navController: NavHostController) {
     var longitude by remember { mutableStateOf<Double?>(null) }
     var plotName by remember { mutableStateOf("") }
     var personalNotes by remember { mutableStateOf("") }
+    var isSaving by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     val context = LocalContext.current
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+    val db = FirebaseFirestore.getInstance()
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
+    errorMessage?.let {
+        LaunchedEffect(errorMessage) {
+            errorMessage = null
+        }
+        Snackbar(
+            modifier = Modifier.padding(16.dp),
+            action = {
+                TextButton(onClick = { errorMessage = null }) {
+                    Text("OK")
+                }
+            }
+        ) {
+            Text(it)
+        }
+    }
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -181,7 +204,8 @@ fun NewPlotScreen(navController: NavHostController) {
             OutlinedButton(
                 onClick = { navController.popBackStack() },
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(24.dp),
+                enabled = !isSaving
             ) {
                 Text(stringResource(R.string.cancel))
             }
@@ -190,14 +214,47 @@ fun NewPlotScreen(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    // Logique pour créer la parcelle
-                    navController.popBackStack()
+                    if (currentUser != null && latitude != null && longitude != null) {
+                        isSaving = true
+                        // Création de la parcelle dans Firebase
+                        val plot = hashMapOf(
+                            "name" to plotName,
+                            "notes" to personalNotes,
+                            "latitude" to latitude,
+                            "longitude" to longitude,
+                            "createdAt" to com.google.firebase.Timestamp.now(),
+                            "lastEdited" to com.google.firebase.Timestamp.now()
+                        )
+
+                        // Sauvegarde dans Firestore
+                        db.collection("users")
+                            .document(currentUser.uid)
+                            .collection("plots")
+                            .add(plot)
+                            .addOnSuccessListener {
+                                isSaving = false
+                                navController.popBackStack()
+                            }
+                            .addOnFailureListener { e ->
+                                isSaving = false
+                                errorMessage = "Erreur lors de la sauvegarde: ${e.message}"
+                            }
+                    } else {
+                        errorMessage = "Connexion ou localisation manquante"
+                    }
                 },
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(24.dp),
-                enabled = plotName.isNotBlank()
+                enabled = plotName.isNotBlank() && !isSaving && latitude != null && longitude != null
             ) {
-                Text(stringResource(R.string.create))
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text(stringResource(R.string.create))
+                }
             }
         }
     }
