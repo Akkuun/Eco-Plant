@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.akkuunamatata.eco_plant.R
+import com.akkuunamatata.eco_plant.utils.getLocationAndUpdateText
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import java.util.*
@@ -131,28 +132,6 @@ fun LocationBar(
                 tint = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.fillMaxSize(0.6f)
             )
-        }
-    }
-}
-
-// Fonction pour obtenir la localisation
-@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-fun getLocationAndUpdateText(
-    fusedLocationClient: FusedLocationProviderClient,
-    context: Context,
-    onLocationUpdated: (String, Double?, Double?) -> Unit
-) {
-    fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-        if (location != null) {
-            val geocoder = Geocoder(context, Locale.getDefault())
-            val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-            if (address?.isNotEmpty() == true) {
-                onLocationUpdated(address[0].locality ?: "Ville inconnue", location.latitude, location.longitude)
-            } else {
-                onLocationUpdated("Lieu inconnu", location.latitude, location.longitude)
-            }
-        } else {
-            onLocationUpdated("Localisation non disponible", null, null)
         }
     }
 }

@@ -24,7 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.components.LocationBar
-import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.getLocationAndUpdateText
+import com.akkuunamatata.eco_plant.utils.getLocationAndUpdateText
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth

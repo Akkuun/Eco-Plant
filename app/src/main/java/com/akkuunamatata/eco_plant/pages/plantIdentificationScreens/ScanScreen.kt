@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.akkuunamatata.eco_plant.components.LocationBar
+import com.akkuunamatata.eco_plant.utils.getLocationAndUpdateText
 import java.io.File
 
 @Composable
@@ -291,27 +292,4 @@ fun androidx.navigation.NavHostController.navigateToOrganChoice(
     imageUri: Uri,
 ) {
     this.navigate("organ_choice?imageUri=${imageUri}")
-}
-
-// Function to get the location and update the text
-@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-fun getLocationAndUpdateText(
-    fusedLocationClient: FusedLocationProviderClient,
-    context: Context,
-    onLocationUpdated: (String, Double?, Double?) -> Unit
-) {
-    fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-        if (location != null) {
-            // Convert the latitude and longitude into a city name
-            val geocoder = Geocoder(context, Locale.getDefault())
-            val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-            if (address?.isNotEmpty() == true) {
-                onLocationUpdated(address[0].locality ?: "Unknown City", location.latitude, location.longitude)
-            } else {
-                onLocationUpdated("Unknown Location", location.latitude, location.longitude)
-            }
-        } else {
-            onLocationUpdated("Location not available", null, null)
-        }
-    }
 }
