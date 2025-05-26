@@ -16,6 +16,7 @@ import androidx.core.net.toUri
 import com.akkuunamatata.eco_plant.pages.mapsScreens.MapScreen
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.IdentifiedPlant
 import com.akkuunamatata.eco_plant.pages.plotScreens.NewPlotScreen
+import com.akkuunamatata.eco_plant.pages.plotScreens.PlantListScreen
 import com.akkuunamatata.eco_plant.pages.plotScreens.PlotDetailScreen
 import com.akkuunamatata.eco_plant.pages.plotScreens.PlotList
 import com.akkuunamatata.eco_plant.pages.plotScreens.PlotSettingsScreen
@@ -38,6 +39,7 @@ object Routes {
     const val PLOT_LIST = "plot_list"
     const val PLOT_DETAIL = "plot_detail"
     const val PLOT_SETTINGS = "plot_settings"
+    const val PLANTS_IN_PLOT = "plants_in_plot"
 }
 
 /**
@@ -143,6 +145,17 @@ fun AppNavHost(
         ) { backStackEntry ->
             val plotId = backStackEntry.arguments?.getString("plotId") ?: ""
             PlotSettingsScreen(plotId = plotId, navController = navController)
+        }
+
+        // Plants in plot screen route with arguments
+        composable(
+            "${Routes.PLANTS_IN_PLOT}/{plotId}",
+            arguments = listOf(
+                navArgument("plotId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val plotId = backStackEntry.arguments?.getString("plotId") ?: ""
+            PlantListScreen(plotId = plotId, navController = navController)
         }
     }
 }

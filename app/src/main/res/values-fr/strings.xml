@@ -108,4 +108,15 @@
     <string name="confirm">Confirmer</string>
     <string name="error_saving">Erreur lors de l\'enregistrement: %1$s</string>
     <string name="error_deleting">Erreur lors de la suppression: %1$s</string>
+
+    <!-- PlantList Screen -->
+    <string name="plants_in_plot">Plantes dans %1$s</string>
+    <string name="plants_in_plot_generic">Plantes dans la parcelle</string>
+    <string name="search_plants">Rechercher des plantes</string>
+    <string name="no_plants_found">Aucune plante trouvée dans cette parcelle</string>
+    <string name="back_to_plot">Retour à la parcelle</string>
+    <string name="remove_plant">Supprimer</string>
+    <string name="more_info">Plus d\'infos</string>
+
+    <string name="no_value">Pas de valeur</string>
 </resources>

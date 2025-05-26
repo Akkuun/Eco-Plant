@@ -193,7 +193,7 @@ fun PlotDetailScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(
-                    onClick = { /* Voir les plantes */ },
+                    onClick = { navController.navigate("${Routes.PLANTS_IN_PLOT}/${plotId}") },
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 8.dp)
