@@ -48,7 +48,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-
+import androidx.compose.foundation.text.BasicTextField
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(navController: NavHostController) {
@@ -223,23 +223,60 @@ fun MapScreen(navController: NavHostController) {
                 .padding(16.dp)
                 .align(Alignment.TopCenter)
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+            // Barre de recherche compacte sans espace blanc en bas
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(56.dp) // Hauteur fixe pour éviter les espaces
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp))
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surface),
-                placeholder = { Text("Rechercher une ville") },
-                leadingIcon = {
+                    .clip(RoundedCornerShape(24.dp)),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                },
-                trailingIcon = {
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        decorationBox = { innerTextField ->
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        "Rechercher une ville",
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(
+                            onSearch = {
+                                if (searchQuery.isNotEmpty()) {
+                                    geocodeLocation(searchQuery)
+                                }
+                            }
+                        )
+                    )
+
                     if (isSearching) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
@@ -270,34 +307,20 @@ fun MapScreen(navController: NavHostController) {
                             }
                         }
                     }
-                },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.Transparent,
-                    errorBorderColor = MaterialTheme.colorScheme.error
-                ),
-                singleLine = true,
-                shape = RoundedCornerShape(24.dp),
-                isError = searchError != null,
-                supportingText = {
-                    if (searchError != null) {
-                        Text(
-                            text = searchError!!,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        if (searchQuery.isNotEmpty()) {
-                            geocodeLocation(searchQuery)
-                        }
-                    }
-                )
-            )
-        }
+                }
+            }
 
+            // Affichage de l'erreur en dehors du champ de recherche
+            if (searchError != null) {
+                Text(
+                    text = searchError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 58.dp) // Le padding top est juste après la barre
+                        .align(Alignment.TopStart)
+                )
+            }
+        }
         // FABs at bottom-right
         Column(
             modifier = Modifier
