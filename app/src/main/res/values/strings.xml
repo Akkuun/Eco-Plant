@@ -14,7 +14,7 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="welcome">Welcome !</string>
     <string name="forgot_password">Forgot Password?</string>
-    <string name="email_adress">Email adress</string>
+    <string name="email_adress">Email address</string>
     <string name="not_a_member">Not a member?</string>
     <string name="register_now">Register now</string>
 
@@ -80,4 +80,45 @@
     <string name="add_to_plot">Add to slected plot</string>
     <string name="take_another_picture">Take another picture</string>
     <string name="last_edited">Last edited: %1$s</string>
+
+    <!-- New plot -->
+    <string name="plot_name">Plot name</string>
+    <string name="personal_notes">Personal notes</string>
+    <string name="create">Create</string>
+
+    <!-- PlotList Screen -->
+    <string name="your_plots">Your plots</string>
+    <string name="no_plots_found">No plot found</string>
+    <string name="login_required">Login required to see plots</string>
+    <string name="error_loading">Error: %1$s</string>
+
+    <!-- PlotDetail Screen -->
+    <string name="plot_not_found">Plot not found</string>
+    <string name="nitrogen_fixation">Nitrogen fixation in soil</string>
+    <string name="soil_structure">Soil structure improvement</string>
+    <string name="water_retention">Ability to retain water in the soil</string>
+    <string name="no_notes">No notes</string>
+    <string name="view_plants">See plants</string>
+    <string name="add_plant">Add a plant</string>
+
+    <!-- PlotSettings Screen -->
+    <string name="plot_settings">Plot settings</string>
+    <string name="delete_plot">Delete this plot</string>
+    <string name="confirm_deletion">Confirm deletion</string>
+    <string name="delete_plot_confirmation">Are you sure you want to delete this plot? This action cannot be reverted.</string>
+    <string name="delete">Delete</string>
+    <string name="confirm">Confirm</string>
+    <string name="error_saving">Error while saving: %1$s</string>
+    <string name="error_deleting">Error while deleting: %1$s</string>
+
+    <!-- PlantList Screen -->
+    <string name="plants_in_plot">Plants in %1$s</string>
+    <string name="plants_in_plot_generic">Plants in plot</string>
+    <string name="search_plants">Search plants</string>
+    <string name="no_plants_found">No plants found in this plot</string>
+    <string name="back_to_plot">Back to plot</string>
+    <string name="remove_plant">Remove from plot</string>
+    <string name="more_info">More info</string>
+
+    <string name="no_value">No value</string>
 </resources>

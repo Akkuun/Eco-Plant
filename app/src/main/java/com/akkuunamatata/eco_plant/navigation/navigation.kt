@@ -15,6 +15,11 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.core.net.toUri
 import com.akkuunamatata.eco_plant.pages.mapsScreens.MapScreen
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.IdentifiedPlant
+import com.akkuunamatata.eco_plant.pages.plotScreens.NewPlotScreen
+import com.akkuunamatata.eco_plant.pages.plotScreens.PlantListScreen
+import com.akkuunamatata.eco_plant.pages.plotScreens.PlotDetailScreen
+import com.akkuunamatata.eco_plant.pages.plotScreens.PlotList
+import com.akkuunamatata.eco_plant.pages.plotScreens.PlotSettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
@@ -30,6 +35,11 @@ object Routes {
     const val SETTINGS = "settings"
     const val ORGAN_CHOICE = "organ_choice"
     const val IDENTIFIED_PLANT = "identified_plant"
+    const val NEW_PLOT = "new_plot"
+    const val PLOT_LIST = "plot_list"
+    const val PLOT_DETAIL = "plot_detail"
+    const val PLOT_SETTINGS = "plot_settings"
+    const val PLANTS_IN_PLOT = "plants_in_plot"
 }
 
 /**
@@ -89,6 +99,7 @@ fun AppNavHost(
             }
         }
 
+        // Identified plant screen route with arguments
         composable(
             "${Routes.IDENTIFIED_PLANT}?imageUri={imageUri}&plantName={plantName}&scientificName={scientificName}",
             arguments = listOf(
@@ -104,6 +115,47 @@ fun AppNavHost(
             if (imageUri != null) {
                 IdentifiedPlant(navController, imageUri, plantName, scientificName)
             }
+        }
+
+        // New plot screen route
+        composable(Routes.NEW_PLOT) {
+            NewPlotScreen(navController = navController)
+        }
+
+        // Plot list screen route
+        composable(Routes.PLOT_LIST) { PlotList(navController = navController) }
+
+        // Plot detail screen route with arguments
+        composable(
+            "${Routes.PLOT_DETAIL}/{plotId}",
+            arguments = listOf(
+                navArgument("plotId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val plotId = backStackEntry.arguments?.getString("plotId") ?: ""
+            PlotDetailScreen(plotId = plotId, navController = navController)
+        }
+
+        // Plot settings screen route with arguments
+        composable(
+            "${Routes.PLOT_SETTINGS}/{plotId}",
+            arguments = listOf(
+                navArgument("plotId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val plotId = backStackEntry.arguments?.getString("plotId") ?: ""
+            PlotSettingsScreen(plotId = plotId, navController = navController)
+        }
+
+        // Plants in plot screen route with arguments
+        composable(
+            "${Routes.PLANTS_IN_PLOT}/{plotId}",
+            arguments = listOf(
+                navArgument("plotId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val plotId = backStackEntry.arguments?.getString("plotId") ?: ""
+            PlantListScreen(plotId = plotId, navController = navController)
         }
     }
 }
