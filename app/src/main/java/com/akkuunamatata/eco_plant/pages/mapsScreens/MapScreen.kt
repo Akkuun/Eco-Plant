@@ -56,19 +56,25 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.LocalTextStyle
 import com.google.firebase.auth.FirebaseAuth
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun MapScreen(
     navController: NavHostController,
-    // Paramètre pour vérifier si l'utilisateur est connecté
+    // get if the user is logged in
     isUserLoggedIn: Boolean = FirebaseAuth.getInstance().currentUser != null
 ) {
-    // Si l'utilisateur n'est pas connecté, afficher l'écran de connexion nécessaire
+    // if not login, show the NotLoggedInScreen
     if (!isUserLoggedIn) {
         NotLoggedInScreen(navController)
         return
     }
+    //else show the Map
+    Map(navController)
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Map(navController : NavHostController){
     // Le reste du code pour l'affichage de la carte quand l'utilisateur est connecté
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -417,6 +423,7 @@ fun MapScreen(
         }
     }
 }
+
 
 /**
  * Écran affiché lorsque l'utilisateur n'est pas connecté
