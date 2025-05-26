@@ -497,7 +497,7 @@ fun NotLoggedInScreen(navController: NavHostController) {
 
             // Titre de style Google
             Text(
-                text = "EcoPlant Maps",
+                text = stringResource(R.string.eco_plant_map),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -506,7 +506,7 @@ fun NotLoggedInScreen(navController: NavHostController) {
 
             // Message explicatif
             Text(
-                text = "Cette fonctionnalité n'est disponible que pour les utilisateurs connectés.",
+                text = stringResource(R.string.eco_plant_feature_for_logged),
                 fontSize = 16.sp,
                 color = Color(0xFF5F6368),
                 textAlign = TextAlign.Center,
