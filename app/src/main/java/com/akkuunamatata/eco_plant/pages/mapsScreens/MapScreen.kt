@@ -1,6 +1,7 @@
 package com.akkuunamatata.eco_plant.pages.mapsScreens
 
 import NotLoggedInScreen
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -48,6 +49,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.ui.res.stringResource
+import com.akkuunamatata.eco_plant.database.plants.maps.ParcelleRepository
 import com.akkuunamatata.eco_plant.utils.getActualGeoPosition
 import com.akkuunamatata.eco_plant.utils.searchLocationWithNominatim
 import com.google.firebase.auth.FirebaseAuth
@@ -76,43 +78,15 @@ fun Map(navController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
 
-    // Exemple data
-    val exampleData = listOf(
-        ParcelleData(
-            lat = 43.764014,
-            long = 3.869409,
-            idAuthor = "user123",
-            plants = listOf(
-                PlantSpecies(
-                    name = "Lavande",
-                    services = floatArrayOf(0.9f, 0.8f, 0.7f),
-                    reliabilities = floatArrayOf(0.95f, 0.9f, 0.85f),
-                    culturalConditions = arrayOf(
-                        "Soleil",
-                        "Sol bien drainé",
-                        "Résistant à la sécheresse"
-                    )
-                ),
-            )
-        ),
-        ParcelleData(
-            lat = 43.763200,
-            long = 3.871500,
-            idAuthor = "user456",
-            plants = listOf(
-                PlantSpecies(
-                    name = "Romarin",
-                    services = floatArrayOf(0.8f, 0.7f, 0.6f),
-                    reliabilities = floatArrayOf(0.9f, 0.85f, 0.8f),
-                    culturalConditions = arrayOf(
-                        "Soleil",
-                        "Sol bien drainé",
-                        "Résistant à la sécheresse"
-                    )
-                )
-            )
-        )
-    )
+    var parcelles by remember { mutableStateOf<List<ParcelleData>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        isLoading = true
+        parcelles = ParcelleRepository.getInstance().getAllParcelles()
+        isLoading = false
+    }
+
 
     // Selected marker state
     var selectedParcelleData by remember { mutableStateOf<ParcelleData?>(null) }
@@ -218,26 +192,9 @@ fun Map(navController: NavHostController) {
             // Add location overlay
             map.overlays.add(locationOverlay)
 
-            // Add markers for each ParcelleData
-            exampleData.forEach { parcelle ->
-                val marker = Marker(map)
-                marker.position = GeoPoint(parcelle.lat, parcelle.long)
-                marker.title = "Parcelle de ${parcelle.idAuthor}"
-                marker.snippet = parcelle.plants.joinToString(", ") { it.name }
-                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
 
-                // Custom marker icon
-                ContextCompat.getDrawable(context, R.drawable.ic_map_filled)?.let {
-                    marker.icon = it
-                }
-
-                // Handle marker click
-                marker.setOnMarkerClickListener { _, _ ->
-                    selectedParcelleData = parcelle
-                    true
-                }
-
-                map.overlays.add(marker)
+            parcelles.forEach { parcelle ->
+                Log.d("parcelle", "Plant data: $parcelle")
             }
         }
 
@@ -400,8 +357,8 @@ fun Map(navController: NavHostController) {
                         mapView.controller.animateTo(location)
                     }
                 },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             ) {
                 Icon(
                     imageVector = Icons.Default.LocationOn,
