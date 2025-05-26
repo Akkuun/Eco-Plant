@@ -1,15 +1,17 @@
 package com.akkuunamatata.eco_plant.pages.mapsScreens
 
-import android.os.Handler
-import android.os.Looper
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -20,7 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -31,7 +35,10 @@ import androidx.preference.PreferenceManager
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -39,6 +46,10 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
+import androidx.compose.foundation.text.BasicTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +57,7 @@ fun MapScreen(navController: NavHostController) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current // Pour gérer la fermeture du clavier
 
     // Exemple data
     val exampleData = listOf(
@@ -64,16 +76,6 @@ fun MapScreen(navController: NavHostController) {
                         "Résistant à la sécheresse"
                     )
                 ),
-                PlantSpecies(
-                    name = "Thym",
-                    services = floatArrayOf(0.85f, 0.75f, 0.65f),
-                    reliabilities = floatArrayOf(0.9f, 0.88f, 0.85f),
-                    culturalConditions = arrayOf(
-                        "Soleil",
-                        "Sol bien drainé",
-                        "Résistant à la sécheresse"
-                    )
-                )
             )
         ),
         ParcelleData(
@@ -105,23 +107,32 @@ fun MapScreen(navController: NavHostController) {
     // Search query state
     var searchQuery by remember { mutableStateOf("") }
 
-    // Configurer osmdroid
+    // Search error state
+    var searchError by remember { mutableStateOf<String?>(null) }
+
+    // Loading state
+    var isSearching by remember { mutableStateOf(false) }
+
+    // Configure OSMDroid
     DisposableEffect(Unit) {
-        Configuration.getInstance()
-            .load(context, PreferenceManager.getDefaultSharedPreferences(context))
+        Configuration.getInstance().apply {
+            load(context, PreferenceManager.getDefaultSharedPreferences(context))
+            userAgentValue = "EcoPlant/1.0 (Android)" // User agent for Nominatim
+        }
         onDispose { }
     }
 
-    // Créer et configurer la carte
+    // Create and configure the map
     val mapView = remember {
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
+            setBuiltInZoomControls(false) // Désactive les boutons +/-
             controller.setZoom(15.0)
         }
     }
 
-    // Gérer le cycle de vie
+    // Manage lifecycle
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -137,38 +148,57 @@ fun MapScreen(navController: NavHostController) {
         }
     }
 
+    // Geocoding function using Nominatim directly
+    val geocodeLocation = { query: String ->
+        coroutineScope.launch {
+            isSearching = true
+            searchError = null
+            focusManager.clearFocus() // Ferme le clavier
+
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    searchLocationWithNominatim(query)
+                }
+
+                if (result != null) {
+                    // Move map to found location
+                    mapView.controller.animateTo(GeoPoint(result.first, result.second))
+                    mapView.controller.setZoom(12.0) // Zoom level appropriate for cities
+                } else {
+                    searchError = "Lieu introuvable"
+                }
+            } catch (e: Exception) {
+                searchError = "Erreur: ${e.message}"
+            } finally {
+                isSearching = false
+            }
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Map view
         AndroidView(
             factory = { mapView },
             modifier = Modifier.fillMaxSize()
         ) { map ->
-            // Position de départ par défaut (Montpellier)
+            // Default starting position (Montpellier)
             val startPoint = GeoPoint(43.764014, 3.869409)
 
-            // Centrer initialement la carte sur la position par défaut
+            // Center initially on default position
             map.controller.setCenter(startPoint)
 
-            // Ajouter un overlay de localisation
+            // Add location overlay without automatic recentering
             val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map).apply {
                 enableMyLocation()
             }
-            map.overlays.add(locationOverlay)
 
-            // Utiliser le Handler du thread principal pour l'animation
-            locationOverlay.runOnFirstFix {
-                Handler(Looper.getMainLooper()).post {
-                    map.controller.animateTo(locationOverlay.myLocation)
-                }
-            }
-
-            // Clear existing markers (to prevent duplicates on recomposition)
-            map.overlays.removeAll { it is Marker }
+            // Clear existing overlays to prevent duplicates
+            map.overlays.clear()
 
             // Add location overlay
             map.overlays.add(locationOverlay)
 
-            // Pour chaque ParcelleData, ajouter un marqueur à la carte
+            // Add markers for each ParcelleData
             exampleData.forEach { parcelle ->
                 val marker = Marker(map)
                 marker.position = GeoPoint(parcelle.lat, parcelle.long)
@@ -176,13 +206,13 @@ fun MapScreen(navController: NavHostController) {
                 marker.snippet = parcelle.plants.joinToString(", ") { it.name }
                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
 
-                // Custom marker icon (use a Material Design marker)
+                // Custom marker icon
                 ContextCompat.getDrawable(context, R.drawable.ic_map_filled)?.let {
                     marker.icon = it
                 }
 
                 // Handle marker click
-                marker.setOnMarkerClickListener { clickedMarker, _ ->
+                marker.setOnMarkerClickListener { _, _ ->
                     selectedParcelleData = parcelle
                     true
                 }
@@ -198,29 +228,108 @@ fun MapScreen(navController: NavHostController) {
                 .padding(16.dp)
                 .align(Alignment.TopCenter)
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+            // Barre de recherche compacte sans espace blanc en bas
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(56.dp) // Hauteur fixe pour éviter les espaces
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp))
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.tertiary),
-                placeholder = { Text("Rechercher une plante ou un lieu") },
-                leadingIcon = {
+                    .clip(RoundedCornerShape(24.dp)),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colorScheme.tertiary,
-                    unfocusedBorderColor = Color.Transparent
-                ),
-                singleLine = true,
-                shape = RoundedCornerShape(24.dp)
-            )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        decorationBox = { innerTextField ->
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        "Rechercher une ville",
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(
+                            onSearch = {
+                                if (searchQuery.isNotEmpty()) {
+                                    geocodeLocation(searchQuery)
+                                }
+                                focusManager.clearFocus() // Ferme le clavier
+                            }
+                        )
+                    )
+
+                    if (isSearching) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else if (searchQuery.isNotEmpty()) {
+                        Row {
+                            // Search icon button
+                            IconButton(onClick = {
+                                if (searchQuery.isNotEmpty()) {
+                                    geocodeLocation(searchQuery)
+                                }
+                                focusManager.clearFocus() // Ferme le clavier
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Rechercher",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            // Clear icon button
+                            IconButton(onClick = {
+                                searchQuery = ""
+                                focusManager.clearFocus() // Ferme également le clavier lors de l'effacement
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Effacer",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Affichage de l'erreur en dehors du champ de recherche
+            if (searchError != null) {
+                Text(
+                    text = searchError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 58.dp) // Le padding top est juste après la barre
+                        .align(Alignment.TopStart)
+                )
+            }
         }
 
         // FABs at bottom-right
@@ -242,7 +351,7 @@ fun MapScreen(navController: NavHostController) {
                 )
             }
 
-            // My location FAB
+            // My location FAB - Manual centering on user's location
             FloatingActionButton(
                 onClick = {
                     val locationOverlay = mapView.overlays
@@ -289,6 +398,47 @@ fun MapScreen(navController: NavHostController) {
                     MapFullPreviewCard(parcelle = parcelle)
                 }
             }
+        }
+    }
+}
+
+/**
+ * Search for a location using the Nominatim API directly
+ * @return Pair<Double, Double> containing latitude and longitude if found, null otherwise
+ */
+@SuppressLint("SetJavaScriptEnabled")
+suspend fun searchLocationWithNominatim(query: String): Pair<Double, Double>? {
+    return withContext(Dispatchers.IO) {
+        try {
+            val encodedQuery = URLEncoder.encode(query, "UTF-8")
+            val urlString = "https://nominatim.openstreetmap.org/search?q=$encodedQuery&format=json&limit=1"
+
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("User-Agent", "EcoPlant/1.0 (Android)")
+            connection.connectTimeout = 15000
+            connection.readTimeout = 15000
+            connection.connect()
+
+            val responseCode = connection.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                val reader = connection.inputStream.bufferedReader()
+                val response = reader.readText()
+                reader.close()
+
+                val jsonArray = JSONArray(response)
+                if (jsonArray.length() > 0) {
+                    val result = jsonArray.getJSONObject(0)
+                    val lat = result.getDouble("lat")
+                    val lon = result.getDouble("lon")
+                    return@withContext Pair(lat, lon)
+                }
+            }
+            null
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 }

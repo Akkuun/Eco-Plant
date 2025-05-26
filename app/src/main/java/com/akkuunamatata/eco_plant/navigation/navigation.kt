@@ -13,7 +13,6 @@ import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.ScanScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.userSettingsScreens.*
 import com.google.firebase.auth.FirebaseAuth
 import androidx.core.net.toUri
-import com.akkuunamatata.eco_plant.pages.mapsScreens.MapScreen
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.IdentifiedPlant
 import com.akkuunamatata.eco_plant.pages.plotScreens.NewPlotScreen
 import com.akkuunamatata.eco_plant.pages.plotScreens.PlantListScreen
@@ -24,6 +23,7 @@ import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.UserChangeSettingsScreen
+import com.akkuunamatata.eco_plant.pages.mapsScreens.*
 
 /**
  * Object containing all route constants for navigation.
