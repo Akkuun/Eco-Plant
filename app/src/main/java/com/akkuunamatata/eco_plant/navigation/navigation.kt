@@ -18,6 +18,7 @@ import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SignInScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.UserChangeSettingsScreen
+import com.akkuunamatata.eco_plant.pages.mapsScreens.*
 
 /**
  * Object containing all route constants for navigation.
