@@ -94,7 +94,6 @@ fun PlantListScreen(
                                 tempValues.add(floatValue)
                             }
 
-                            // Compléter avec des 0 si nécessaire
                             while (tempValues.size < 3) {
                                 tempValues.add(0f)
                             }
@@ -222,7 +221,10 @@ fun PlantCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiary
+        )
     ) {
         Column(
             modifier = Modifier
@@ -233,14 +235,14 @@ fun PlantCard(
             Text(
                 text = plant.name,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onTertiary
             )
 
             if (plant.scientificName.isNotEmpty()) {
                 Text(
                     text = plant.scientificName,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onTertiary,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }

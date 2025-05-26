@@ -55,7 +55,9 @@ fun ScoreBar(
                         .height(20.dp)
                         .align(androidx.compose.ui.Alignment.Center)
                         .background(
-                            color = MaterialTheme.colorScheme.tertiary,
+                            color = MaterialTheme.colorScheme.tertiary.copy(red = MaterialTheme.colorScheme.tertiary.red * 0.9f,
+                                green = MaterialTheme.colorScheme.tertiary.green * 0.9f,
+                                blue = MaterialTheme.colorScheme.tertiary.blue * 0.9f),
                             shape = RoundedCornerShape(6.dp)
                         )
                 ) {
