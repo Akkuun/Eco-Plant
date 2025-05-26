@@ -120,10 +120,10 @@ class PlantSpecies {
     }
 }
 
-class ParcelleData(
+data class ParcelleData(
     val lat: Double,
     val long: Double,
-    val idAuthor: String,
+    var idAuthor: String,
     val plants: List<PlantSpecies>
 ) {
     override fun equals(other: Any?): Boolean {
