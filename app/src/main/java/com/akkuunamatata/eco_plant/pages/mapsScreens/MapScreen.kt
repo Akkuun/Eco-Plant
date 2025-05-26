@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -49,12 +50,14 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import androidx.compose.foundation.text.BasicTextField
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(navController: NavHostController) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current // Pour gérer la fermeture du clavier
 
     // Exemple data
     val exampleData = listOf(
@@ -124,6 +127,7 @@ fun MapScreen(navController: NavHostController) {
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
+            setBuiltInZoomControls(false) // Désactive les boutons +/-
             controller.setZoom(15.0)
         }
     }
@@ -149,6 +153,7 @@ fun MapScreen(navController: NavHostController) {
         coroutineScope.launch {
             isSearching = true
             searchError = null
+            focusManager.clearFocus() // Ferme le clavier
 
             try {
                 val result = withContext(Dispatchers.IO) {
@@ -273,6 +278,7 @@ fun MapScreen(navController: NavHostController) {
                                 if (searchQuery.isNotEmpty()) {
                                     geocodeLocation(searchQuery)
                                 }
+                                focusManager.clearFocus() // Ferme le clavier
                             }
                         )
                     )
@@ -289,6 +295,7 @@ fun MapScreen(navController: NavHostController) {
                                 if (searchQuery.isNotEmpty()) {
                                     geocodeLocation(searchQuery)
                                 }
+                                focusManager.clearFocus() // Ferme le clavier
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
@@ -298,7 +305,10 @@ fun MapScreen(navController: NavHostController) {
                             }
 
                             // Clear icon button
-                            IconButton(onClick = { searchQuery = "" }) {
+                            IconButton(onClick = {
+                                searchQuery = ""
+                                focusManager.clearFocus() // Ferme également le clavier lors de l'effacement
+                            }) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
                                     contentDescription = "Effacer",
@@ -321,6 +331,7 @@ fun MapScreen(navController: NavHostController) {
                 )
             }
         }
+
         // FABs at bottom-right
         Column(
             modifier = Modifier
