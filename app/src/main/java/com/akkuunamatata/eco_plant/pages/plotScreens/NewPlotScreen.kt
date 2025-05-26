@@ -174,6 +174,7 @@ fun NewPlotScreen(navController: NavHostController) {
                             "notes" to personalNotes,
                             "latitude" to latitude,
                             "longitude" to longitude,
+                            "location" to locationText,
                             "createdAt" to com.google.firebase.Timestamp.now(),
                             "lastEdited" to com.google.firebase.Timestamp.now(),
                         )

@@ -3,8 +3,6 @@ package com.akkuunamatata.eco_plant.pages.plantIdentificationScreens
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -39,12 +36,12 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.firestore.Query
 import com.akkuunamatata.eco_plant.database.plants.PlantDatabaseHelper
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
-import kotlinx.coroutines.launch
 
 data class Plot(
     val id: String,
     val name: String,
-    val lastEdited: Date
+    val lastEdited: Date,
+    val location: String = "Emplacement inconnu"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,11 +65,9 @@ fun IdentifiedPlant(
 
     // Contexte pour instancier le PlantDatabaseHelper
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     // Firebase
     val db = FirebaseFirestore.getInstance()
-    val storage = FirebaseStorage.getInstance()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
     // Chargement des données de plante depuis la base de données

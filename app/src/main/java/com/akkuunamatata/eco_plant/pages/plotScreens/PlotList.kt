@@ -1,7 +1,6 @@
 package com.akkuunamatata.eco_plant.pages.plotScreens
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -62,7 +62,8 @@ fun PlotList(navController: NavHostController) {
                     Plot(
                         id = doc.id,
                         name = doc.getString("name") ?: "",
-                        lastEdited = (doc.getTimestamp("lastEdited")?.toDate() ?: Date())
+                        lastEdited = (doc.getTimestamp("lastEdited")?.toDate() ?: Date()),
+                        location = doc.getString("location") ?: "Emplacement inconnu"
                     )
                 }
                 isLoading = false
@@ -164,14 +165,11 @@ fun PlotListItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Emplacement pour l'image (placeholder)
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(4.dp)
-                    )
+            Icon(
+                painter = painterResource(id = R.drawable.ic_plant_filled),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -180,6 +178,16 @@ fun PlotListItem(
                 Text(
                     text = plot.name,
                     style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Affichage de la localisation
+                Text(
+                    text = plot.location,
+                    style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
