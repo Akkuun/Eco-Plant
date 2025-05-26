@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -254,6 +255,10 @@ fun organChosen(
 
         println("Taille du fichier: ${tempFile.length()} octets")
 
+        val locale = context.resources.configuration.locales.get(0).language
+
+        Log.d("PlantNet", "Langue sélectionnée: $locale")
+
         val requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart(
@@ -265,7 +270,7 @@ fun organChosen(
             .build()
 
         val request = Request.Builder()
-            .url("https://my-api.plantnet.org/v2/identify/all?api-key=$key")
+            .url("https://my-api.plantnet.org/v2/identify/all?api-key=$key&lang=$locale")
             .post(requestBody)
             .build()
 
