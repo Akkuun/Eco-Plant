@@ -38,13 +38,11 @@ private val LightColorScheme = lightColorScheme(
     scrim = Neutral.Dark.Lightest, // Gray inactive
 //    error = Support.Error.ErrorHigh,
     surface = Neutral.Light.Lightest, // Surface color
-//    surfaceVariant = HighlightColors.Lightest,
+    surfaceVariant = HighlightColors.Lightest,
 //    inverseSurface = HighlightColors.Light,
 
     // Set debugging colors (kept them as debug mode as long as they are unused)
     error = Color(0xFFFF0000), // Error color
-    // surface = Color(0xFF00FF00), // Surface color
-    surfaceVariant = Color(0xFF0000FF), // Surface variant color
     inverseSurface = Support.Error.ErrorHigh, // Inverse surface color
 )
 
