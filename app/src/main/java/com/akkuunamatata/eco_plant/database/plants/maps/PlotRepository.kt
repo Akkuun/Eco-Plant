@@ -4,6 +4,7 @@ import android.util.Log
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.Plot
+import com.akkuunamatata.eco_plant.utils.searchLocationWithNominatim
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
@@ -89,8 +90,8 @@ class PlotRepository private constructor() {
             // Pour chaque utilisateur
             for (userDoc in usersSnapshot.documents) {
                 val userId = userDoc.id
-                val lat = -1.0 // default value
-                val long = -1.0 // default value
+                var lat = -1.0 // default value
+                var long = -1.0 // default value
                 val plants = mutableListOf<PlantSpecies>()
                 // Récupérer les parcelles de l'utilisateur
                 val plotsSnapshot = db.collection("users")
@@ -110,9 +111,18 @@ class PlotRepository private constructor() {
                         location = doc.getString("location") ?: "Emplacement inconnu"
                     )
                 }
+                Log.d("PlotRepository", "Parcelles pour l'utilisateur $userId: $plots")
+                var geoPoint = searchLocationWithNominatim(plots.firstOrNull()?.location ?: "Emplacement inconnu")
 
-
-                Log.d("PlotRepository", " ${plots}")
+                allPlots.add(
+                    ParcelleData(
+                        lat = lat,
+                        long = long,
+                        idAuthor = userId,
+                        plants = plants,
+                    )
+                )
+                Log.d("PlotRepository", " ${geoPoint}")
 
 
 
