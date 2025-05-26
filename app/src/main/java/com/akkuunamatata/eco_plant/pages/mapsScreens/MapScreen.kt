@@ -1,6 +1,7 @@
 package com.akkuunamatata.eco_plant.pages.mapsScreens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -55,6 +56,7 @@ import java.net.URL
 import java.net.URLEncoder
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.ui.res.stringResource
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -203,8 +205,11 @@ fun Map(navController : NavHostController){
             factory = { mapView },
             modifier = Modifier.fillMaxSize()
         ) { map ->
-            // Default starting position (Montpellier)
-            val startPoint = GeoPoint(43.764014, 3.869409)
+            // Default starting position -> actual user location
+            val actualLocation = getActualLocation(context);
+//            val startPoint = GeoPoint(43.764014, 3.869409)
+            // Use actual location if available, otherwise default to Paris coordinates
+            val startPoint = actualLocation ?: GeoPoint(48.8566, 2.3522) // Paris coordinates
 
             // Center initially on default position
             map.controller.setCenter(startPoint)
@@ -307,7 +312,7 @@ fun Map(navController : NavHostController){
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (searchQuery.isEmpty()) {
                                     Text(
-                                        "Rechercher une ville",
+                                        stringResource(R.string.search_city),
                                         color = if (isSearchError)
                                             MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                                         else
@@ -436,6 +441,22 @@ fun Map(navController : NavHostController){
         }
     }
 }
+// Function to get the actual location of the user in geoPoint format
+fun getActualLocation(context: Context): GeoPoint? {
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+    return try {
+        // Get the last known location
+        val location = locationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
+            ?: return null // Return null if no location is found
+
+        // Convert to GeoPoint
+        GeoPoint(location.latitude, location.longitude)
+    } catch (e: SecurityException) {
+        e.printStackTrace()
+        null // Return null if there is a security exception (e.g., permissions not granted)
+    }
+
+}
 
 
 /**
@@ -497,7 +518,7 @@ fun NotLoggedInScreen(navController: NavHostController) {
                 ),
                 shape = RoundedCornerShape(4.dp)
             ) {
-                Text("Se connecter", fontSize = 16.sp)
+             Text(stringResource(R.string.Go_to_login), fontSize = 16.sp)
             }
 
             // Bouton secondaire pour s'inscrire
@@ -512,7 +533,7 @@ fun NotLoggedInScreen(navController: NavHostController) {
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text("Créer un compte", fontSize = 16.sp)
+                Text(stringResource(R.string.create_an_account), fontSize = 16.sp)
             }
         }
     }
