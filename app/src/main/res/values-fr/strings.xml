@@ -98,4 +98,14 @@
     <string name="no_notes">Aucune note</string>
     <string name="view_plants">Voir les plantes</string>
     <string name="add_plant">Ajouter une plante</string>
+
+    <!-- PlotSettings Screen -->
+    <string name="plot_settings">Paramètres de la parcelle</string>
+    <string name="delete_plot">Supprimer cette parcelle</string>
+    <string name="confirm_deletion">Confirmer la suppression</string>
+    <string name="delete_plot_confirmation">Êtes-vous sûr de vouloir supprimer cette parcelle? Cette action est irréversible.</string>
+    <string name="delete">Supprimer</string>
+    <string name="confirm">Confirmer</string>
+    <string name="error_saving">Erreur lors de l\'enregistrement: %1$s</string>
+    <string name="error_deleting">Erreur lors de la suppression: %1$s</string>
 </resources>

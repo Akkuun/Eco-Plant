@@ -17,6 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import java.util.*
 import com.akkuunamatata.eco_plant.R
+import com.akkuunamatata.eco_plant.navigation.Routes
 
 @Composable
 fun PlotDetailScreen(
@@ -137,7 +138,7 @@ fun PlotDetailScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = { /* Paramètres de la parcelle */ }) {
+                IconButton(onClick = { navController.navigate("${Routes.PLOT_SETTINGS}/${plotId}") }) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = stringResource(id = R.string.settings),
