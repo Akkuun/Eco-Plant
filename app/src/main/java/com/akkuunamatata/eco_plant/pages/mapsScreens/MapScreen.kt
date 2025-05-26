@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -75,7 +76,6 @@ fun MapScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Map(navController : NavHostController){
-    // Le reste du code pour l'affichage de la carte quand l'utilisateur est connecté
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
@@ -130,7 +130,7 @@ fun Map(navController : NavHostController){
     var searchQuery by remember { mutableStateOf("") }
 
     // Search error state
-    var searchError by remember { mutableStateOf<String?>(null) }
+    var isSearchError by remember { mutableStateOf(false) }
 
     // Loading state
     var isSearching by remember { mutableStateOf(false) }
@@ -174,7 +174,7 @@ fun Map(navController : NavHostController){
     val geocodeLocation = { query: String ->
         coroutineScope.launch {
             isSearching = true
-            searchError = null
+            isSearchError = false // Réinitialiser l'état d'erreur
             focusManager.clearFocus() // Ferme le clavier
 
             try {
@@ -187,10 +187,10 @@ fun Map(navController : NavHostController){
                     mapView.controller.animateTo(GeoPoint(result.first, result.second))
                     mapView.controller.setZoom(12.0) // Zoom level appropriate for cities
                 } else {
-                    searchError = "Lieu introuvable"
+                    isSearchError = true // Mettre l'état d'erreur à true au lieu d'afficher un message
                 }
             } catch (e: Exception) {
-                searchError = "Erreur: ${e.message}"
+                isSearchError = true // Mettre l'état d'erreur à true en cas d'exception
             } finally {
                 isSearching = false
             }
@@ -250,13 +250,29 @@ fun Map(navController : NavHostController){
                 .padding(16.dp)
                 .align(Alignment.TopCenter)
         ) {
-            // Barre de recherche compacte sans espace blanc en bas
+            // Barre de recherche avec bord rouge lorsqu'il y a une erreur
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp) // Hauteur fixe pour éviter les espaces
-                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp))
-                    .clip(RoundedCornerShape(24.dp)),
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        ambientColor = if (isSearchError) MaterialTheme.colorScheme.error else Color.Black.copy(alpha = 0.2f),
+                        spotColor = if (isSearchError) MaterialTheme.colorScheme.error else Color.Black.copy(alpha = 0.2f)
+                    )
+                    .clip(RoundedCornerShape(24.dp))
+                    .then(
+                        if (isSearchError) {
+                            Modifier.border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.error,
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                        } else {
+                            Modifier
+                        }
+                    ),
                 color = MaterialTheme.colorScheme.surface
             ) {
                 Row(
@@ -268,27 +284,34 @@ fun Map(navController : NavHostController){
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
 
                     BasicTextField(
                         value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        onValueChange = {
+                            searchQuery = it
+                            // Réinitialiser l'erreur si l'utilisateur modifie la requête
+                            if (isSearchError) isSearchError = false
+                        },
                         modifier = Modifier
                             .weight(1f)
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         textStyle = LocalTextStyle.current.copy(
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                         ),
                         decorationBox = { innerTextField ->
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (searchQuery.isEmpty()) {
                                     Text(
                                         "Rechercher une ville",
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        color = if (isSearchError)
+                                            MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                                        else
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                     )
                                 }
                                 innerTextField()
@@ -322,35 +345,25 @@ fun Map(navController : NavHostController){
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = "Rechercher",
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                                 )
                             }
 
                             // Clear icon button
                             IconButton(onClick = {
                                 searchQuery = ""
+                                isSearchError = false // Réinitialiser l'erreur en effaçant la recherche
                                 focusManager.clearFocus() // Ferme également le clavier lors de l'effacement
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
                                     contentDescription = "Effacer",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    tint = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
                     }
                 }
-            }
-
-            // Affichage de l'erreur en dehors du champ de recherche
-            if (searchError != null) {
-                Text(
-                    text = searchError!!,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .padding(start = 16.dp, top = 58.dp) // Le padding top est juste après la barre
-                        .align(Alignment.TopStart)
-                )
             }
         }
 
