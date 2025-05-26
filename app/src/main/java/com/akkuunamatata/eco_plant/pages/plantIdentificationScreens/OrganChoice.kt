@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -58,7 +59,6 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
-import kotlin.toString
 
 @Composable
 fun ButtonWithImage(
@@ -255,6 +255,10 @@ fun organChosen(
 
         println("Taille du fichier: ${tempFile.length()} octets")
 
+        val locale = context.resources.configuration.locales.get(0).language
+
+        Log.d("PlantNet", "Langue sélectionnée: $locale")
+
         val requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart(
@@ -266,7 +270,7 @@ fun organChosen(
             .build()
 
         val request = Request.Builder()
-            .url("https://my-api.plantnet.org/v2/identify/all?api-key=$key")
+            .url("https://my-api.plantnet.org/v2/identify/all?api-key=$key&lang=$locale")
             .post(requestBody)
             .build()
 
@@ -301,10 +305,18 @@ fun organChosen(
 
                         val species = topResult.getJSONObject("species")
                         val scientificName = species.optString("scientificNameWithoutAuthor", "Inconnu")
+                        // take the first common name
+                        val commonNamesArray = species.optJSONArray("commonNames")
+                        val plantCommonName = if (commonNamesArray != null && commonNamesArray.length() > 0) {
+                            commonNamesArray.getString(0)
+                        } else {
+                            "Inconnu"
+                        }
+
                         val score = topResult.optDouble("score", 0.0)
 
                         val encodedUri = Uri.encode(imageUri.toString())
-                        val encodedPlantName = Uri.encode(scientificName)
+                        val encodedPlantName = Uri.encode(plantCommonName)
                         val encodedScientificName = Uri.encode(scientificName)
 
                         println("Meilleure correspondance: $scientificName (score: ${(score * 100).toInt()}%)")

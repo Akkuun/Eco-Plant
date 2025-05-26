@@ -8,7 +8,6 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
@@ -36,15 +35,10 @@ private val LightColorScheme = lightColorScheme(
     tertiary = HighlightColors.Lightest, // Tertiary button
     onTertiary = HighlightColors.Darkest, // Tertiary button text
     scrim = Neutral.Dark.Lightest, // Gray inactive
-//    error = Support.Error.ErrorHigh,
+    error = Support.Error.ErrorMedium, // Error color
+    onError = Neutral.Light.Dark, // Error text color
     surface = Neutral.Light.Lightest, // Surface color
-//    surfaceVariant = HighlightColors.Lightest,
-//    inverseSurface = HighlightColors.Light,
-
-    // Set debugging colors (kept them as debug mode as long as they are unused)
-    error = Color(0xFFFF0000), // Error color
-    // surface = Color(0xFF00FF00), // Surface color
-    surfaceVariant = Color(0xFF0000FF), // Surface variant color
+    surfaceVariant = HighlightColors.Lightest,
     inverseSurface = Support.Error.ErrorHigh, // Inverse surface color
 )
 
