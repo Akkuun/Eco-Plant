@@ -49,7 +49,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.ui.res.stringResource
-import com.akkuunamatata.eco_plant.database.plants.maps.ParcelleRepository
+import com.akkuunamatata.eco_plant.database.plants.maps.PlotRepository
 import com.akkuunamatata.eco_plant.utils.getActualGeoPosition
 import com.akkuunamatata.eco_plant.utils.searchLocationWithNominatim
 import com.google.firebase.auth.FirebaseAuth
@@ -78,13 +78,23 @@ fun Map(navController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
 
+    val repository = remember { PlotRepository.getInstance() }
     var parcelles by remember { mutableStateOf<List<ParcelleData>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
+// Utiliser collectAsState pour observer le StateFlow
+    val parcellesFlow = remember { repository.parcelles }.collectAsState()
+
+// Effet pour charger les données au démarrage
     LaunchedEffect(Unit) {
         isLoading = true
-        parcelles = ParcelleRepository.getInstance().getAllParcelles()
+        repository.getAllParcelles()
         isLoading = false
+    }
+
+// Mettre à jour parcelles quand parcellesFlow change
+    LaunchedEffect(parcellesFlow.value) {
+        parcelles = parcellesFlow.value
     }
 
 
@@ -194,7 +204,19 @@ fun Map(navController: NavHostController) {
 
 
             parcelles.forEach { parcelle ->
-                Log.d("parcelle", "Plant data: $parcelle")
+                // Create marker for each parcelle
+                val marker = Marker(map).apply {
+                    position = GeoPoint(parcelle.lat, parcelle.long)
+                    title = parcelle.idAuthor
+                    icon = ContextCompat.getDrawable(context, R.drawable.ic_map_filled)
+                    setOnMarkerClickListener { _, _ ->
+                        selectedParcelleData = parcelle // Set selected parcelle data
+                        showBottomSheet = false // Close bottom sheet if open
+                        true // Return true to indicate the click was handled
+                    }
+                }
+                map.overlays.add(marker)
+
             }
         }
 

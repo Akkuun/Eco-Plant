@@ -1,54 +1,59 @@
 package com.akkuunamatata.eco_plant.database.plants.maps
 
 import android.util.Log
-import android.widget.Toast
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
+import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.Plot
+import com.akkuunamatata.eco_plant.utils.searchLocationWithNominatim
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import kotlin.math.log
+import java.util.Date
 
-class ParcelleRepository private constructor() {
-    // Cache des parcelles déjà chargées
-    private var parcelles: List<ParcelleData>? = null
+class PlotRepository private constructor() {
+    // Utilisation de StateFlow pour exposer les données et leur état
+    private val _parcelles = MutableStateFlow<List<ParcelleData>>(emptyList())
+    val parcelles: StateFlow<List<ParcelleData>> = _parcelles.asStateFlow()
 
-    // État de chargement pour éviter les appels simultanés
-    private var isLoading = false
+    // Mutex pour la synchronisation des opérations de chargement
+    private val mutex = Mutex()
+
+    // Flag pour suivre si le chargement initial a été effectué
+    private var isInitialized = false
 
     /**
      * Récupère toutes les parcelles, en utilisant le cache si disponible
      */
     suspend fun getAllParcelles(): List<ParcelleData> {
-        // Si les données sont déjà en cache, les retourner immédiatement
-        parcelles?.let { return it }
-
-        // Si un chargement est déjà en cours, attendre qu'il se termine
-        if (isLoading) {
-            // Attendre que le chargement se termine
-            while (isLoading) {
-//                delay(100)
-            }
-            // Retourner les données du cache qui devraient maintenant être disponibles
-            return parcelles ?: emptyList()
-        }
-
-        // Marquer comme en cours de chargement
-        isLoading = true
-
-        try {
-            // Charger les données (depuis l'API, Firebase, etc.)
-            val loadedParcelles = withContext(Dispatchers.IO) {
-                fetchParcellesFromSource()
+        // Utiliser le mutex pour éviter les chargements simultanés
+        mutex.withLock {
+            // Si déjà initialisé, retourner simplement les données actuelles
+            if (isInitialized) {
+                return _parcelles.value
             }
 
-            // Mettre en cache les données chargées
-            parcelles = loadedParcelles
-            return loadedParcelles
-        } finally {
-            // Marquer comme terminé, qu'il y ait eu succès ou erreur
-            isLoading = false
+            try {
+                // Charger les données depuis Firebase
+                val loadedParcelles = withContext(Dispatchers.IO) {
+                    fetchParcellesFromSource()
+                }
+
+                // Mettre à jour le StateFlow avec les nouvelles données
+                _parcelles.value = loadedParcelles
+                isInitialized = true
+
+                return loadedParcelles
+            } catch (e: Exception) {
+                Log.e("PlotRepository", "Erreur lors de la récupération des parcelles", e)
+                return emptyList()
+            }
         }
     }
 
@@ -56,83 +61,157 @@ class ParcelleRepository private constructor() {
      * Force le rechargement des données
      */
     suspend fun refreshParcelles() {
-        parcelles = null
-        getAllParcelles()
+        mutex.withLock {
+            try {
+                val loadedParcelles = withContext(Dispatchers.IO) {
+                    fetchParcellesFromSource()
+                }
+                _parcelles.value = loadedParcelles
+            } catch (e: Exception) {
+                Log.e("PlotRepository", "Erreur lors du rafraîchissement des parcelles", e)
+            }
+        }
     }
 
     /**
-     * Récupère les données depuis la source (API, Firebase, etc.)
+     * Récupère les données depuis Firebase
      */
     private suspend fun fetchParcellesFromSource(): List<ParcelleData> {
-        // Remplacer par votre logique de chargement réelle
-        // Simuler un délai réseau
-        //delay(1000)
-
-        // the request -> loop of all user in users database
-        // for each user, get  the plots collection to get the parcellData and inside it
-        // loop on the plants collection to get the PlantSpecies
-        var allPlots = mutableListOf<ParcelleData>()
-
+        val allPlots = mutableListOf<ParcelleData>()
         val db = FirebaseFirestore.getInstance()
 
-        val usersSnapshot = db.collection("users").get().await()
-        for (userDoc in usersSnapshot.documents) {
-            val plants = mutableListOf<PlantSpecies>()
-            val userId = userDoc.id
-            val plotsSnapshot =
-                db.collection("users").document(userId).collection("plots").get().await()
+        try {
+            // Récupérer tous les utilisateurs
+            val usersSnapshot = db.collection("users")
+                .get()
+                .await()
 
-            for (plotDoc in plotsSnapshot.documents) {
-                // log plotDoc data
-                Log.d("PlotRepository", "Plot data: ${plotDoc.data}")
-                val lat = plotDoc.getDouble("lat") ?: continue
-                val long = plotDoc.getDouble("long") ?: continue
-                val idAuthor = userId
-
-                // get the plants collection inside of the plotDoc
-                val plantsSnapshot =
-                    db.collection("users").document(userId).collection("plots").document(plotDoc.id)
-                        .collection("plants").get().await()
-
-                for (plantDoc in plantsSnapshot.documents) {
-                    // log plantDoc data
-                    Log.d("PlotRepository", "Plant data: ${plantDoc.data}")
-                    val plantName = plantDoc.getString("name") ?: continue
-                    val services = plantDoc.get("services") as? List<Float> ?: continue
-                    val reliabilities = plantDoc.get("reliabilities") as? List<Float> ?: continue
-                    val culturalConditions =
-                        plantDoc.get("culturalConditions") as? List<String> ?: continue
-
-                    // Create PlantSpecies object
-                    val plantSpecies = PlantSpecies(
-                        name = plantName,
-                        services = services.toFloatArray(),
-                        reliabilities = reliabilities.toFloatArray(),
-                        culturalConditions = culturalConditions.toTypedArray()
-                    )
-                    plants.add(plantSpecies)
+            // Pour chaque utilisateur
+            for (userDoc in usersSnapshot.documents) {
+                if (userDoc.id.isEmpty()) {
+                    Log.w("PlotRepository", "Utilisateur sans ID trouvé, ignoré")
+                    continue
                 }
-                // Create ParcelleData object
-                val parcelleData = ParcelleData(
-                    lat = lat,
-                    long = long,
-                    idAuthor = idAuthor,
-                    plants = plants
-                )
-                allPlots.add(parcelleData)
 
+                val userId = userDoc.id
+                val userName = userDoc.getString("name") ?: "Inconnu"
+
+                Log.d("PlotRepository", "USER: $userDoc")
+
+                // Récupérer les parcelles de l'utilisateur
+                val plotsSnapshot = db.collection("users")
+                    .document(userId)
+                    .collection("plots").orderBy("lastEdited", Query.Direction.DESCENDING)
+                    .get()
+                    .await()
+
+                // Skip if no plots
+                if (plotsSnapshot.isEmpty) {
+                    Log.d("PlotRepository", "Aucune parcelle trouvée pour l'utilisateur $userName")
+                    continue
+                }
+
+                // Pour chaque parcelle de l'utilisateur
+                for (plotDoc in plotsSnapshot.documents) {
+                    // Récupérer directement le document de la parcelle pour accéder à tous ses champs
+                    Log.d("PlotRepository", "PLOTDOC: ${plotDoc.data}")
+
+                    // Extraire les coordonnées GPS de la parcelle
+                    val latitude = plotDoc.getDouble("latitude")
+                    val longitude = plotDoc.getDouble("longitude")
+
+                    Log.d("PlotRepository", "Coordonnées GPS: lat=$latitude, long=$longitude")
+
+                    val plot = Plot(
+                        id = plotDoc.id,
+                        name = plotDoc.getString("name") ?: "",
+                        lastEdited = (plotDoc.getTimestamp("lastEdited")?.toDate() ?: Date()),
+                        location = plotDoc.getString("location") ?: "Emplacement inconnu"
+                    )
+
+                    Log.d("PlotRepository", "PLOT ${plot}")
+
+                    val plantsForThisPlot = mutableListOf<PlantSpecies>()
+
+                    val plantsSnapshot = db.collection("users")
+                        .document(userId)
+                        .collection("plots")
+                        .document(plot.id)
+                        .collection("plants")
+                        .get()
+                        .await()
+
+                    // Traiter chaque document de plante dans la collection
+                    for (plantDoc in plantsSnapshot.documents) {
+                        Log.d("PlotRepository", "PLANTDOC ${plantDoc}")
+                        try {
+                            // Récupérer les données de la plante
+                            val commonName = plantDoc.getString("commonName") ?: "Inconnu"
+                            val scientificName = plantDoc.getString("scientificName") ?: "Inconnu"
+
+                            // Récupérer les valeurs de service
+                            val serviceValues = plantDoc.get("serviceValues") as? List<*>
+                            val services = if (serviceValues != null && serviceValues.size >= 3) {
+                                floatArrayOf(
+                                    (serviceValues[0] as? Number)?.toFloat() ?: -1f,
+                                    (serviceValues[1] as? Number)?.toFloat() ?: -1f,
+                                    (serviceValues[2] as? Number)?.toFloat() ?: -1f
+                                )
+                            } else {
+                                floatArrayOf(-1f, -1f, -1f)
+                            }
+
+                            // Récupérer les fiabilités
+                            val reliabilities = (plantDoc.get("reliabilityValues") as? List<*>)?.map {
+                                (it as? Number)?.toFloat() ?: -1f
+                            }?.toFloatArray() ?: floatArrayOf(-1f, -1f, -1f)
+
+                            // Récupérer les conditions culturales
+                            val culturalConditions = (plantDoc.get("culturalConditions") as? List<*>)?.map {
+                                it.toString()
+                            }?.toTypedArray() ?: arrayOf("", "", "")
+
+                            // Créer l'objet PlantSpecies et l'ajouter à la liste
+                            val plantSpecies = PlantSpecies(
+                                name = commonName,
+                                services = services,
+                                reliabilities = reliabilities,
+                                culturalConditions = culturalConditions
+                            )
+
+                            plantsForThisPlot.add(plantSpecies)
+                            Log.d("PlotRepository", "Plante ajoutée: $plantSpecies")
+                        } catch (e: Exception) {
+                            Log.e("PlotRepository", "Erreur lors du traitement d'une plante: ${e.message}", e)
+                        }
+                    }
+
+                    // Utiliser les coordonnées GPS récupérées directement du document
+                    val parcelleData = ParcelleData(
+                        lat = latitude ?: -1.0,  // Utiliser la valeur extraite directement
+                        long = longitude ?: -1.0, // Utiliser la valeur extraite directement
+                        idAuthor = userName,
+                        plants = plantsForThisPlot
+                    )
+
+                    allPlots.add(parcelleData)
+                    Log.d("PlotRepository", "Parcelle ajoutée: lat=${parcelleData.lat}, long=${parcelleData.long}, plantes=${plantsForThisPlot.size}")
+                }
             }
+        } catch (e: Exception) {
+            Log.e("PlotRepository", "Erreur lors de la récupération des parcelles", e)
         }
+
         return allPlots
     }
 
     companion object {
         @Volatile
-        private var instance: ParcelleRepository? = null
+        private var instance: PlotRepository? = null
 
-        fun getInstance(): ParcelleRepository {
+        fun getInstance(): PlotRepository {
             return instance ?: synchronized(this) {
-                instance ?: ParcelleRepository().also { instance = it }
+                instance ?: PlotRepository().also { instance = it }
             }
         }
     }
