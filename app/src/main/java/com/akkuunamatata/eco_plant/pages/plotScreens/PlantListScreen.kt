@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +19,9 @@ import com.akkuunamatata.eco_plant.components.ScoreBar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 
 // Modèle de données pour une plante dans une parcelle
 data class PlotPlant(
@@ -46,6 +48,7 @@ fun PlantListScreen(
 
     val loginRequiredMessage = stringResource(id = R.string.login_required)
     val errorLoadingMessage = stringResource(id = R.string.error_loading)
+    val context = LocalContext.current
 
     // Récupération des informations de la parcelle et des plantes
     LaunchedEffect(plotId) {
@@ -192,7 +195,11 @@ fun PlantListScreen(
                             PlantCard(
                                 plant = plant,
                                 onRemove = { /* À implémenter plus tard */ },
-                                onMoreInfo = { /* À implémenter plus tard */ }
+                                onMoreInfo = {
+                                    val url = "https://www.tela-botanica.org/?s=${plant.scientificName.replace(" ", "+")}"
+                                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                                    context.startActivity(intent)
+                                }
                             )
                         }
                     }

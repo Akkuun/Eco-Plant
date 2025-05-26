@@ -1,6 +1,8 @@
 package com.akkuunamatata.eco_plant.pages.plotScreens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -133,16 +135,21 @@ fun PlotDetailScreen(
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = plot!!.name,
-                    style = MaterialTheme.typography.headlineMedium,
+                    text = "Parcelle : ${plot!!.name}",
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = { navController.navigate("${Routes.PLOT_SETTINGS}/${plotId}") }) {
+                FilledIconButton(
+                    onClick = { navController.navigate("${Routes.PLOT_SETTINGS}/${plotId}") },
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
+                ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = stringResource(id = R.string.settings),
-                        tint = MaterialTheme.colorScheme.onSurface
+                        contentDescription = stringResource(id = R.string.settings)
                     )
                 }
             }
@@ -182,7 +189,15 @@ fun PlotDetailScreen(
             Text(
                 text = personalNotes.ifEmpty { stringResource(id = R.string.no_notes) },
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(12.dp)
+                    .fillMaxWidth()
+
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -196,7 +211,11 @@ fun PlotDetailScreen(
                     onClick = { navController.navigate("${Routes.PLANTS_IN_PLOT}/${plotId}") },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 8.dp)
+                        .padding(end = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Text(stringResource(id = R.string.view_plants))
                 }
@@ -205,7 +224,11 @@ fun PlotDetailScreen(
                     onClick = { /* Ajouter une plante */ },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 8.dp)
+                        .padding(start = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
                 ) {
                     Text(stringResource(id = R.string.add_plant))
                 }
