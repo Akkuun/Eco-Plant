@@ -7,10 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.material3.NavigationBarDefaults.containerColor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -186,7 +184,7 @@ fun MainBottomBar(navController: NavHostController) {
             selected = selectedItem.intValue == 1,
             onClick = {
                 selectedItem.intValue = 1
-                navController.navigate("history") {
+                navController.navigate("plot_list") {
                     popUpTo("history") { inclusive = true }
                 }
             },
