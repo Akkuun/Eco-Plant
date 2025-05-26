@@ -24,8 +24,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -50,14 +53,26 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.LocalTextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(navController: NavHostController) {
+fun MapScreen(
+    navController: NavHostController,
+    // Paramètre pour vérifier si l'utilisateur est connecté
+    isUserLoggedIn: Boolean = false
+) {
+    // Si l'utilisateur n'est pas connecté, afficher l'écran de connexion nécessaire
+    if (!isUserLoggedIn) {
+        NotLoggedInScreen(navController)
+        return
+    }
+
+    // Le reste du code pour l'affichage de la carte quand l'utilisateur est connecté
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current // Pour gérer la fermeture du clavier
+    val focusManager = LocalFocusManager.current
 
     // Exemple data
     val exampleData = listOf(
@@ -397,6 +412,86 @@ fun MapScreen(navController: NavHostController) {
                 selectedParcelleData?.let { parcelle ->
                     MapFullPreviewCard(parcelle = parcelle)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Écran affiché lorsque l'utilisateur n'est pas connecté
+ * Style inspiré de Google
+ */
+@Composable
+fun NotLoggedInScreen(navController: NavHostController) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Logo ou icône
+            Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = "Location Icon",
+                modifier = Modifier
+                    .size(64.dp)
+                    .padding(bottom = 16.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            // Titre de style Google
+            Text(
+                text = "EcoPlant Maps",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF202124),
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            // Message explicatif
+            Text(
+                text = "Cette fonctionnalité n'est disponible que pour les utilisateurs connectés.",
+                fontSize = 16.sp,
+                color = Color(0xFF5F6368),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
+
+            // Bouton de connexion style Google
+            Button(
+                onClick = { navController.navigate("settings") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Text("Se connecter", fontSize = 16.sp)
+            }
+
+            // Bouton secondaire pour s'inscrire
+            OutlinedButton(
+                onClick = { navController.navigate("sign_in") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .padding(top = 12.dp),
+                shape = RoundedCornerShape(4.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text("Créer un compte", fontSize = 16.sp)
             }
         }
     }
