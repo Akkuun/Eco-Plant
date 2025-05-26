@@ -54,13 +54,14 @@ import java.net.URL
 import java.net.URLEncoder
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.LocalTextStyle
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
     navController: NavHostController,
     // Paramètre pour vérifier si l'utilisateur est connecté
-    isUserLoggedIn: Boolean = false
+    isUserLoggedIn: Boolean = FirebaseAuth.getInstance().currentUser != null
 ) {
     // Si l'utilisateur n'est pas connecté, afficher l'écran de connexion nécessaire
     if (!isUserLoggedIn) {
