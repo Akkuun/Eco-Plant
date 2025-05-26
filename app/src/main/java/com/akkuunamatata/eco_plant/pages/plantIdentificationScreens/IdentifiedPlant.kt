@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,7 +31,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.akkuunamatata.eco_plant.ui.theme.Support
-import com.google.firebase.storage.FirebaseStorage
+import com.akkuunamatata.eco_plant.components.SearchBar
 import com.google.firebase.firestore.Query
 import com.akkuunamatata.eco_plant.database.plants.PlantDatabaseHelper
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
@@ -226,14 +225,11 @@ fun IdentifiedPlant(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Champ de recherche
-        OutlinedTextField(
+        SearchBar(
             value = searchText,
             onValueChange = { searchText = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.search_plot)) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            singleLine = true,
-            shape = RoundedCornerShape(8.dp)
+            labelText = stringResource(R.string.search_plot),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))

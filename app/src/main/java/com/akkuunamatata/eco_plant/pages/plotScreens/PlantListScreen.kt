@@ -22,6 +22,7 @@ import kotlinx.coroutines.tasks.await
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
+import com.akkuunamatata.eco_plant.components.SearchBar
 
 // Modèle de données pour une plante dans une parcelle
 data class PlotPlant(
@@ -161,13 +162,11 @@ fun PlantListScreen(
                 .padding(horizontal = 16.dp)
         ) {
             // Barre de recherche
-            OutlinedTextField(
+            SearchBar(
                 value = searchText,
                 onValueChange = { searchText = it },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                label = { Text(stringResource(id = R.string.search_plants)) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                singleLine = true
+                labelText = stringResource(id = R.string.search_plants),
+                modifier = Modifier.padding(vertical = 8.dp)
             )
 
             // Contenu principal
