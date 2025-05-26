@@ -3,8 +3,6 @@ package com.akkuunamatata.eco_plant.pages.plantIdentificationScreens
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,13 +10,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -35,16 +31,16 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.akkuunamatata.eco_plant.ui.theme.Support
-import com.google.firebase.storage.FirebaseStorage
+import com.akkuunamatata.eco_plant.components.SearchBar
 import com.google.firebase.firestore.Query
 import com.akkuunamatata.eco_plant.database.plants.PlantDatabaseHelper
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
-import kotlinx.coroutines.launch
 
 data class Plot(
     val id: String,
     val name: String,
-    val lastEdited: Date
+    val lastEdited: Date,
+    val location: String = "Emplacement inconnu"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,11 +64,9 @@ fun IdentifiedPlant(
 
     // Contexte pour instancier le PlantDatabaseHelper
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     // Firebase
     val db = FirebaseFirestore.getInstance()
-    val storage = FirebaseStorage.getInstance()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
     // Chargement des données de plante depuis la base de données
@@ -231,14 +225,11 @@ fun IdentifiedPlant(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Champ de recherche
-        OutlinedTextField(
+        SearchBar(
             value = searchText,
             onValueChange = { searchText = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.search_plot)) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            singleLine = true,
-            shape = RoundedCornerShape(8.dp)
+            labelText = stringResource(R.string.search_plot),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -264,7 +255,7 @@ fun IdentifiedPlant(
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
                                 .clickable { navController.navigate(Routes.NEW_PLOT) },
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(24.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = HighlightColors.Medium
                             )
@@ -346,8 +337,8 @@ fun IdentifiedPlant(
             successMessage?.let {
                 Snackbar(
                     modifier = Modifier.fillMaxWidth(),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
@@ -365,7 +356,7 @@ fun IdentifiedPlant(
                         TextButton(
                             onClick = { successMessage = null },
                             colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.secondary
+                                contentColor = MaterialTheme.colorScheme.onTertiary
                             ),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                         ) {
@@ -422,10 +413,10 @@ fun PlotItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onSelect() },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
-                MaterialTheme.colorScheme.scrim
+                MaterialTheme.colorScheme.tertiary
             else
                 MaterialTheme.colorScheme.surface
         )

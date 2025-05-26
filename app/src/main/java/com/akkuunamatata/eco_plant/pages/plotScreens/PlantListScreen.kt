@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +19,11 @@ import com.akkuunamatata.eco_plant.components.ScoreBar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import android.content.Intent
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
+import com.akkuunamatata.eco_plant.components.SearchBar
 
 // Modèle de données pour une plante dans une parcelle
 data class PlotPlant(
@@ -46,6 +50,7 @@ fun PlantListScreen(
 
     val loginRequiredMessage = stringResource(id = R.string.login_required)
     val errorLoadingMessage = stringResource(id = R.string.error_loading)
+    val context = LocalContext.current
 
     // Récupération des informations de la parcelle et des plantes
     LaunchedEffect(plotId) {
@@ -94,7 +99,6 @@ fun PlantListScreen(
                                 tempValues.add(floatValue)
                             }
 
-                            // Compléter avec des 0 si nécessaire
                             while (tempValues.size < 3) {
                                 tempValues.add(0f)
                             }
@@ -159,13 +163,11 @@ fun PlantListScreen(
                 .padding(horizontal = 16.dp)
         ) {
             // Barre de recherche
-            OutlinedTextField(
+            SearchBar(
                 value = searchText,
                 onValueChange = { searchText = it },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                label = { Text(stringResource(id = R.string.search_plants)) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                singleLine = true
+                labelText = stringResource(id = R.string.search_plants),
+                modifier = Modifier.padding(vertical = 8.dp)
             )
 
             // Contenu principal
@@ -193,7 +195,11 @@ fun PlantListScreen(
                             PlantCard(
                                 plant = plant,
                                 onRemove = { /* À implémenter plus tard */ },
-                                onMoreInfo = { /* À implémenter plus tard */ }
+                                onMoreInfo = {
+                                    val url = "https://www.tela-botanica.org/?s=${plant.scientificName.replace(" ", "+")}"
+                                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                                    context.startActivity(intent)
+                                }
                             )
                         }
                     }
@@ -222,7 +228,11 @@ fun PlantCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiary
+        ),
+        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -233,14 +243,14 @@ fun PlantCard(
             Text(
                 text = plant.name,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onTertiary
             )
 
             if (plant.scientificName.isNotEmpty()) {
                 Text(
                     text = plant.scientificName,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onTertiary,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
