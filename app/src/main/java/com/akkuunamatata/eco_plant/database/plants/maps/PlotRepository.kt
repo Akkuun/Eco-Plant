@@ -81,7 +81,6 @@ class PlotRepository private constructor() {
         val db = FirebaseFirestore.getInstance()
 
         try {
-            // Le reste de votre code existant pour fetchParcellesFromSource
             // Récupérer tous les utilisateurs
             val usersSnapshot = db.collection("users")
                 .get()
@@ -92,17 +91,19 @@ class PlotRepository private constructor() {
                 val userId = userDoc.id
                 var lat = -1.0 // default value
                 var long = -1.0 // default value
-                val plants = mutableListOf<PlantSpecies>()
+
                 // Récupérer les parcelles de l'utilisateur
                 val plotsSnapshot = db.collection("users")
                     .document(userId)
                     .collection("plots").orderBy("lastEdited", Query.Direction.DESCENDING)
                     .get()
                     .await()
+
                 Log.d(
                     "PlotRepository",
                     "Nombre de parcelles pour l'utilisateur $userId: ${plotsSnapshot.size()}"
                 )
+
                 val plots = plotsSnapshot.documents.map { doc ->
                     Plot(
                         id = doc.id,
@@ -111,21 +112,92 @@ class PlotRepository private constructor() {
                         location = doc.getString("location") ?: "Emplacement inconnu"
                     )
                 }
+
                 Log.d("PlotRepository", "Parcelles pour l'utilisateur $userId: $plots")
-                var geoPoint = searchLocationWithNominatim(plots.firstOrNull()?.location ?: "Emplacement inconnu")
 
-                allPlots.add(
-                    ParcelleData(
-                        lat = lat,
-                        long = long,
-                        idAuthor = userId,
-                        plants = plants,
-                    )
+                var geoPoint = searchLocationWithNominatim(
+                    plots.firstOrNull()?.location ?: "Emplacement inconnu"
                 )
-                Log.d("PlotRepository", " ${geoPoint}")
 
+                // Pour chaque parcelle de l'utilisateur
+                for (plot in plots) {
+                    val plantsForThisPlot = mutableListOf<PlantSpecies>()
 
+                    Log.d("PlotRepository", "Récupération des plantes pour la parcelle: ${plot.id}")
 
+                    val plantsSnapshot = db.collection("users")
+                        .document(userId)
+                        .collection("plots")
+                        .document(plot.id)
+                        .collection("plants")
+                        .get()
+                        .await()
+
+                    Log.d("PlotRepository", "Planteeeee ${plantsSnapshot}")
+
+                    // Traiter chaque document de plante dans la collection
+                    for (plantDoc in plantsSnapshot.documents) {
+                        try {
+                            Log.d("PlotRepository", "Traitement de la plante: ${plantDoc.id}")
+
+                            // Récupérer les données de la plante
+                            val commonName = plantDoc.getString("commonName") ?: "Inconnu"
+                            val scientificName = plantDoc.getString("scientificName") ?: "Inconnu"
+
+                            // Récupérer les valeurs de service
+                            val serviceValues = plantDoc.get("serviceValues") as? List<*>
+                            val services = if (serviceValues != null && serviceValues.size >= 3) {
+                                floatArrayOf(
+                                    (serviceValues[0] as? Number)?.toFloat() ?: -1f,
+                                    (serviceValues[1] as? Number)?.toFloat() ?: -1f,
+                                    (serviceValues[2] as? Number)?.toFloat() ?: -1f
+                                )
+                            } else {
+                                floatArrayOf(-1f, -1f, -1f)
+                            }
+
+                            // Récupérer les fiabilités
+                            val reliabilities = (plantDoc.get("reliabilityValues") as? List<*>)?.map {
+                                (it as? Number)?.toFloat() ?: -1f
+                            }?.toFloatArray() ?: floatArrayOf(-1f, -1f, -1f)
+
+                            // Récupérer les conditions culturales
+                            val culturalConditions = (plantDoc.get("culturalConditions") as? List<*>)?.map {
+                                it.toString()
+                            }?.toTypedArray() ?: arrayOf("", "", "")
+
+                            // Créer l'objet PlantSpecies et l'ajouter à la liste
+                            // name: String,
+                            //        services: FloatArray,
+                            //        reliabilities: FloatArray,
+                            //        culturalConditions: Array<String>
+
+                            val plantSpecies = PlantSpecies(
+                                name = commonName,
+                                services = services,
+                                reliabilities = reliabilities,
+                                culturalConditions = culturalConditions
+
+                            )
+
+                            plantsForThisPlot.add(plantSpecies)
+                            Log.d("PlotRepository", "Plante ajoutée: $plantSpecies")
+                        } catch (e: Exception) {
+                            Log.e("PlotRepository", "Erreur lors du traitement d'une plante: ${e.message}", e)
+                        }
+                    }
+
+                    // Créer et ajouter ParcelleData avec les plantes de cette parcelle
+                    val parcelleData = ParcelleData(
+                        lat = geoPoint?.first ?: lat,
+                        long = geoPoint?.second ?: long,
+                        idAuthor = userId,
+                        plants = plantsForThisPlot,
+                    )
+
+                    allPlots.add(parcelleData)
+                    Log.d("PlotRepository", "Parcelle ajoutée avec ${plantsForThisPlot.size} plantes: $parcelleData")
+                }
             }
         } catch (e: Exception) {
             Log.e("PlotRepository", "Erreur lors de la récupération des parcelles", e)
