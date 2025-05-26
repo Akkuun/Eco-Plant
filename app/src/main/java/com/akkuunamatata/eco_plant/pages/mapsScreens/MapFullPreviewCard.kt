@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
 
@@ -20,7 +22,7 @@ fun MapFullPreviewCard(parcelle: ParcelleData) {
             .padding(bottom = 32.dp)
     ) {
         Text(
-            text = "Parcelle de ${parcelle.idAuthor}",
+            text = "${stringResource(R.string.plot_of)} ${parcelle.idAuthor}",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
@@ -28,25 +30,25 @@ fun MapFullPreviewCard(parcelle: ParcelleData) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Coordonnées",
+            text = stringResource(R.string.coordinates),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
 
         Text(
-            text = "Latitude: ${parcelle.lat}",
+           text = "${stringResource(R.string.latitude)}: ${parcelle.lat}",
             style = MaterialTheme.typography.bodyMedium
         )
 
         Text(
-            text = "Longitude: ${parcelle.long}",
+            text = "${stringResource(R.string.longitude)}: ${parcelle.long}",
             style = MaterialTheme.typography.bodyMedium
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Plantes",
+            text = stringResource(R.string.plants),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
@@ -80,7 +82,7 @@ private fun PlantCard(plant: PlantSpecies) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Conditions de culture:",
+                text = stringResource(R.string.culture_condition),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )

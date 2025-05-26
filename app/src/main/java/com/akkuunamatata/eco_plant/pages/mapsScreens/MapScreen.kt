@@ -1,10 +1,12 @@
 package com.akkuunamatata.eco_plant.pages.mapsScreens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -24,8 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -50,14 +55,33 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.ui.res.stringResource
+import com.google.firebase.auth.FirebaseAuth
+
+
+@Composable
+fun MapScreen(
+    navController: NavHostController,
+    // get if the user is logged in
+    isUserLoggedIn: Boolean = FirebaseAuth.getInstance().currentUser != null
+) {
+    // if not login, show the NotLoggedInScreen
+    if (!isUserLoggedIn) {
+        NotLoggedInScreen(navController)
+        return
+    }
+    //else show the Map
+    Map(navController)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(navController: NavHostController) {
+fun Map(navController : NavHostController){
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current // Pour gérer la fermeture du clavier
+    val focusManager = LocalFocusManager.current
 
     // Exemple data
     val exampleData = listOf(
@@ -108,7 +132,7 @@ fun MapScreen(navController: NavHostController) {
     var searchQuery by remember { mutableStateOf("") }
 
     // Search error state
-    var searchError by remember { mutableStateOf<String?>(null) }
+    var isSearchError by remember { mutableStateOf(false) }
 
     // Loading state
     var isSearching by remember { mutableStateOf(false) }
@@ -152,7 +176,7 @@ fun MapScreen(navController: NavHostController) {
     val geocodeLocation = { query: String ->
         coroutineScope.launch {
             isSearching = true
-            searchError = null
+            isSearchError = false // Réinitialiser l'état d'erreur
             focusManager.clearFocus() // Ferme le clavier
 
             try {
@@ -165,10 +189,10 @@ fun MapScreen(navController: NavHostController) {
                     mapView.controller.animateTo(GeoPoint(result.first, result.second))
                     mapView.controller.setZoom(12.0) // Zoom level appropriate for cities
                 } else {
-                    searchError = "Lieu introuvable"
+                    isSearchError = true // Mettre l'état d'erreur à true au lieu d'afficher un message
                 }
             } catch (e: Exception) {
-                searchError = "Erreur: ${e.message}"
+                isSearchError = true // Mettre l'état d'erreur à true en cas d'exception
             } finally {
                 isSearching = false
             }
@@ -181,8 +205,11 @@ fun MapScreen(navController: NavHostController) {
             factory = { mapView },
             modifier = Modifier.fillMaxSize()
         ) { map ->
-            // Default starting position (Montpellier)
-            val startPoint = GeoPoint(43.764014, 3.869409)
+            // Default starting position -> actual user location
+            val actualLocation = getActualLocation(context);
+//            val startPoint = GeoPoint(43.764014, 3.869409)
+            // Use actual location if available, otherwise default to Paris coordinates
+            val startPoint = actualLocation ?: GeoPoint(48.8566, 2.3522) // Paris coordinates
 
             // Center initially on default position
             map.controller.setCenter(startPoint)
@@ -228,13 +255,29 @@ fun MapScreen(navController: NavHostController) {
                 .padding(16.dp)
                 .align(Alignment.TopCenter)
         ) {
-            // Barre de recherche compacte sans espace blanc en bas
+            // Barre de recherche avec bord rouge lorsqu'il y a une erreur
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp) // Hauteur fixe pour éviter les espaces
-                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp))
-                    .clip(RoundedCornerShape(24.dp)),
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        ambientColor = if (isSearchError) MaterialTheme.colorScheme.error else Color.Black.copy(alpha = 0.2f),
+                        spotColor = if (isSearchError) MaterialTheme.colorScheme.error else Color.Black.copy(alpha = 0.2f)
+                    )
+                    .clip(RoundedCornerShape(24.dp))
+                    .then(
+                        if (isSearchError) {
+                            Modifier.border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.error,
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                        } else {
+                            Modifier
+                        }
+                    ),
                 color = MaterialTheme.colorScheme.surface
             ) {
                 Row(
@@ -246,27 +289,34 @@ fun MapScreen(navController: NavHostController) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
 
                     BasicTextField(
                         value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        onValueChange = {
+                            searchQuery = it
+                            // Réinitialiser l'erreur si l'utilisateur modifie la requête
+                            if (isSearchError) isSearchError = false
+                        },
                         modifier = Modifier
                             .weight(1f)
                             .padding(vertical = 8.dp),
                         singleLine = true,
                         textStyle = LocalTextStyle.current.copy(
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                         ),
                         decorationBox = { innerTextField ->
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (searchQuery.isEmpty()) {
                                     Text(
-                                        "Rechercher une ville",
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        stringResource(R.string.search_city),
+                                        color = if (isSearchError)
+                                            MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                                        else
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                     )
                                 }
                                 innerTextField()
@@ -300,35 +350,25 @@ fun MapScreen(navController: NavHostController) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = "Rechercher",
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                                 )
                             }
 
                             // Clear icon button
                             IconButton(onClick = {
                                 searchQuery = ""
+                                isSearchError = false // Réinitialiser l'erreur en effaçant la recherche
                                 focusManager.clearFocus() // Ferme également le clavier lors de l'effacement
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
                                     contentDescription = "Effacer",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    tint = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
                     }
                 }
-            }
-
-            // Affichage de l'erreur en dehors du champ de recherche
-            if (searchError != null) {
-                Text(
-                    text = searchError!!,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .padding(start = 16.dp, top = 58.dp) // Le padding top est juste après la barre
-                        .align(Alignment.TopStart)
-                )
             }
         }
 
@@ -397,6 +437,103 @@ fun MapScreen(navController: NavHostController) {
                 selectedParcelleData?.let { parcelle ->
                     MapFullPreviewCard(parcelle = parcelle)
                 }
+            }
+        }
+    }
+}
+// Function to get the actual location of the user in geoPoint format
+fun getActualLocation(context: Context): GeoPoint? {
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+    return try {
+        // Get the last known location
+        val location = locationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
+            ?: return null // Return null if no location is found
+
+        // Convert to GeoPoint
+        GeoPoint(location.latitude, location.longitude)
+    } catch (e: SecurityException) {
+        e.printStackTrace()
+        null // Return null if there is a security exception (e.g., permissions not granted)
+    }
+
+}
+
+
+/**
+ * Écran affiché lorsque l'utilisateur n'est pas connecté
+ * Style inspiré de Google
+ */
+@Composable
+fun NotLoggedInScreen(navController: NavHostController) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Logo ou icône
+            Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = "Location Icon",
+                modifier = Modifier
+                    .size(64.dp)
+                    .padding(bottom = 16.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            // Titre de style Google
+            Text(
+                text = "EcoPlant Maps",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            // Message explicatif
+            Text(
+                text = "Cette fonctionnalité n'est disponible que pour les utilisateurs connectés.",
+                fontSize = 16.sp,
+                color = Color(0xFF5F6368),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
+
+            // Bouton de connexion style Google
+            Button(
+                onClick = { navController.navigate("settings") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(4.dp)
+            ) {
+             Text(stringResource(R.string.Go_to_login), fontSize = 16.sp)
+            }
+
+            // Bouton secondaire pour s'inscrire
+            OutlinedButton(
+                onClick = { navController.navigate("sign_in") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .padding(top = 12.dp),
+                shape = RoundedCornerShape(4.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(stringResource(R.string.create_an_account), fontSize = 16.sp)
             }
         }
     }

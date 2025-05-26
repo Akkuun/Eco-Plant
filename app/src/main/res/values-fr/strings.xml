@@ -118,5 +118,14 @@
     <string name="remove_plant">Supprimer</string>
     <string name="more_info">Plus d\'infos</string>
 
+    <!-- Map Screen -->
+    <string name="search_city">Rechercher une ville</string>
+    <string name="no_location_found">Ville non valide</string>
+    <string name="coordinates">Coordonnées</string>
+    <string name="plants">Plantes: </string>
+    <string name="culture_condition">Conditions de culture: </string>
+    <string name="plot_of">Parcelle de </string>
+    <string name="Go_to_login">Se connecter</string>
+
     <string name="no_value">Pas de valeur</string>
 </resources>

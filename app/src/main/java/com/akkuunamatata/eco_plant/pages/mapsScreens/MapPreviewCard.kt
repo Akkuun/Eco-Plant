@@ -13,10 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 
 @Composable
@@ -61,7 +63,7 @@ fun MapPreviewCard(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Parcelle de ${parcelle.idAuthor}",
+                    "${stringResource(R.string.plot_of)} ${parcelle.idAuthor}",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -88,7 +90,7 @@ fun MapPreviewCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Plantes: ${parcelle.plants.joinToString(", ") { it.name }}",
+                    "${stringResource(R.string.plants)} ${parcelle.plants.joinToString(", ") { it.name }}",
                     style = MaterialTheme.typography.bodyLarge,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
