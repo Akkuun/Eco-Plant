@@ -88,10 +88,15 @@ class PlotRepository private constructor() {
 
             // Pour chaque utilisateur
             for (userDoc in usersSnapshot.documents) {
+                if (userDoc.id.isEmpty()) {
+                    Log.w("PlotRepository", "Utilisateur sans ID trouvé, ignoré")
+                    continue
+                }
+
                 val userId = userDoc.id
                 val userName = userDoc.getString("name") ?: "Inconnu"
-                var lat = -1.0 // default value
-                var long = -1.0 // default value
+
+                Log.d("PlotRepository", "USER: $userDoc")
 
                 // Récupérer les parcelles de l'utilisateur
                 val plotsSnapshot = db.collection("users")
@@ -100,31 +105,33 @@ class PlotRepository private constructor() {
                     .get()
                     .await()
 
-                Log.d(
-                    "PlotRepository",
-                    "Nombre de parcelles pour l'utilisateur $userId: ${plotsSnapshot.size()}"
-                )
-
-                val plots = plotsSnapshot.documents.map { doc ->
-                    Plot(
-                        id = doc.id,
-                        name = doc.getString("name") ?: "",
-                        lastEdited = (doc.getTimestamp("lastEdited")?.toDate() ?: Date()),
-                        location = doc.getString("location") ?: "Emplacement inconnu"
-                    )
+                // Skip if no plots
+                if (plotsSnapshot.isEmpty) {
+                    Log.d("PlotRepository", "Aucune parcelle trouvée pour l'utilisateur $userName")
+                    continue
                 }
 
-                Log.d("PlotRepository", "Parcelles pour l'utilisateur $userId: $plots")
-
-                var geoPoint = searchLocationWithNominatim(
-                    plots.firstOrNull()?.location ?: "Emplacement inconnu"
-                )
-
                 // Pour chaque parcelle de l'utilisateur
-                for (plot in plots) {
-                    val plantsForThisPlot = mutableListOf<PlantSpecies>()
+                for (plotDoc in plotsSnapshot.documents) {
+                    // Récupérer directement le document de la parcelle pour accéder à tous ses champs
+                    Log.d("PlotRepository", "PLOTDOC: ${plotDoc.data}")
 
-                    Log.d("PlotRepository", "Récupération des plantes pour la parcelle: ${plot.id}")
+                    // Extraire les coordonnées GPS de la parcelle
+                    val latitude = plotDoc.getDouble("latitude")
+                    val longitude = plotDoc.getDouble("longitude")
+
+                    Log.d("PlotRepository", "Coordonnées GPS: lat=$latitude, long=$longitude")
+
+                    val plot = Plot(
+                        id = plotDoc.id,
+                        name = plotDoc.getString("name") ?: "",
+                        lastEdited = (plotDoc.getTimestamp("lastEdited")?.toDate() ?: Date()),
+                        location = plotDoc.getString("location") ?: "Emplacement inconnu"
+                    )
+
+                    Log.d("PlotRepository", "PLOT ${plot}")
+
+                    val plantsForThisPlot = mutableListOf<PlantSpecies>()
 
                     val plantsSnapshot = db.collection("users")
                         .document(userId)
@@ -134,13 +141,10 @@ class PlotRepository private constructor() {
                         .get()
                         .await()
 
-                    Log.d("PlotRepository", "Planteeeee ${plantsSnapshot}")
-
                     // Traiter chaque document de plante dans la collection
                     for (plantDoc in plantsSnapshot.documents) {
+                        Log.d("PlotRepository", "PLANTDOC ${plantDoc}")
                         try {
-                            Log.d("PlotRepository", "Traitement de la plante: ${plantDoc.id}")
-
                             // Récupérer les données de la plante
                             val commonName = plantDoc.getString("commonName") ?: "Inconnu"
                             val scientificName = plantDoc.getString("scientificName") ?: "Inconnu"
@@ -168,17 +172,11 @@ class PlotRepository private constructor() {
                             }?.toTypedArray() ?: arrayOf("", "", "")
 
                             // Créer l'objet PlantSpecies et l'ajouter à la liste
-                            // name: String,
-                            //        services: FloatArray,
-                            //        reliabilities: FloatArray,
-                            //        culturalConditions: Array<String>
-
                             val plantSpecies = PlantSpecies(
                                 name = commonName,
                                 services = services,
                                 reliabilities = reliabilities,
                                 culturalConditions = culturalConditions
-
                             )
 
                             plantsForThisPlot.add(plantSpecies)
@@ -188,16 +186,16 @@ class PlotRepository private constructor() {
                         }
                     }
 
-                    // Créer et ajouter ParcelleData avec les plantes de cette parcelle
+                    // Utiliser les coordonnées GPS récupérées directement du document
                     val parcelleData = ParcelleData(
-                        lat = geoPoint?.first ?: lat,
-                        long = geoPoint?.second ?: long,
+                        lat = latitude ?: -1.0,  // Utiliser la valeur extraite directement
+                        long = longitude ?: -1.0, // Utiliser la valeur extraite directement
                         idAuthor = userName,
-                        plants = plantsForThisPlot,
+                        plants = plantsForThisPlot
                     )
 
                     allPlots.add(parcelleData)
-                    Log.d("PlotRepository", "Parcelle ajoutée avec ${plantsForThisPlot.size} plantes: $parcelleData")
+                    Log.d("PlotRepository", "Parcelle ajoutée: lat=${parcelleData.lat}, long=${parcelleData.long}, plantes=${plantsForThisPlot.size}")
                 }
             }
         } catch (e: Exception) {
