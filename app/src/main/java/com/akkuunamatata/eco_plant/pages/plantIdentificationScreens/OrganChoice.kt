@@ -58,7 +58,6 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
-import kotlin.toString
 
 @Composable
 fun ButtonWithImage(
@@ -301,10 +300,18 @@ fun organChosen(
 
                         val species = topResult.getJSONObject("species")
                         val scientificName = species.optString("scientificNameWithoutAuthor", "Inconnu")
+                        // take the first common name
+                        val commonNamesArray = species.optJSONArray("commonNames")
+                        val plantCommonName = if (commonNamesArray != null && commonNamesArray.length() > 0) {
+                            commonNamesArray.getString(0)
+                        } else {
+                            "Inconnu"
+                        }
+
                         val score = topResult.optDouble("score", 0.0)
 
                         val encodedUri = Uri.encode(imageUri.toString())
-                        val encodedPlantName = Uri.encode(scientificName)
+                        val encodedPlantName = Uri.encode(plantCommonName)
                         val encodedScientificName = Uri.encode(scientificName)
 
                         println("Meilleure correspondance: $scientificName (score: ${(score * 100).toInt()}%)")
