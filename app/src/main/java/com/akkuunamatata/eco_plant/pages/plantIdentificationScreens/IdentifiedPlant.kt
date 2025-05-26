@@ -255,7 +255,7 @@ fun IdentifiedPlant(
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
                                 .clickable { navController.navigate(Routes.NEW_PLOT) },
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(24.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = HighlightColors.Medium
                             )
@@ -337,8 +337,8 @@ fun IdentifiedPlant(
             successMessage?.let {
                 Snackbar(
                     modifier = Modifier.fillMaxWidth(),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
@@ -356,7 +356,7 @@ fun IdentifiedPlant(
                         TextButton(
                             onClick = { successMessage = null },
                             colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.secondary
+                                contentColor = MaterialTheme.colorScheme.onTertiary
                             ),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                         ) {
@@ -413,10 +413,10 @@ fun PlotItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onSelect() },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
-                MaterialTheme.colorScheme.scrim
+                MaterialTheme.colorScheme.tertiary
             else
                 MaterialTheme.colorScheme.surface
         )
