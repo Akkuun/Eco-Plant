@@ -89,6 +89,7 @@ class PlotRepository private constructor() {
             // Pour chaque utilisateur
             for (userDoc in usersSnapshot.documents) {
                 val userId = userDoc.id
+                val userName = userDoc.getString("name") ?: "Inconnu"
                 var lat = -1.0 // default value
                 var long = -1.0 // default value
 
@@ -191,7 +192,7 @@ class PlotRepository private constructor() {
                     val parcelleData = ParcelleData(
                         lat = geoPoint?.first ?: lat,
                         long = geoPoint?.second ?: long,
-                        idAuthor = userId,
+                        idAuthor = userName,
                         plants = plantsForThisPlot,
                     )
 
