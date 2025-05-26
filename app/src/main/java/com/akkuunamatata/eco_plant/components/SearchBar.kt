@@ -23,7 +23,7 @@ fun SearchBar(
     contentDescription: String? = null,
     containerColor: Color = MaterialTheme.colorScheme.tertiary,
     borderColor: Color = MaterialTheme.colorScheme.primary,
-    unfocusedBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    unfocusedBorderColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
 ) {
     OutlinedTextField(
         value = value,
