@@ -1,5 +1,6 @@
 package com.akkuunamatata.eco_plant.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun ScoreBar(
     label: String,
