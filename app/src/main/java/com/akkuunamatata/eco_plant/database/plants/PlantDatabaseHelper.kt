@@ -52,6 +52,10 @@ class PlantDatabaseHelper private constructor(inputStream: InputStream) {
         return plantSpecies.find { it.name.equals(scientificName, ignoreCase = true) }
     }
 
+    fun getAllPlants(): List<PlantSpecies> {
+        return plantSpecies.toList()
+    }
+
     companion object {
         @Volatile
         private var instance: PlantDatabaseHelper? = null

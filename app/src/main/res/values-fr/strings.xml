@@ -117,6 +117,8 @@
     <string name="back_to_plot">Retour à la parcelle</string>
     <string name="remove_plant">Supprimer</string>
     <string name="more_info">Plus d\'infos</string>
+    <string name="plant_deleted_successfully">Plante supprimée avec succès</string>
+    <string name="confirm_delete_plant">Êtes-vous sûr de vouloir supprimer %1$s ?</string>
 
     <!-- Map Screen -->
     <string name="search_city">Rechercher une ville</string>
@@ -130,5 +132,9 @@
     <string name="eco_plant_feature_for_logged">Cette fonctionnalité n\'est disponible que pour les utilisateurs connectés.</string>
     <string name="serviceValues">Valeur de service:</string>
     <string name="reliability">Valeur de confiance: </string>
+
+    <!-- Plant advice -->
+    <string name="advice_to_improve_scores">Advice to improve scores</string>
+
     <string name="no_value">Pas de valeur</string>
 </resources>
