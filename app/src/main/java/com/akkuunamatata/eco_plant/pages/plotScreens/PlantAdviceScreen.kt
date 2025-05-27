@@ -40,7 +40,7 @@ fun PlantAdviceScreen(
     var allPlants by remember { mutableStateOf<List<PlantSpecies>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    // Remplacer le critère unique par un ensemble de critères
+
     var selectedCriteria by remember {
         mutableStateOf(setOf(SortCriteria.NITROGEN_FIXATION))
     }
@@ -96,7 +96,7 @@ fun PlantAdviceScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
         ) {
-            // Filtres avec sélection multiple et styles personnalisés
+            // Filtres
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,12 +104,11 @@ fun PlantAdviceScreen(
                     .padding(vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(1.dp)
             ) {
-                // Couleurs personnalisées pour les FilterChip
                 val filterChipColors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.tertiary,
-                    selectedLabelColor = MaterialTheme.colorScheme.onTertiary,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    labelColor = MaterialTheme.colorScheme.onTertiary
                 )
 
                 FilterChip(
