@@ -128,7 +128,7 @@
     <string name="Go_to_login">Se connecter</string>
     <string name="eco_plant_map">Carte d\'EcoPlant</string>
     <string name="eco_plant_feature_for_logged">Cette fonctionnalité n\'est disponible que pour les utilisateurs connectés.</string>
-
-
+    <string name="serviceValues">Valeur de service:</string>
+    <string name="reliability">Valeur de confiance: </string>
     <string name="no_value">Pas de valeur</string>
 </resources>

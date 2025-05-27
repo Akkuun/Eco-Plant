@@ -3,6 +3,8 @@ package com.akkuunamatata.eco_plant.pages.mapsScreens
 
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,6 +19,7 @@ import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
 fun MapFullPreviewCard(parcelle: ParcelleData) {
     Column(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
             .fillMaxWidth()
             .padding(16.dp)
             .padding(bottom = 32.dp)
@@ -93,6 +96,34 @@ private fun PlantCard(plant: PlantSpecies) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.serviceValues),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+            plant.services.forEach { service ->
+                Text(
+                    text = "• $service",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.reliability),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+            plant.services.forEach { service ->
+                Text(
+                    text = "• $service",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
         }
     }
 }
