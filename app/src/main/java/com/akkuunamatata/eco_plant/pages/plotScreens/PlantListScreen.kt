@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,12 +44,28 @@ fun PlantListScreen(
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    // États pour le message de succès
+    var successMessage by remember { mutableStateOf<String?>(null) }
+
+    // États pour la boîte de dialogue de confirmation
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var plantToDelete by remember { mutableStateOf<PlotPlant?>(null) }
+
     val db = FirebaseFirestore.getInstance()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
     val loginRequiredMessage = stringResource(id = R.string.login_required)
     val errorLoadingMessage = stringResource(id = R.string.error_loading)
+    val deletedSuccessfully = stringResource(id = R.string.plant_deleted_successfully)
     val context = LocalContext.current
+
+    // Effet pour cacher le message de succès après 3 secondes
+    LaunchedEffect(successMessage) {
+        if (successMessage != null) {
+            kotlinx.coroutines.delay(3000) // 3 secondes
+            successMessage = null
+        }
+    }
 
     // Récupération des informations de la parcelle et des plantes
     LaunchedEffect(plotId) {
@@ -128,6 +143,25 @@ fun PlantListScreen(
         }
     }
 
+    fun deletePlant(plant: PlotPlant) {
+        db.collection("users")
+            .document(currentUser!!.uid)
+            .collection("plots")
+            .document(plotId)
+            .collection("plants")
+            .document(plant.id)
+            .delete()
+            .addOnSuccessListener {
+                // Rafraîchir la liste des plantes
+                plants = plants.filter { it.id != plant.id }
+                successMessage = deletedSuccessfully
+            }
+            .addOnFailureListener { e ->
+                Log.e("PlantListScreen", "Error removing plant: ${e.message}")
+                errorMessage = "${e.message}"
+            }
+    }
+
     // Filtrer les plantes par texte de recherche
     val filteredPlants = remember(searchText, plants) {
         if (searchText.isEmpty()) plants
@@ -194,7 +228,10 @@ fun PlantListScreen(
                         items(filteredPlants) { plant ->
                             PlantCard(
                                 plant = plant,
-                                onRemove = { /* À implémenter plus tard */ },
+                                onRemove = {
+                                    plantToDelete = plant
+                                    showDeleteDialog = true
+                                },
                                 onMoreInfo = {
                                     val url = "https://www.tela-botanica.org/?s=${plant.scientificName.replace(" ", "+")}"
                                     val intent = Intent(Intent.ACTION_VIEW, url.toUri())
@@ -206,6 +243,24 @@ fun PlantListScreen(
                 }
             }
 
+            // Message placeholder
+            successMessage?.let {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Text(
+                        text = it,
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+
             // Bouton retour à la parcelle
             Button(
                 onClick = { navController.popBackStack() },
@@ -214,6 +269,35 @@ fun PlantListScreen(
                     .padding(vertical = 16.dp)
             ) {
                 Text(stringResource(id = R.string.back_to_plot))
+            }
+
+            if (showDeleteDialog && plantToDelete != null) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteDialog = false },
+                    title = { Text(stringResource(id = R.string.confirm_deletion)) },
+                    text = { Text(stringResource(id = R.string.confirm_delete_plant, plantToDelete?.name ?: "")) },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                plantToDelete?.let { deletePlant(it) }
+                                showDeleteDialog = false
+                                plantToDelete = null
+                            }
+                        ) {
+                            Text(stringResource(id = R.string.delete))
+                        }
+                    },
+                    dismissButton = {
+                        OutlinedButton(
+                            onClick = {
+                                showDeleteDialog = false
+                                plantToDelete = null
+                            }
+                        ) {
+                            Text(stringResource(id = R.string.cancel))
+                        }
+                    }
+                )
             }
         }
     }
