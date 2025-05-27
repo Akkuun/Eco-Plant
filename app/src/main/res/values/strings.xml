@@ -119,6 +119,8 @@
     <string name="back_to_plot">Back to plot</string>
     <string name="remove_plant">Remove from plot</string>
     <string name="more_info">More info</string>
+    <string name="plant_deleted_successfully">Plant deleted successfully</string>
+    <string name="confirm_delete_plant">Are you sure you want to delete %1$s ?</string>
 
     <!-- Map Screen -->
     <string name="search_city">Search a city</string>
@@ -133,4 +135,7 @@
     <string name="Go_to_login">Go to login</string>
     <string name="eco_plant_map">EcoPlant Maps</string>
     <string name="eco_plant_feature_for_logged"> This feature is only allowed for logged users.</string>
+
+    <!-- Plant advice -->
+    <string name="advice_to_improve_scores">Advice to improve scores</string>
 </resources>

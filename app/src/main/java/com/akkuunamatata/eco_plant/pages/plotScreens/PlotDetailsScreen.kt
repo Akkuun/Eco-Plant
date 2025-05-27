@@ -177,6 +177,22 @@ fun PlotDetailScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Bouton de conseils
+            Button(
+                onClick = { navController.navigate("plant_advice/${plotId}") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Text(stringResource(id = R.string.advice_to_improve_scores))
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Notes personnelles
             Text(
                 text = stringResource(id = R.string.personal_notes),
@@ -221,7 +237,9 @@ fun PlotDetailScreen(
                 }
 
                 Button(
-                    onClick = { /* Ajouter une plante */ },
+                    onClick = {
+                        navController.navigate(Routes.SCAN)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 8.dp),
