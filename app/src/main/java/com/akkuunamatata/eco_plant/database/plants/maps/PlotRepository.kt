@@ -4,7 +4,6 @@ import android.util.Log
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
 import com.akkuunamatata.eco_plant.pages.plantIdentificationScreens.Plot
-import com.akkuunamatata.eco_plant.utils.searchLocationWithNominatim
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.Dispatchers
@@ -89,14 +88,12 @@ class PlotRepository private constructor() {
             // Pour chaque utilisateur
             for (userDoc in usersSnapshot.documents) {
                 if (userDoc.id.isEmpty()) {
-                    Log.w("PlotRepository", "Utilisateur sans ID trouvé, ignoré")
                     continue
                 }
 
                 val userId = userDoc.id
                 val userName = userDoc.getString("name") ?: "Inconnu"
 
-                Log.d("PlotRepository", "USER: $userDoc")
 
                 // Récupérer les parcelles de l'utilisateur
                 val plotsSnapshot = db.collection("users")
@@ -120,7 +117,6 @@ class PlotRepository private constructor() {
                     val latitude = plotDoc.getDouble("latitude")
                     val longitude = plotDoc.getDouble("longitude")
 
-                    Log.d("PlotRepository", "Coordonnées GPS: lat=$latitude, long=$longitude")
 
                     val plot = Plot(
                         id = plotDoc.id,
@@ -180,7 +176,6 @@ class PlotRepository private constructor() {
                             )
 
                             plantsForThisPlot.add(plantSpecies)
-                            Log.d("PlotRepository", "Plante ajoutée: $plantSpecies")
                         } catch (e: Exception) {
                             Log.e("PlotRepository", "Erreur lors du traitement d'une plante: ${e.message}", e)
                         }
@@ -188,14 +183,13 @@ class PlotRepository private constructor() {
 
                     // Utiliser les coordonnées GPS récupérées directement du document
                     val parcelleData = ParcelleData(
-                        lat = latitude ?: -1.0,  // Utiliser la valeur extraite directement
-                        long = longitude ?: -1.0, // Utiliser la valeur extraite directement
+                        lat = latitude ?: -1.0,
+                        long = longitude ?: -1.0,
                         idAuthor = userName,
                         plants = plantsForThisPlot
                     )
 
                     allPlots.add(parcelleData)
-                    Log.d("PlotRepository", "Parcelle ajoutée: lat=${parcelleData.lat}, long=${parcelleData.long}, plantes=${plantsForThisPlot.size}")
                 }
             }
         } catch (e: Exception) {

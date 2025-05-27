@@ -131,10 +131,12 @@
     <string name="plants">Plants: </string>
     <string name="no_value">No value</string>
     <string name="culture_condition">Culture conditions: </string>
-    <string name="plot_of">Author\'s plot </string>
+    <string name="plot_of">Author\'s plot: </string>
     <string name="Go_to_login">Go to login</string>
     <string name="eco_plant_map">EcoPlant Maps</string>
     <string name="eco_plant_feature_for_logged"> This feature is only allowed for logged users.</string>
+    <string name="serviceValues">Service values: </string>
+    <string name="reliability">Relability values: </string>
 
     <!-- Plant advice -->
     <string name="advice_to_improve_scores">Advice to improve scores</string>

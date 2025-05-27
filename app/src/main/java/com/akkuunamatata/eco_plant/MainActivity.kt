@@ -13,6 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.akkuunamatata.eco_plant.navigation.AppNavHost
 import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
@@ -137,7 +138,20 @@ fun AppNavigation() {
  */
 @Composable
 fun MainBottomBar(navController: NavHostController) {
-    val selectedItem = remember { mutableIntStateOf(0) }
+    // Observer l'état actuel de la navigation
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Déterminer l'élément sélectionné en fonction de la route actuelle
+    val selectedIndex = when (currentRoute) {
+        "map" -> 0
+        "plot_list" -> 1
+        "scan" -> 2
+        "settings" -> 3
+        else -> 0 // Par défaut, sélectionner la carte
+    }
+
+    val selectedItem = remember(currentRoute) { mutableIntStateOf(selectedIndex) }
 
     NavigationBar (
         containerColor = MaterialTheme.colorScheme.background,
@@ -185,7 +199,7 @@ fun MainBottomBar(navController: NavHostController) {
             onClick = {
                 selectedItem.intValue = 1
                 navController.navigate("plot_list") {
-                    popUpTo("history") { inclusive = true }
+                    popUpTo("plot_list") { inclusive = true } // Correction de l'incohérence
                 }
             },
             colors = NavigationBarItemDefaults.colors(
