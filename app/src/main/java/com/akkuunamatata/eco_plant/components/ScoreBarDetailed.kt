@@ -89,9 +89,11 @@ fun ScoreBarDetailed(
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .align(Alignment.CenterStart)
-                            .padding(start = 12.dp, end = 12.dp),
+                            .padding(start = 12.dp, end = 12.dp)
+                            .fillMaxWidth(),
                         textAlign = TextAlign.Start,
-                        color = MaterialTheme.colorScheme.secondary
+                        // Utilisation d'une couleur plus foncée pour assurer la visibilité
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
