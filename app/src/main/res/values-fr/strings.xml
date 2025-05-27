@@ -124,7 +124,7 @@
     <string name="coordinates">Coordonnées</string>
     <string name="plants">Plantes: </string>
     <string name="culture_condition">Conditions de culture: </string>
-    <string name="plot_of">Parcelle de </string>
+    <string name="plot_of">Parcelle de: </string>
     <string name="Go_to_login">Se connecter</string>
     <string name="eco_plant_map">Carte d\'EcoPlant</string>
     <string name="eco_plant_feature_for_logged">Cette fonctionnalité n\'est disponible que pour les utilisateurs connectés.</string>

@@ -1,7 +1,6 @@
 package com.akkuunamatata.eco_plant.pages.mapsScreens
 
 import NotLoggedInScreen
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -35,7 +34,7 @@ import androidx.navigation.NavHostController
 import androidx.preference.PreferenceManager
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
-import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -185,11 +184,8 @@ fun Map(navController: NavHostController) {
         ) { map ->
             // Default starting position -> actual user location
             val actualLocation = getActualGeoPosition(context);
-            // Use actual location if available, otherwise default to Paris coordinates
-            val startPoint = actualLocation ?: GeoPoint(48.8566, 2.3522) // Paris coordinates
-
             // Center initially on default position
-            map.controller.setCenter(startPoint)
+            map.controller.setCenter(actualLocation)
 
             // Add location overlay without automatic recentering
             val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map).apply {
