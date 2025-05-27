@@ -7,14 +7,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.material3.NavigationBarDefaults.containerColor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.akkuunamatata.eco_plant.navigation.AppNavHost
 import com.akkuunamatata.eco_plant.ui.theme.EcoPlantTheme
@@ -139,7 +138,20 @@ fun AppNavigation() {
  */
 @Composable
 fun MainBottomBar(navController: NavHostController) {
-    val selectedItem = remember { mutableIntStateOf(0) }
+    // Observer l'état actuel de la navigation
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Déterminer l'élément sélectionné en fonction de la route actuelle
+    val selectedIndex = when (currentRoute) {
+        "map" -> 0
+        "plot_list" -> 1
+        "scan" -> 2
+        "settings" -> 3
+        else -> 0 // Par défaut, sélectionner la carte
+    }
+
+    val selectedItem = remember(currentRoute) { mutableIntStateOf(selectedIndex) }
 
     NavigationBar (
         containerColor = MaterialTheme.colorScheme.background,
@@ -186,8 +198,8 @@ fun MainBottomBar(navController: NavHostController) {
             selected = selectedItem.intValue == 1,
             onClick = {
                 selectedItem.intValue = 1
-                navController.navigate("history") {
-                    popUpTo("history") { inclusive = true }
+                navController.navigate("plot_list") {
+                    popUpTo("plot_list") { inclusive = true } // Correction de l'incohérence
                 }
             },
             colors = NavigationBarItemDefaults.colors(

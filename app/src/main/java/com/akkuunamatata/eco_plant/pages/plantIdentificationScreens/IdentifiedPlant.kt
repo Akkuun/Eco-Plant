@@ -1,9 +1,8 @@
 package com.akkuunamatata.eco_plant.pages.plantIdentificationScreens
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,13 +10,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -26,14 +23,24 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.akkuunamatata.eco_plant.R
+import com.akkuunamatata.eco_plant.navigation.Routes
 import com.akkuunamatata.eco_plant.ui.theme.HighlightColors
 import java.text.SimpleDateFormat
 import java.util.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+import com.akkuunamatata.eco_plant.ui.theme.Support
+import com.akkuunamatata.eco_plant.components.SearchBar
+import com.google.firebase.firestore.Query
+import com.akkuunamatata.eco_plant.database.plants.PlantDatabaseHelper
+import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
 
 data class Plot(
     val id: String,
     val name: String,
-    val lastEdited: Date
+    val lastEdited: Date,
+    val location: String = "Emplacement inconnu"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,28 +51,136 @@ fun IdentifiedPlant(
     plantName: String,
     scientificName: String
 ) {
-    // État pour stocker la parcelle sélectionnée
     var selectedPlot by remember { mutableStateOf<Plot?>(null) }
-
-    // État pour stocker le texte de recherche
     var searchText by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(true) }
+    var isAddingPlant by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var plots by remember { mutableStateOf<List<Plot>>(emptyList()) }
+    var successMessage by remember { mutableStateOf<String?>(null) }
 
-    // Liste de parcelles fictive (à remplacer par des données réelles)
-    val mockPlots = remember {
-        listOf(
-            Plot("1", "Jardin potager", Date()),
-            Plot("2", "Terrasse", Date(System.currentTimeMillis() - 86400000)),
-            Plot("3", "Balcon", Date(System.currentTimeMillis() - 172800000)),
-            Plot("4", "Jardin d'hiver", Date(System.currentTimeMillis() - 259200000))
-        )
+    // Ajout d'un état pour stocker les données de l'espèce de plante
+    var plantSpecies by remember { mutableStateOf<PlantSpecies?>(null) }
+
+    // Contexte pour instancier le PlantDatabaseHelper
+    val context = LocalContext.current
+
+    // Firebase
+    val db = FirebaseFirestore.getInstance()
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
+    // Chargement des données de plante depuis la base de données
+    LaunchedEffect(scientificName) {
+        try {
+            val databaseHelper = PlantDatabaseHelper.getInstance(context)
+            plantSpecies = databaseHelper.getPlantSpeciesByScientificName(scientificName)
+
+            // Ajout de logs pour vérifier les valeurs chargées
+            if (plantSpecies != null) {
+                Log.d("IdentifiedPlant", "Données de la plante chargées: ${plantSpecies?.name}")
+                Log.d("IdentifiedPlant", "Services: ${plantSpecies?.services?.joinToString()}")
+                Log.d("IdentifiedPlant", "Fiabilités: ${plantSpecies?.reliabilities?.joinToString()}")
+            } else {
+                Log.d("IdentifiedPlant", "Données non trouvées: $scientificName")
+            }
+        } catch (e: Exception) {
+            errorMessage = "Erreur de recherche: ${e.message}"
+            print("Erreur lors du chargement des données de la plante: ${e.message}")
+        }
+    }
+
+    // Récupération des parcelles depuis Firestore
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) {
+            try {
+                val snapshot = db.collection("users")
+                    .document(currentUser.uid)
+                    .collection("plots")
+                    .orderBy("lastEdited", Query.Direction.DESCENDING)
+                    .get()
+                    .await()
+
+                plots = snapshot.documents.map { doc ->
+                    Plot(
+                        id = doc.id,
+                        name = doc.getString("name") ?: "",
+                        lastEdited = (doc.getTimestamp("lastEdited")?.toDate() ?: Date())
+                    )
+                }
+                isLoading = false
+            } catch (e: Exception) {
+                errorMessage = "Erreur: ${e.message}"
+                isLoading = false
+            }
+        } else {
+            errorMessage = "Vous devez être connecté pour voir vos parcelles"
+            isLoading = false
+        }
+    }
+
+    // Fonction d'ajout de plante
+    fun addPlantToPlot() {
+        if (currentUser == null || selectedPlot == null) {
+            errorMessage = "Veuillez sélectionner une parcelle"
+            return
+        }
+
+        isAddingPlant = true
+
+        try {
+            // Récupérer les valeurs de service, fiabilité et conditions culturales
+            val serviceValues = plantSpecies?.services?.toList() ?: listOf(-1f, -1f, -1f)
+            val reliabilityValues = plantSpecies?.reliabilities?.toList() ?: listOf(-1f, -1f, -1f)
+            val culturalConditions = plantSpecies?.culturalConditions?.toList() ?: listOf("", "", "")
+
+            val plantMap = hashMapOf(
+                "commonName" to plantName,
+                "scientificName" to scientificName,
+                "imageUrl" to "",
+                "serviceValues" to serviceValues,
+                "reliabilityValues" to reliabilityValues,
+                "culturalConditions" to culturalConditions,
+                "addedAt" to com.google.firebase.Timestamp.now()
+            )
+
+            // Ajout à Firestore
+            db.collection("users")
+                .document(currentUser.uid)
+                .collection("plots")
+                .document(selectedPlot!!.id)
+                .collection("plants")
+                .add(plantMap)
+                .addOnSuccessListener {
+                    db.collection("users")
+                        .document(currentUser.uid)
+                        .collection("plots")
+                        .document(selectedPlot!!.id)
+                        .update("lastEdited", com.google.firebase.Timestamp.now())
+                        .addOnSuccessListener {
+                            successMessage = "Plante ajoutée à ${selectedPlot!!.name}"
+                            isAddingPlant = false
+                        }
+                        .addOnFailureListener { e ->
+                            errorMessage = "Erreur lors de la mise à jour: ${e.message}"
+                            isAddingPlant = false
+                        }
+                }
+                .addOnFailureListener { e ->
+                    errorMessage = "Erreur lors de l'ajout: ${e.message}"
+                    isAddingPlant = false
+                }
+        } catch (e: Exception) {
+            errorMessage = "Erreur: ${e.message}"
+            isAddingPlant = false
+        }
     }
 
     // Filtrer les parcelles en fonction du texte de recherche
-    val filteredPlots = remember(searchText, mockPlots) {
+    val filteredPlots = remember(searchText, plots) {
         if (searchText.isEmpty()) {
-            mockPlots
+            plots
         } else {
-            mockPlots.filter { it.name.contains(searchText, ignoreCase = true) }
+            plots.filter { it.name.contains(searchText, ignoreCase = true) }
         }
     }
 
@@ -110,69 +225,147 @@ fun IdentifiedPlant(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Champ de recherche
-        OutlinedTextField(
+        SearchBar(
             value = searchText,
             onValueChange = { searchText = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.search_plot)) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            singleLine = true,
-            shape = RoundedCornerShape(8.dp)
+            labelText = stringResource(R.string.search_plot),
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         // Liste des parcelles
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
-            // Bouton Nouvelle parcelle
-            item {
-                Card(
+        Box(modifier = Modifier.weight(1f)) {
+            if (isLoading) {
+                // Indicateur de chargement
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .align(Alignment.Center)
+                )
+            } else {
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable { /* Créer une nouvelle parcelle */ },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = HighlightColors.Medium
-                    )
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            text = stringResource(R.string.new_plot),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimary
+                    // Bouton Nouvelle parcelle
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable { navController.navigate(Routes.NEW_PLOT) },
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = HighlightColors.Medium
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(
+                                    text = stringResource(R.string.new_plot),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                    }
+
+                    // Liste des parcelles existantes
+                    items(filteredPlots) { plot ->
+                        PlotItem(
+                            plot = plot,
+                            isSelected = selectedPlot?.id == plot.id,
+                            dateFormat = dateFormat,
+                            onSelect = { selectedPlot = plot }
                         )
                     }
                 }
             }
-
-            // Liste des parcelles existantes
-            items(filteredPlots) { plot ->
-                PlotItem(
-                    plot = plot,
-                    isSelected = selectedPlot?.id == plot.id,
-                    dateFormat = dateFormat,
-                    onSelect = { selectedPlot = plot }
-                )
-            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 0.dp)
+                .padding(vertical = 8.dp)
+        ) {
+            // Message d'erreur
+            errorMessage?.let {
+                Snackbar(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = Support.Error.ErrorMediumLow,
+                    contentColor = Support.Error.ErrorHigh,
+                    shape = RoundedCornerShape(8.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = it,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 8.dp),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        TextButton(
+                            onClick = { errorMessage = null },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = Support.Error.ErrorHigh
+                            ),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                        ) {
+                            Text("OK", style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                }
+            }
+
+            // Message de succès
+            successMessage?.let {
+                Snackbar(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = it,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 8.dp),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        TextButton(
+                            onClick = { successMessage = null },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onTertiary
+                            ),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                        ) {
+                            Text("OK", style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                }
+            }
+        }
 
         // Boutons d'action
         Row(
@@ -180,12 +373,19 @@ fun IdentifiedPlant(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(
-                onClick = { /* Ajouter à la parcelle sélectionnée */ },
-                enabled = selectedPlot != null,
+                onClick = { addPlantToPlot() },
+                enabled = selectedPlot != null && !isAddingPlant,
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(24.dp)
             ) {
-                Text(stringResource(R.string.add_to_plot))
+                if (isAddingPlant) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text(stringResource(R.string.add_to_plot))
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -213,10 +413,10 @@ fun PlotItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onSelect() },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
-                MaterialTheme.colorScheme.scrim
+                MaterialTheme.colorScheme.tertiary
             else
                 MaterialTheme.colorScheme.surface
         )

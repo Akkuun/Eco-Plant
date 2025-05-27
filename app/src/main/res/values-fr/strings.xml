@@ -78,4 +78,63 @@
     <string name="add_to_plot">Ajouter à la parcelle selectionnée</string>
     <string name="take_another_picture">Prendre une autre photo</string>
     <string name="last_edited">Dernière modification: %1$s</string>
+
+    <!-- New plot -->
+    <string name="plot_name">Nom de la parcelle</string>
+    <string name="personal_notes">Notes personnelles</string>
+    <string name="create">Créer</string>
+
+    <!-- PlotList Screen -->
+    <string name="your_plots">Vos parcelles</string>
+    <string name="no_plots_found">Aucune parcelle trouvée</string>
+    <string name="login_required">Vous devez être connecté pour voir vos parcelles</string>
+    <string name="error_loading">Erreur: %1$s</string>
+
+    <!-- PlotDetail Screen -->
+    <string name="plot_not_found">Parcelle introuvable</string>
+    <string name="nitrogen_fixation">Fixation d\'azote dans le sol</string>
+    <string name="soil_structure">Amélioration de la structure du sol</string>
+    <string name="water_retention">Capacité à retenir l\'eau dans le sol</string>
+    <string name="no_notes">Aucune note</string>
+    <string name="view_plants">Voir les plantes</string>
+    <string name="add_plant">Ajouter une plante</string>
+
+    <!-- PlotSettings Screen -->
+    <string name="plot_settings">Paramètres de la parcelle</string>
+    <string name="delete_plot">Supprimer cette parcelle</string>
+    <string name="confirm_deletion">Confirmer la suppression</string>
+    <string name="delete_plot_confirmation">Êtes-vous sûr de vouloir supprimer cette parcelle? Cette action est irréversible.</string>
+    <string name="delete">Supprimer</string>
+    <string name="confirm">Confirmer</string>
+    <string name="error_saving">Erreur lors de l\'enregistrement: %1$s</string>
+    <string name="error_deleting">Erreur lors de la suppression: %1$s</string>
+
+    <!-- PlantList Screen -->
+    <string name="plants_in_plot">Plantes dans %1$s</string>
+    <string name="plants_in_plot_generic">Plantes dans la parcelle</string>
+    <string name="search_plants">Rechercher des plantes</string>
+    <string name="no_plants_found">Aucune plante trouvée dans cette parcelle</string>
+    <string name="back_to_plot">Retour à la parcelle</string>
+    <string name="remove_plant">Supprimer</string>
+    <string name="more_info">Plus d\'infos</string>
+    <string name="plant_deleted_successfully">Plante supprimée avec succès</string>
+    <string name="confirm_delete_plant">Êtes-vous sûr de vouloir supprimer %1$s ?</string>
+
+    <!-- Map Screen -->
+    <string name="search_city">Rechercher une ville</string>
+    <string name="no_location_found">Ville non valide</string>
+    <string name="coordinates">Coordonnées</string>
+    <string name="plants">Plantes: </string>
+    <string name="culture_condition">Conditions de culture: </string>
+    <string name="plot_of">Parcelle de: </string>
+    <string name="Go_to_login">Se connecter</string>
+    <string name="eco_plant_map">Carte d\'EcoPlant</string>
+    <string name="eco_plant_feature_for_logged">Cette fonctionnalité n\'est disponible que pour les utilisateurs connectés.</string>
+    <string name="serviceValues">Valeur de service:</string>
+    <string name="reliability">Valeur de confiance: </string>
+
+    <!-- Plant advice -->
+    <string name="advice_to_improve_scores">Advice to improve scores</string>
+
+    <string name="no_value">Pas de valeur</string>
 </resources>

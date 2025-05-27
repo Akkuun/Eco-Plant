@@ -1,15 +1,17 @@
 package com.akkuunamatata.eco_plant.pages.mapsScreens
 
-import android.os.Handler
-import android.os.Looper
+import NotLoggedInScreen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -20,7 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -30,8 +34,10 @@ import androidx.navigation.NavHostController
 import androidx.preference.PreferenceManager
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
-import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
+import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -39,61 +45,57 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.ui.res.stringResource
+import com.akkuunamatata.eco_plant.database.plants.maps.PlotRepository
+import com.akkuunamatata.eco_plant.utils.getActualGeoPosition
+import com.akkuunamatata.eco_plant.utils.searchLocationWithNominatim
+import com.google.firebase.auth.FirebaseAuth
+
+
+@Composable
+fun MapScreen(
+    navController: NavHostController,
+    // get if the user is logged in
+    isUserLoggedIn: Boolean = FirebaseAuth.getInstance().currentUser != null
+) {
+    // if not login, show the NotLoggedInScreen.kt
+    if (!isUserLoggedIn) {
+        NotLoggedInScreen(navController)
+        return
+    }
+    //else show the Map
+    Map(navController)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(navController: NavHostController) {
+fun Map(navController: NavHostController) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
-    // Exemple data
-    val exampleData = listOf(
-        ParcelleData(
-            lat = 43.764014,
-            long = 3.869409,
-            idAuthor = "user123",
-            plants = listOf(
-                PlantSpecies(
-                    name = "Lavande",
-                    services = floatArrayOf(0.9f, 0.8f, 0.7f),
-                    reliabilities = floatArrayOf(0.95f, 0.9f, 0.85f),
-                    culturalConditions = arrayOf(
-                        "Soleil",
-                        "Sol bien drainé",
-                        "Résistant à la sécheresse"
-                    )
-                ),
-                PlantSpecies(
-                    name = "Thym",
-                    services = floatArrayOf(0.85f, 0.75f, 0.65f),
-                    reliabilities = floatArrayOf(0.9f, 0.88f, 0.85f),
-                    culturalConditions = arrayOf(
-                        "Soleil",
-                        "Sol bien drainé",
-                        "Résistant à la sécheresse"
-                    )
-                )
-            )
-        ),
-        ParcelleData(
-            lat = 43.763200,
-            long = 3.871500,
-            idAuthor = "user456",
-            plants = listOf(
-                PlantSpecies(
-                    name = "Romarin",
-                    services = floatArrayOf(0.8f, 0.7f, 0.6f),
-                    reliabilities = floatArrayOf(0.9f, 0.85f, 0.8f),
-                    culturalConditions = arrayOf(
-                        "Soleil",
-                        "Sol bien drainé",
-                        "Résistant à la sécheresse"
-                    )
-                )
-            )
-        )
-    )
+    val repository = remember { PlotRepository.getInstance() }
+    var parcelles by remember { mutableStateOf<List<ParcelleData>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+// Utiliser collectAsState pour observer le StateFlow
+    val parcellesFlow = remember { repository.parcelles }.collectAsState()
+
+// Effet pour charger les données au démarrage
+    LaunchedEffect(Unit) {
+        isLoading = true
+        repository.getAllParcelles()
+        isLoading = false
+    }
+
+// Mettre à jour parcelles quand parcellesFlow change
+    LaunchedEffect(parcellesFlow.value) {
+        parcelles = parcellesFlow.value
+    }
+
 
     // Selected marker state
     var selectedParcelleData by remember { mutableStateOf<ParcelleData?>(null) }
@@ -105,23 +107,32 @@ fun MapScreen(navController: NavHostController) {
     // Search query state
     var searchQuery by remember { mutableStateOf("") }
 
-    // Configurer osmdroid
+    // Search error state
+    var isSearchError by remember { mutableStateOf(false) }
+
+    // Loading state
+    var isSearching by remember { mutableStateOf(false) }
+
+    // Configure OSMDroid
     DisposableEffect(Unit) {
-        Configuration.getInstance()
-            .load(context, PreferenceManager.getDefaultSharedPreferences(context))
+        Configuration.getInstance().apply {
+            load(context, PreferenceManager.getDefaultSharedPreferences(context))
+            userAgentValue = "EcoPlant/1.0 (Android)" // User agent for Nominatim
+        }
         onDispose { }
     }
 
-    // Créer et configurer la carte
+    // Create and configure the map
     val mapView = remember {
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
+            setBuiltInZoomControls(false) // Désactive les boutons +/-
             controller.setZoom(15.0)
         }
     }
 
-    // Gérer le cycle de vie
+    // Manage lifecycle
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -137,57 +148,71 @@ fun MapScreen(navController: NavHostController) {
         }
     }
 
+    // Geocoding function using Nominatim directly
+    val geocodeLocation = { query: String ->
+        coroutineScope.launch {
+            isSearching = true
+            isSearchError = false // Réinitialiser l'état d'erreur
+            focusManager.clearFocus() // Ferme le clavier
+
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    searchLocationWithNominatim(query)
+                }
+
+                if (result != null) {
+                    // Move map to found location
+                    mapView.controller.animateTo(GeoPoint(result.first, result.second))
+                    mapView.controller.setZoom(12.0) // Zoom level appropriate for cities
+                } else {
+                    isSearchError =
+                        true // Mettre l'état d'erreur à true au lieu d'afficher un message
+                }
+            } catch (e: Exception) {
+                isSearchError = true // Mettre l'état d'erreur à true en cas d'exception
+            } finally {
+                isSearching = false
+            }
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Map view
         AndroidView(
             factory = { mapView },
             modifier = Modifier.fillMaxSize()
         ) { map ->
-            // Position de départ par défaut (Montpellier)
-            val startPoint = GeoPoint(43.764014, 3.869409)
+            // Default starting position -> actual user location
+            val actualLocation = getActualGeoPosition(context);
+            // Center initially on default position
+            map.controller.setCenter(actualLocation)
 
-            // Centrer initialement la carte sur la position par défaut
-            map.controller.setCenter(startPoint)
-
-            // Ajouter un overlay de localisation
+            // Add location overlay without automatic recentering
             val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map).apply {
                 enableMyLocation()
             }
-            map.overlays.add(locationOverlay)
 
-            // Utiliser le Handler du thread principal pour l'animation
-            locationOverlay.runOnFirstFix {
-                Handler(Looper.getMainLooper()).post {
-                    map.controller.animateTo(locationOverlay.myLocation)
-                }
-            }
-
-            // Clear existing markers (to prevent duplicates on recomposition)
-            map.overlays.removeAll { it is Marker }
+            // Clear existing overlays to prevent duplicates
+            map.overlays.clear()
 
             // Add location overlay
             map.overlays.add(locationOverlay)
 
-            // Pour chaque ParcelleData, ajouter un marqueur à la carte
-            exampleData.forEach { parcelle ->
-                val marker = Marker(map)
-                marker.position = GeoPoint(parcelle.lat, parcelle.long)
-                marker.title = "Parcelle de ${parcelle.idAuthor}"
-                marker.snippet = parcelle.plants.joinToString(", ") { it.name }
-                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
 
-                // Custom marker icon (use a Material Design marker)
-                ContextCompat.getDrawable(context, R.drawable.ic_map_filled)?.let {
-                    marker.icon = it
+            parcelles.forEach { parcelle ->
+                // Create marker for each parcelle
+                val marker = Marker(map).apply {
+                    position = GeoPoint(parcelle.lat, parcelle.long)
+                    title = parcelle.idAuthor
+                    icon = ContextCompat.getDrawable(context, R.drawable.ic_map_filled)
+                    setOnMarkerClickListener { _, _ ->
+                        selectedParcelleData = parcelle // Set selected parcelle data
+                        showBottomSheet = false // Close bottom sheet if open
+                        true // Return true to indicate the click was handled
+                    }
                 }
-
-                // Handle marker click
-                marker.setOnMarkerClickListener { clickedMarker, _ ->
-                    selectedParcelleData = parcelle
-                    true
-                }
-
                 map.overlays.add(marker)
+
             }
         }
 
@@ -198,29 +223,126 @@ fun MapScreen(navController: NavHostController) {
                 .padding(16.dp)
                 .align(Alignment.TopCenter)
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+            // Barre de recherche avec bord rouge lorsqu'il y a une erreur
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp))
+                    .height(56.dp) // Hauteur fixe pour éviter les espaces
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        ambientColor = if (isSearchError) MaterialTheme.colorScheme.error else Color.Black.copy(
+                            alpha = 0.2f
+                        ),
+                        spotColor = if (isSearchError) MaterialTheme.colorScheme.error else Color.Black.copy(
+                            alpha = 0.2f
+                        )
+                    )
                     .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.tertiary),
-                placeholder = { Text("Rechercher une plante ou un lieu") },
-                leadingIcon = {
+                    .then(
+                        if (isSearchError) {
+                            Modifier.border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.error,
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                        } else {
+                            Modifier
+                        }
+                    ),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colorScheme.tertiary,
-                    unfocusedBorderColor = Color.Transparent
-                ),
-                singleLine = true,
-                shape = RoundedCornerShape(24.dp)
-            )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    BasicTextField(
+                        value = searchQuery,
+                        onValueChange = {
+                            searchQuery = it
+                            // Réinitialiser l'erreur si l'utilisateur modifie la requête
+                            if (isSearchError) isSearchError = false
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.copy(
+                            color = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                        ),
+                        decorationBox = { innerTextField ->
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        stringResource(R.string.search_city),
+                                        color = if (isSearchError)
+                                            MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                                        else
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(
+                            onSearch = {
+                                if (searchQuery.isNotEmpty()) {
+                                    geocodeLocation(searchQuery)
+                                }
+                                focusManager.clearFocus() // Ferme le clavier
+                            }
+                        )
+                    )
+
+                    if (isSearching) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else if (searchQuery.isNotEmpty()) {
+                        Row {
+                            // Search icon button
+                            IconButton(onClick = {
+                                if (searchQuery.isNotEmpty()) {
+                                    geocodeLocation(searchQuery)
+                                }
+                                focusManager.clearFocus() // Ferme le clavier
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Rechercher",
+                                    tint = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            // Clear icon button
+                            IconButton(onClick = {
+                                searchQuery = ""
+                                isSearchError =
+                                    false // Réinitialiser l'erreur en effaçant la recherche
+                                focusManager.clearFocus() // Ferme également le clavier lors de l'effacement
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Effacer",
+                                    tint = if (isSearchError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // FABs at bottom-right
@@ -242,7 +364,7 @@ fun MapScreen(navController: NavHostController) {
                 )
             }
 
-            // My location FAB
+            // My location FAB - Manual centering on user's location
             FloatingActionButton(
                 onClick = {
                     val locationOverlay = mapView.overlays
@@ -253,8 +375,8 @@ fun MapScreen(navController: NavHostController) {
                         mapView.controller.animateTo(location)
                     }
                 },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             ) {
                 Icon(
                     imageVector = Icons.Default.LocationOn,
@@ -292,3 +414,7 @@ fun MapScreen(navController: NavHostController) {
         }
     }
 }
+
+
+
+

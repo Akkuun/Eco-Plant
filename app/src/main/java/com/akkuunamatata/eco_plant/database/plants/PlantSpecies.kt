@@ -18,8 +18,8 @@ fun getPlantServiceByString(service: String): PlantService {
 
 class PlantSpecies {
     var name: String = ""
-    var services: FloatArray = FloatArray(3)
-    var reliabilities: FloatArray = FloatArray(3)
+    var services: FloatArray = FloatArray(3) { -1f }
+    var reliabilities: FloatArray = FloatArray(3) { -1f }
     var culturalConditions: Array<String> = arrayOf("", "", "")
 
     constructor(
@@ -38,8 +38,8 @@ class PlantSpecies {
         name: String,
     ) {
         this.name = name
-        this.services = FloatArray(3)
-        this.reliabilities = FloatArray(3)
+        this.services = FloatArray(3) { -1f }
+        this.reliabilities = FloatArray(3) { -1f }
         this.culturalConditions = arrayOf("", "", "")
     }
 
@@ -120,10 +120,10 @@ class PlantSpecies {
     }
 }
 
-class ParcelleData(
+data class ParcelleData(
     val lat: Double,
     val long: Double,
-    val idAuthor: String,
+    var idAuthor: String,
     val plants: List<PlantSpecies>
 ) {
     override fun equals(other: Any?): Boolean {

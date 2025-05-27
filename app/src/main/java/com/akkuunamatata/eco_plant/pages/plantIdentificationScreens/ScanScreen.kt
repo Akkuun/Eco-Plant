@@ -4,15 +4,11 @@ import android.Manifest
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
-import android.location.Geocoder
-import android.location.Location
 import android.os.Environment
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresPermission
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,20 +30,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import java.util.Locale
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.akkuunamatata.eco_plant.components.LocationBar
+import com.akkuunamatata.eco_plant.utils.getLocationAndUpdateText
 import java.io.File
 
 @Composable
@@ -179,76 +172,14 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // GPS Position row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.tertiary,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                // Position icon
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.15f)
-                        .aspectRatio(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_map_filled),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.fillMaxSize(0.6f)
-                            .graphicsLayer {
-                                scaleX = 1.5f
-                                scaleY = 1.5f
-                            }
-                    )
-                }
-
-                // Position text
-                Text(
-                    text = locationText,
-                    color = MaterialTheme.colorScheme.onTertiary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
-                )
-
-                // Refresh button
-                Button(
-                    onClick = {
-                        if (hasLocationPermission) {
-                            getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
-                                locationText = location
-                                latitude = lat
-                                longitude = lon
-                                android.util.Log.d("ScanScreen", "Location updated: $locationText ($lat, $lon)")
-                            }
-                        } else {
-                            android.util.Log.d("ScanScreen", "Location permission not granted")
-                            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                        }
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    modifier = Modifier
-                        .fillMaxWidth(0.15f)
-                        .aspectRatio(1f)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_refresh_unfilled),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.fillMaxSize(0.6f)
-                    )
-                }
-            }
+            LocationBar(
+                onLocationUpdated = { location, lat, lon ->
+                    locationText = location
+                    latitude = lat
+                    longitude = lon
+                },
+                modifier = Modifier.padding(16.dp)
+            )
 
             // Centered elements
             Box(
@@ -352,27 +283,4 @@ fun androidx.navigation.NavHostController.navigateToOrganChoice(
     imageUri: Uri,
 ) {
     this.navigate("organ_choice?imageUri=${imageUri}")
-}
-
-// Function to get the location and update the text
-@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-fun getLocationAndUpdateText(
-    fusedLocationClient: FusedLocationProviderClient,
-    context: Context,
-    onLocationUpdated: (String, Double?, Double?) -> Unit
-) {
-    fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-        if (location != null) {
-            // Convert the latitude and longitude into a city name
-            val geocoder = Geocoder(context, Locale.getDefault())
-            val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-            if (address?.isNotEmpty() == true) {
-                onLocationUpdated(address[0].locality ?: "Unknown City", location.latitude, location.longitude)
-            } else {
-                onLocationUpdated("Unknown Location", location.latitude, location.longitude)
-            }
-        } else {
-            onLocationUpdated("Location not available", null, null)
-        }
-    }
 }

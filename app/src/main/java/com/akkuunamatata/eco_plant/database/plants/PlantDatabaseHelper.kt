@@ -34,8 +34,8 @@ class PlantDatabaseHelper private constructor(inputStream: InputStream) {
                         existing.reliabilities[serviceIndex] = values[3].toFloat()
                         existing.culturalConditions[serviceIndex] = values[4]
                     } else {
-                        val services = FloatArray(3)
-                        val reliabilities = FloatArray(3)
+                        val services = FloatArray(3) { -1f }
+                        val reliabilities = FloatArray(3) { -1f }
                         val culturalConditions = arrayOf("", "", "")
                         services[serviceIndex] = values[2].toFloat()
                         reliabilities[serviceIndex] = values[3].toFloat()
@@ -46,6 +46,14 @@ class PlantDatabaseHelper private constructor(inputStream: InputStream) {
             }
         }
         return speciesList
+    }
+
+    fun getPlantSpeciesByScientificName(scientificName: String): PlantSpecies? {
+        return plantSpecies.find { it.name.equals(scientificName, ignoreCase = true) }
+    }
+
+    fun getAllPlants(): List<PlantSpecies> {
+        return plantSpecies.toList()
     }
 
     companion object {
