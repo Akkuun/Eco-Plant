@@ -1,7 +1,6 @@
 package com.akkuunamatata.eco_plant.pages.mapsScreens
 
 
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
+import com.akkuunamatata.eco_plant.components.ScoreBar
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
 
@@ -39,7 +39,7 @@ fun MapFullPreviewCard(parcelle: ParcelleData) {
         )
 
         Text(
-           text = "${stringResource(R.string.latitude)}: ${parcelle.lat}",
+            text = "${stringResource(R.string.latitude)}: ${parcelle.lat}",
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -97,32 +97,60 @@ private fun PlantCard(plant: PlantSpecies) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = stringResource(R.string.serviceValues),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
-            plant.services.forEach { service ->
-                Text(
-                    text = "• $service",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+
+            // Affichage des services avec les barres de progression
+            Spacer(modifier = Modifier.height(4.dp))
+
+            ScoreBar(
+                label = stringResource(R.string.nitrogen_fixation),
+                value = plant.services[0]
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
+
+            ScoreBar(
+                label = stringResource(R.string.soil_structure),
+                value = plant.services[1]
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            ScoreBar(
+                label = stringResource(R.string.water_retention),
+                value = plant.services[2]
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(R.string.reliability),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
-            plant.services.forEach { service ->
-                Text(
-                    text = "• $service",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            // Affichage des valeurs de fiabilité avec les barres de progression
+            Spacer(modifier = Modifier.height(4.dp))
+
+            ScoreBar(
+                label = stringResource(R.string.reliability),
+                value = plant.reliabilities[0]
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            ScoreBar(
+                label = stringResource(R.string.reliability),
+                value = plant.reliabilities[1]
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            ScoreBar(
+                label = stringResource(R.string.reliability),
+                value = plant.reliabilities[2]
+            )
 
         }
     }
