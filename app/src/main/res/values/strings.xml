@@ -135,4 +135,7 @@
     <string name="Go_to_login">Go to login</string>
     <string name="eco_plant_map">EcoPlant Maps</string>
     <string name="eco_plant_feature_for_logged"> This feature is only allowed for logged users.</string>
+
+    <!-- Plant advice -->
+    <string name="advice_to_improve_scores">Advice to improve scores</string>
 </resources>

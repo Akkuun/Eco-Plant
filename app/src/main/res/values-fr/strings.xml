@@ -131,6 +131,8 @@
     <string name="eco_plant_map">Carte d\'EcoPlant</string>
     <string name="eco_plant_feature_for_logged">Cette fonctionnalité n\'est disponible que pour les utilisateurs connectés.</string>
 
+    <!-- Plant advice -->
+    <string name="advice_to_improve_scores">Advice to improve scores</string>
 
     <string name="no_value">Pas de valeur</string>
 </resources>

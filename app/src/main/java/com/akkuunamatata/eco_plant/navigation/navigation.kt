@@ -18,6 +18,7 @@ import com.akkuunamatata.eco_plant.pages.plotScreens.NewPlotScreen
 import com.akkuunamatata.eco_plant.pages.plotScreens.PlantListScreen
 import com.akkuunamatata.eco_plant.pages.plotScreens.PlotDetailScreen
 import com.akkuunamatata.eco_plant.pages.plotScreens.PlotList
+import com.akkuunamatata.eco_plant.pages.plotScreens.PlantAdviceScreen
 import com.akkuunamatata.eco_plant.pages.plotScreens.PlotSettingsScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.EmailVerificationScreen
 import com.akkuunamatata.eco_plant.pages.userScreens.SettingsScreen
@@ -40,6 +41,7 @@ object Routes {
     const val PLOT_DETAIL = "plot_detail"
     const val PLOT_SETTINGS = "plot_settings"
     const val PLANTS_IN_PLOT = "plants_in_plot"
+    const val PLANT_ADVICE = "plant_advice"
 }
 
 /**
@@ -156,6 +158,16 @@ fun AppNavHost(
         ) { backStackEntry ->
             val plotId = backStackEntry.arguments?.getString("plotId") ?: ""
             PlantListScreen(plotId = plotId, navController = navController)
+        }
+
+        composable(
+            "plant_advice/{plotId}",
+            arguments = listOf(
+                navArgument("plotId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val plotId = backStackEntry.arguments?.getString("plotId") ?: ""
+            PlantAdviceScreen(plotId = plotId, navController = navController)
         }
     }
 }
