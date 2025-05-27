@@ -161,7 +161,7 @@ fun AppNavHost(
         }
 
         composable(
-            "plant_advice/{plotId}",
+            "${Routes.PLANT_ADVICE}/{plotId}",
             arguments = listOf(
                 navArgument("plotId") { type = NavType.StringType }
             )

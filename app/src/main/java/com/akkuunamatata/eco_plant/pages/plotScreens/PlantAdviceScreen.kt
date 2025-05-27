@@ -1,5 +1,6 @@
 package com.akkuunamatata.eco_plant.pages.plotScreens
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,7 @@ import com.akkuunamatata.eco_plant.database.plants.PlantSpecies
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.core.net.toUri
 
 enum class SortCriteria {
     NITROGEN_FIXATION,
@@ -38,7 +40,10 @@ fun PlantAdviceScreen(
     var allPlants by remember { mutableStateOf<List<PlantSpecies>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var sortCriteria by remember { mutableStateOf(SortCriteria.NITROGEN_FIXATION) }
+    // Remplacer le critère unique par un ensemble de critères
+    var selectedCriteria by remember {
+        mutableStateOf(setOf(SortCriteria.NITROGEN_FIXATION))
+    }
 
     LaunchedEffect(Unit) {
         try {
@@ -53,11 +58,20 @@ fun PlantAdviceScreen(
         }
     }
 
-    val sortedPlants = remember(sortCriteria, allPlants) {
-        when (sortCriteria) {
-            SortCriteria.NITROGEN_FIXATION -> allPlants.sortedByDescending { it.services[0] }
-            SortCriteria.SOIL_STRUCTURE -> allPlants.sortedByDescending { it.services[1] }
-            SortCriteria.WATER_RETENTION -> allPlants.sortedByDescending { it.services[2] }
+    val sortedPlants = remember(selectedCriteria, allPlants) {
+        allPlants.sortedByDescending { plant ->
+            // Calculer un score combiné basé sur les critères sélectionnés
+            var combinedScore = 0f
+            if (selectedCriteria.contains(SortCriteria.NITROGEN_FIXATION)) {
+                combinedScore += plant.services[0]
+            }
+            if (selectedCriteria.contains(SortCriteria.SOIL_STRUCTURE)) {
+                combinedScore += plant.services[1]
+            }
+            if (selectedCriteria.contains(SortCriteria.WATER_RETENTION)) {
+                combinedScore += plant.services[2]
+            }
+            combinedScore
         }
     }
 
@@ -82,30 +96,47 @@ fun PlantAdviceScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
         ) {
-            // Options de tri
-            Row(
+            // Filtres avec sélection multiple et styles personnalisés
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp)
             ) {
-                FilterChip(
-                    selected = sortCriteria == SortCriteria.NITROGEN_FIXATION,
-                    onClick = { sortCriteria = SortCriteria.NITROGEN_FIXATION },
-                    label = { Text(stringResource(id = R.string.nitrogen_fixation)) }
+                // Couleurs personnalisées pour les FilterChip
+                val filterChipColors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.tertiary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onTertiary,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 FilterChip(
-                    selected = sortCriteria == SortCriteria.SOIL_STRUCTURE,
-                    onClick = { sortCriteria = SortCriteria.SOIL_STRUCTURE },
-                    label = { Text(stringResource(id = R.string.soil_structure)) }
+                    selected = selectedCriteria.contains(SortCriteria.NITROGEN_FIXATION),
+                    onClick = {
+                        selectedCriteria = updateCriteria(selectedCriteria, SortCriteria.NITROGEN_FIXATION)
+                    },
+                    label = { Text(stringResource(id = R.string.nitrogen_fixation)) },
+                    colors = filterChipColors
                 )
 
                 FilterChip(
-                    selected = sortCriteria == SortCriteria.WATER_RETENTION,
-                    onClick = { sortCriteria = SortCriteria.WATER_RETENTION },
-                    label = { Text(stringResource(id = R.string.water_retention)) }
+                    selected = selectedCriteria.contains(SortCriteria.SOIL_STRUCTURE),
+                    onClick = {
+                        selectedCriteria = updateCriteria(selectedCriteria, SortCriteria.SOIL_STRUCTURE)
+                    },
+                    label = { Text(stringResource(id = R.string.soil_structure)) },
+                    colors = filterChipColors
+                )
+
+                FilterChip(
+                    selected = selectedCriteria.contains(SortCriteria.WATER_RETENTION),
+                    onClick = {
+                        selectedCriteria = updateCriteria(selectedCriteria, SortCriteria.WATER_RETENTION)
+                    },
+                    label = { Text(stringResource(id = R.string.water_retention)) },
+                    colors = filterChipColors
                 )
             }
 
@@ -132,7 +163,13 @@ fun PlantAdviceScreen(
                     else -> {
                         LazyColumn {
                             items(sortedPlants) { plant ->
-                                PlantAdviceCard(plant = plant)
+                                PlantAdviceCard(
+                                    plant = plant,
+                                    onMoreInfo = {
+                                        val url = "https://www.tela-botanica.org/?s=${plant.name.replace(" ", "+")}"
+                                        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                                        context.startActivity(intent)
+                                    })
                             }
                         }
                     }
@@ -142,8 +179,25 @@ fun PlantAdviceScreen(
     }
 }
 
+private fun updateCriteria(currentCriteria: Set<SortCriteria>, criteria: SortCriteria): Set<SortCriteria> {
+    val newCriteria = currentCriteria.toMutableSet()
+
+    // Si le critère est déjà sélectionné, le retirer (sauf si c'est le seul)
+    if (currentCriteria.contains(criteria)) {
+        // Éviter d'avoir un ensemble vide
+        if (currentCriteria.size > 1) {
+            newCriteria.remove(criteria)
+        }
+    } else {
+        // Sinon, ajouter ce critère
+        newCriteria.add(criteria)
+    }
+
+    return newCriteria
+}
+
 @Composable
-fun PlantAdviceCard(plant: PlantSpecies) {
+fun PlantAdviceCard(plant: PlantSpecies, onMoreInfo: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -178,7 +232,21 @@ fun PlantAdviceCard(plant: PlantSpecies) {
                 modifier = Modifier.padding(vertical = 4.dp)
             )
 
-            // La section des conditions culturelles a été supprimée
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = onMoreInfo,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary
+                ),
+            ) {
+                Text(
+                    text = stringResource(id = R.string.more_info),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
         }
     }
 }

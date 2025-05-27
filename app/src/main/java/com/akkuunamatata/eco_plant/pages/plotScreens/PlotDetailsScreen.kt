@@ -237,7 +237,9 @@ fun PlotDetailScreen(
                 }
 
                 Button(
-                    onClick = { /* Ajouter une plante */ },
+                    onClick = {
+                        navController.navigate(Routes.SCAN)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 8.dp),
