@@ -43,7 +43,7 @@ fun ScoreBarDetailed(
         } else {
             // Pour la barre avec valeur et informations détaillées
             val displayValue = value.coerceIn(0f, 1f)
-            val formattedValue = String.format("%.1f", displayValue)
+            val formattedValue = String.format("%.3f", displayValue)
             val formattedReliability = String.format("%.0f%%", reliability)
 
             // Texte détaillé au format "score (reliability%, condition)"
