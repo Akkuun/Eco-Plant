@@ -205,14 +205,21 @@ fun Map(navController: NavHostController) {
                     position = GeoPoint(parcelle.lat, parcelle.long)
                     title = parcelle.idAuthor
                     icon = ContextCompat.getDrawable(context, R.drawable.ic_map_filled)
-                    setOnMarkerClickListener { _, _ ->
+
+                    // Désactiver le centrage automatique par défaut
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    setPanToView(false)  // On garde cette ligne pour empêcher le comportement par défaut
+
+                    setOnMarkerClickListener { marker, _ ->
+                        // Centrer manuellement la carte sur le marqueur
+                        map.controller.animateTo(marker.position)
+
                         selectedParcelleData = parcelle // Set selected parcelle data
                         showBottomSheet = false // Close bottom sheet if open
                         true // Return true to indicate the click was handled
                     }
                 }
                 map.overlays.add(marker)
-
             }
         }
 
