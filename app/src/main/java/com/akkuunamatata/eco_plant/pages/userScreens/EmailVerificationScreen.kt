@@ -106,9 +106,14 @@ private fun EmailVerificationContent(
     // État pour le cooldown du bouton de renvoi d'email
     val cooldownSeconds = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(30) }
     val isCooldownActive = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(true) }
+    // Compteur pour déclencher un nouveau cooldown
+    val resetTrigger = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(0) }
 
     // Effet pour gérer le cooldown
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(resetTrigger.value) {
+        cooldownSeconds.value = 30
+        isCooldownActive.value = true
+
         while (cooldownSeconds.value > 0) {
             delay(1000)
             cooldownSeconds.value -= 1
@@ -139,9 +144,8 @@ private fun EmailVerificationContent(
         Button(
             onClick = {
                 resendVerificationEmail(auth, context)
-                // Réinitialiser le cooldown après clic
-                cooldownSeconds.value = 30
-                isCooldownActive.value = true
+                // Incrémenter pour relancer le LaunchedEffect
+                resetTrigger.value += 1
             },
             modifier = Modifier.padding(8.dp),
             enabled = !isCooldownActive.value
