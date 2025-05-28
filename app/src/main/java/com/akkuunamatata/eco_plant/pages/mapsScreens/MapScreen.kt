@@ -151,17 +151,34 @@ fun Map(navController: NavHostController) {
         delay(300)
 
         if (!initialCenteringDone) {
-            // Obtenir la position actuelle de l'utilisateur
-            val userLocation = getActualGeoPosition(context)
+            try {
+                // Obtenir la position actuelle de l'utilisateur
+                val userLocation = getActualGeoPosition(context)
 
-            // Centrer la carte sur cette position
-            mapView.controller.setCenter(userLocation)
+                if (userLocation != null) {
+                    // Centrer la carte sur cette position
+                    mapView.controller.setCenter(userLocation)
 
-            // Stocker cette position comme position initiale
-            currentMapPosition = userLocation as GeoPoint
+                    // Stocker cette position comme position initiale
+                    currentMapPosition = userLocation
 
-            // Marquer que le centrage initial a été effectué
-            initialCenteringDone = true
+                    // Marquer que le centrage initial a été effectué
+                    initialCenteringDone = true
+                } else {
+                    // Position par défaut (centre de la France) si la géolocalisation échoue
+                    val defaultPosition = GeoPoint(46.603354, 1.888334)
+                    mapView.controller.setCenter(defaultPosition)
+                    currentMapPosition = defaultPosition
+                    initialCenteringDone = true
+                }
+            } catch (e: Exception) {
+                // En cas d'erreur, utiliser une position par défaut
+                Log.e("MapScreen", "Erreur de géolocalisation: ${e.message}")
+                val defaultPosition = GeoPoint(46.603354, 1.888334)
+                mapView.controller.setCenter(defaultPosition)
+                currentMapPosition = defaultPosition
+                initialCenteringDone = true
+            }
         }
     }
 
