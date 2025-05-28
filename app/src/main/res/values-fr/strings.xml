@@ -140,4 +140,6 @@
 
     <string name="no_value">Pas de valeur</string>
     <string name="latitude">Latitude</string>
+    <string name="users_plot">Vos parcelles</string>
+    <string name="ident_plants">Identification de plantes</string>
 </resources>

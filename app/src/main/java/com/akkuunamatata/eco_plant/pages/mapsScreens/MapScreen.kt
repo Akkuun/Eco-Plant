@@ -1,4 +1,3 @@
-import NotLoggedInScreen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -24,7 +23,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -64,9 +62,9 @@ fun MapScreen(
     // get if the user is logged in
     isUserLoggedIn: Boolean = FirebaseAuth.getInstance().currentUser != null
 ) {
-    // if not login, show the NotLoggedInScreen.kt
+    // if not login, show the ScanNotLoggedInScreen.kt
     if (!isUserLoggedIn) {
-        NotLoggedInScreen(navController)
+        MapNotLoggedInScreen(navController)
         return
     }
     //else show the Map
@@ -77,7 +75,7 @@ fun MapScreen(
 @Composable
 fun Map(navController: NavHostController) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
 

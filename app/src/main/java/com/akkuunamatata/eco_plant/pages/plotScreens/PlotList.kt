@@ -1,5 +1,6 @@
 package com.akkuunamatata.eco_plant.pages.plotScreens
 
+import PlotNotLoggedInScreen
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,9 +27,24 @@ import java.util.*
 import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.components.SearchBar
 
+@Composable
+fun PlotList(
+    navController: NavHostController,
+    // get if the user is logged in
+    isUserLoggedIn: Boolean = FirebaseAuth.getInstance().currentUser != null
+) {
+    // if not login, show the ScanNotLoggedInScreen.kt
+    if (!isUserLoggedIn) {
+        PlotNotLoggedInScreen(navController)
+        return
+    }
+    //else show the Scan page
+    Plot(navController)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlotList(navController: NavHostController) {
+fun Plot(navController: NavHostController) {
     var searchText by remember { mutableStateOf("") }
     var plots by remember { mutableStateOf<List<Plot>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }

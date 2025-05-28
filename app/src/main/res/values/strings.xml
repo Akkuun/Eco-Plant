@@ -141,4 +141,6 @@
 
     <!-- Plant advice -->
     <string name="advice_to_improve_scores">Advice to improve scores</string>
+    <string name="users_plot">Your plots</string>
+    <string name="ident_plants">Plant identification</string>
 </resources>

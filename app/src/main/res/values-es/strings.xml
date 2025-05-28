@@ -140,4 +140,6 @@
 
     <!-- Plant advice -->
     <string name="advice_to_improve_scores">Consejos para mejorar las puntuaciones</string>
+    <string name="users_plot">Tus parcelas</string>
+    <string name="ident_plants">Identifica plantas</string>
 </resources>
