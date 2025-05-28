@@ -37,6 +37,7 @@ import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
@@ -88,6 +89,9 @@ fun Map(navController: NavHostController) {
     var currentMapPosition by remember { mutableStateOf<GeoPoint?>(null) }
     var currentMapZoom by remember { mutableStateOf(15.0) }
 
+    // Variable pour suivre si la carte a déjà été centrée sur l'utilisateur
+    var initialCenteringDone by remember { mutableStateOf(false) }
+
     // Variable pour verrouiller les changements de position
     var isRepositioningLocked by remember { mutableStateOf(false) }
 
@@ -138,6 +142,26 @@ fun Map(navController: NavHostController) {
             setMultiTouchControls(true)
             setBuiltInZoomControls(false) // Désactive les boutons +/-
             controller.setZoom(15.0)
+        }
+    }
+
+    // Centrer la carte sur la position de l'utilisateur au démarrage uniquement
+    LaunchedEffect(Unit) {
+        // Attendre que la vue soit complètement initialisée
+        delay(300)
+
+        if (!initialCenteringDone) {
+            // Obtenir la position actuelle de l'utilisateur
+            val userLocation = getActualGeoPosition(context)
+
+            // Centrer la carte sur cette position
+            mapView.controller.setCenter(userLocation)
+
+            // Stocker cette position comme position initiale
+            currentMapPosition = userLocation as GeoPoint
+
+            // Marquer que le centrage initial a été effectué
+            initialCenteringDone = true
         }
     }
 
@@ -207,17 +231,9 @@ fun Map(navController: NavHostController) {
             update = { map ->
                 // Mettre à jour la carte uniquement si le verrouillage n'est pas actif
                 if (!isRepositioningLocked) {
-                    // Default starting position -> actual user location
-                    val actualLocation = getActualGeoPosition(context)
-
-                    // Center initially on default position only if pas de position sauvegardée
-                    if (currentMapPosition == null) {
-                        map.controller.setCenter(actualLocation)
-                    }
-
                     // Add location overlay without automatic recentering
                     val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map).apply {
-                        enableMyLocation()
+                        enableMyLocation() // Activer la localisation mais PAS le suivi
                     }
 
                     // Clear existing overlays to prevent duplicates
@@ -252,8 +268,8 @@ fun Map(navController: NavHostController) {
                         map.overlays.add(marker)
                     }
 
-                    // Restaurer la position si elle existe
-                    if (currentMapPosition != null) {
+                    // Restaurer la position si elle existe et que ce n'est pas le centrage initial
+                    if (currentMapPosition != null && initialCenteringDone) {
                         restoreMapState()
                     }
                 }
@@ -410,13 +426,9 @@ fun Map(navController: NavHostController) {
             // My location FAB - Manual centering on user's location
             FloatingActionButton(
                 onClick = {
-                    val locationOverlay = mapView.overlays
-                        .filterIsInstance<MyLocationNewOverlay>()
-                        .firstOrNull()
-
-                    locationOverlay?.myLocation?.let { location ->
-                        mapView.controller.animateTo(location)
-                    }
+                    // Centrer manuellement sur la position actuelle de l'utilisateur
+                    val userLocation = getActualGeoPosition(context)
+                    mapView.controller.animateTo(userLocation)
                 },
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
