@@ -73,12 +73,12 @@ fun ScoreBar(
                     )
                 }
 
-                // Texte superposé sur la barre
-                Text(
+                TextBorder(
                     text = formattedValue,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .align(androidx.compose.ui.Alignment.Center),
+                    textColor = MaterialTheme.colorScheme.onPrimary,
+                    borderColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(androidx.compose.ui.Alignment.Center),
                     textAlign = TextAlign.Center
                 )
             }
