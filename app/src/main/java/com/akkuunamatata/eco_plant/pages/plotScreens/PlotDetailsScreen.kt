@@ -135,7 +135,7 @@ fun PlotDetailScreen(
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "Parcelle : ${plot!!.name}",
+                    text = "${stringResource(R.string.plot)} : ${plot!!.name}",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary
                 )

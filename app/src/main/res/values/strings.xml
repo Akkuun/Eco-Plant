@@ -100,6 +100,7 @@
     <string name="no_notes">No notes</string>
     <string name="view_plants">See plants</string>
     <string name="add_plant">Add a plant</string>
+    <string name="plot">Plot</string>
 
     <!-- PlotSettings Screen -->
     <string name="plot_settings">Plot settings</string>

@@ -101,6 +101,7 @@
     <string name="add_plant">Añadir una planta</string>
 
     <!-- PlotSettings Screen -->
+    <string name="plot">Parcela</string>
     <string name="plot_settings">Ajustes de parcela</string>
     <string name="delete_plot">Eliminar esta parcela</string>
     <string name="confirm_deletion">Confirmar eliminación</string>
