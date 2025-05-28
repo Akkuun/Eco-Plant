@@ -45,21 +45,42 @@ fun ChangeLangageSettingsScreen(navController: NavHostController) {
         Text(text = stringResource(R.string.language), style = InterTypography.displayMedium)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            RadioButton(
-                selected = selectedLanguage == "fr",
-                onClick = { selectedLanguage = "fr" }
-            )
-            Text(text = "Français 🇫🇷", style = InterTypography.labelLarge)
+            Row (
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                RadioButton(
+                    selected = selectedLanguage == "fr",
+                    onClick = { selectedLanguage = "fr" }
+                )
+                Text(text = "Français 🇫🇷", style = InterTypography.labelLarge)
+            }
 
-            RadioButton(
-                selected = selectedLanguage == "en",
-                onClick = { selectedLanguage = "en" }
-            )
-            Text(text = "English 🇬🇧", style = InterTypography.labelLarge)
+            Row (
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                RadioButton(
+                    selected = selectedLanguage == "en",
+                    onClick = { selectedLanguage = "en" }
+                )
+                Text(text = "English 🇬🇧", style = InterTypography.labelLarge)
+            }
+
+            Row (
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                RadioButton(
+                    selected = selectedLanguage == "es",
+                    onClick = { selectedLanguage = "es" }
+                )
+                Text(text = "Español \uD83C\uDDEA\uD83C\uDDF8", style = InterTypography.labelLarge)
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
