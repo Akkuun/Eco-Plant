@@ -1,5 +1,6 @@
 package com.akkuunamatata.eco_plant.pages.plantIdentificationScreens
 
+import ScanNotLoggedInScreen
 import android.Manifest
 import android.content.ContentValues
 import android.content.Context
@@ -40,12 +41,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.navigation.NavHostController
 import com.akkuunamatata.eco_plant.components.LocationBar
 import com.akkuunamatata.eco_plant.utils.getLocationAndUpdateText
+import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 
 @Composable
-fun ScanScreen(navController: androidx.navigation.NavHostController) {
+fun ScanScreen(
+    navController: NavHostController,
+    // get if the user is logged in
+    isUserLoggedIn: Boolean = FirebaseAuth.getInstance().currentUser != null
+) {
+    // if not login, show the ScanNotLoggedInScreen.kt
+    if (!isUserLoggedIn) {
+        ScanNotLoggedInScreen(navController)
+        return
+    }
+    //else show the Scan page
+    Scan(navController)
+}
+
+@Composable
+fun Scan(navController: NavHostController) {
     var locationText by remember { mutableStateOf("Position") }
     var hasLocationPermission by remember { mutableStateOf(false) }
     val hasCameraPermission by remember { mutableStateOf(false) }
@@ -279,7 +297,7 @@ fun ScanScreen(navController: androidx.navigation.NavHostController) {
 }
 
 // Extension pour naviguer vers OrganChoice
-fun androidx.navigation.NavHostController.navigateToOrganChoice(
+fun NavHostController.navigateToOrganChoice(
     imageUri: Uri,
 ) {
     this.navigate("organ_choice?imageUri=${imageUri}")

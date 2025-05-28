@@ -71,6 +71,8 @@
     <string name="dark_mode">Mode sombre</string>
     <string name="light_mode">Mode clair</string>
     <string name="update_theme">Mettre à jour le thème</string>
+    <string name="please_verif">Veuillez vérifier votre e-mail pour activer votre compte.</string>
+    <string name="verif_mail">Un e-mail de vérification a été envoyé à</string>
 
     <!-- Identified plant -->
     <string name="search_plot">Rechercher une parcelle</string>
@@ -140,4 +142,6 @@
 
     <string name="no_value">Pas de valeur</string>
     <string name="latitude">Latitude</string>
+    <string name="users_plot">Vos parcelles</string>
+    <string name="ident_plants">Identification de plantes</string>
 </resources>

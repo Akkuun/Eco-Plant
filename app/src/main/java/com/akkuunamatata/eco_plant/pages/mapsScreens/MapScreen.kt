@@ -1,4 +1,3 @@
-import NotLoggedInScreen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -24,7 +23,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -64,9 +62,9 @@ fun MapScreen(
     // get if the user is logged in
     isUserLoggedIn: Boolean = FirebaseAuth.getInstance().currentUser != null
 ) {
-    // if not login, show the NotLoggedInScreen.kt
+    // if not login, show the ScanNotLoggedInScreen.kt
     if (!isUserLoggedIn) {
-        NotLoggedInScreen(navController)
+        MapNotLoggedInScreen(navController)
         return
     }
     //else show the Map
@@ -77,7 +75,7 @@ fun MapScreen(
 @Composable
 fun Map(navController: NavHostController) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
 
@@ -151,17 +149,34 @@ fun Map(navController: NavHostController) {
         delay(300)
 
         if (!initialCenteringDone) {
-            // Obtenir la position actuelle de l'utilisateur
-            val userLocation = getActualGeoPosition(context)
+            try {
+                // Obtenir la position actuelle de l'utilisateur
+                val userLocation = getActualGeoPosition(context)
 
-            // Centrer la carte sur cette position
-            mapView.controller.setCenter(userLocation)
+                if (userLocation != null) {
+                    // Centrer la carte sur cette position
+                    mapView.controller.setCenter(userLocation)
 
-            // Stocker cette position comme position initiale
-            currentMapPosition = userLocation as GeoPoint
+                    // Stocker cette position comme position initiale
+                    currentMapPosition = userLocation
 
-            // Marquer que le centrage initial a été effectué
-            initialCenteringDone = true
+                    // Marquer que le centrage initial a été effectué
+                    initialCenteringDone = true
+                } else {
+                    // Position par défaut (centre de la France) si la géolocalisation échoue
+                    val defaultPosition = GeoPoint(46.603354, 1.888334)
+                    mapView.controller.setCenter(defaultPosition)
+                    currentMapPosition = defaultPosition
+                    initialCenteringDone = true
+                }
+            } catch (e: Exception) {
+                // En cas d'erreur, utiliser une position par défaut
+                Log.e("MapScreen", "Erreur de géolocalisation: ${e.message}")
+                val defaultPosition = GeoPoint(46.603354, 1.888334)
+                mapView.controller.setCenter(defaultPosition)
+                currentMapPosition = defaultPosition
+                initialCenteringDone = true
+            }
         }
     }
 

@@ -33,7 +33,7 @@ import com.akkuunamatata.eco_plant.R
  * Style inspiré de Google
  */
 @Composable
-fun NotLoggedInScreen(navController: NavHostController) {
+fun MapNotLoggedInScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()

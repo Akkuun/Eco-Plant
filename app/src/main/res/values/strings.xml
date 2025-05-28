@@ -73,6 +73,8 @@
     <string name="dark_mode">Dark mode</string>
     <string name="light_mode">Light mode</string>
     <string name="update_theme">Update theme</string>
+    <string name="please_verif">Please verify your email to activate your account.</string>
+    <string name="verif_mail">A verification email has been sent to</string>
 
     <!-- Identified plant -->
     <string name="search_plot">Search a plot</string>
@@ -141,4 +143,6 @@
 
     <!-- Plant advice -->
     <string name="advice_to_improve_scores">Advice to improve scores</string>
+    <string name="users_plot">Your plots</string>
+    <string name="ident_plants">Plant identification</string>
 </resources>
