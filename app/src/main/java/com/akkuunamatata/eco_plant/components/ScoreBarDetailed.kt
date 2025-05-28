@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
@@ -43,7 +42,7 @@ fun ScoreBarDetailed(
         } else {
             // Pour la barre avec valeur et informations détaillées
             val displayValue = value.coerceIn(0f, 1f)
-            val formattedValue = String.format("%.1f", displayValue)
+            val formattedValue = String.format("%.2f", displayValue)
             val formattedReliability = String.format("%.0f%%", reliability)
 
             // Texte détaillé au format "score (reliability%, condition)"
@@ -82,18 +81,14 @@ fun ScoreBarDetailed(
                             )
                     )
 
-                    // Texte détaillé superposé sur la barre
-                    Text(
+                    // Texte détaillé superposé
+                    TextBorder(
                         text = detailedText,
                         style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .padding(start = 12.dp, end = 12.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Start,
-                        // Utilisation d'une couleur plus foncée pour assurer la visibilité
-                        color = MaterialTheme.colorScheme.onSurface
+                        textColor = MaterialTheme.colorScheme.onPrimary,
+                        borderColor = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.align(Alignment.Center),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
