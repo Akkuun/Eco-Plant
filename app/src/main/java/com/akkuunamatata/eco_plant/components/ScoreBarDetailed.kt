@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.akkuunamatata.eco_plant.R
@@ -88,7 +87,7 @@ fun ScoreBarDetailed(
                         style = MaterialTheme.typography.bodySmall,
                         textColor = MaterialTheme.colorScheme.onPrimary,
                         borderColor = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.align(androidx.compose.ui.Alignment.Center),
+                        modifier = Modifier.align(Alignment.Center),
                         textAlign = TextAlign.Center
                     )
                 }
