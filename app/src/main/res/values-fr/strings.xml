@@ -61,7 +61,7 @@
     <string name="update_username">Mettre à jour le nom d\'utilisateur</string>
     <string name="update_email">Mettre à jour l\'e-mail</string>
     <string name="update_language">Mettre à jour la langue</string>
-    <string name="are_you_sure_to_logout"> Êtes-vous sûr de vouloir vous déconnecter</string>
+    <string name="are_you_sure_to_logout">" Êtes-vous sûr de vouloir vous déconnecter"</string>
     <string name="are_you_sure_to_delete_account">Êtes-vous sûr de vouloir supprimer votre compte ?</string>
     <string name="im_sure">  Je suis sûr</string>
     <string name="cancel">Anuler</string>
@@ -123,6 +123,7 @@
     <!-- Map Screen -->
     <string name="search_city">Rechercher une ville</string>
     <string name="no_location_found">Ville non valide</string>
+    <string name="longitude">Longitude</string>
     <string name="coordinates">Coordonnées</string>
     <string name="plants">Plantes: </string>
     <string name="culture_condition">Conditions de culture: </string>
@@ -134,7 +135,8 @@
     <string name="reliability">Valeur de confiance: </string>
 
     <!-- Plant advice -->
-    <string name="advice_to_improve_scores">Advice to improve scores</string>
+    <string name="advice_to_improve_scores">Conseils pour améliorer les scores</string>
 
     <string name="no_value">Pas de valeur</string>
+    <string name="latitude">Latitude</string>
 </resources>
