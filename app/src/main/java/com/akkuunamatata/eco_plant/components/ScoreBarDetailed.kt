@@ -43,7 +43,7 @@ fun ScoreBarDetailed(
         } else {
             // Pour la barre avec valeur et informations détaillées
             val displayValue = value.coerceIn(0f, 1f)
-            val formattedValue = String.format("%.3f", displayValue)
+            val formattedValue = String.format("%.2f", displayValue)
             val formattedReliability = String.format("%.0f%%", reliability)
 
             // Texte détaillé au format "score (reliability%, condition)"
@@ -82,18 +82,14 @@ fun ScoreBarDetailed(
                             )
                     )
 
-                    // Texte détaillé superposé sur la barre
-                    Text(
+                    // Texte détaillé superposé
+                    TextBorder(
                         text = detailedText,
                         style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .padding(start = 12.dp, end = 12.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Start,
-                        // Utilisation d'une couleur plus foncée pour assurer la visibilité
-                        color = MaterialTheme.colorScheme.onSurface
+                        textColor = MaterialTheme.colorScheme.onPrimary,
+                        borderColor = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.align(androidx.compose.ui.Alignment.Center),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
