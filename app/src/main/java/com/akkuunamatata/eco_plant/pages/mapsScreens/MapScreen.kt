@@ -1,5 +1,8 @@
 import NotLoggedInScreen
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.border
@@ -34,7 +37,6 @@ import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
@@ -82,8 +84,12 @@ fun Map(navController: NavHostController) {
     var parcelles by remember { mutableStateOf<List<ParcelleData>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
-    // Ajouter cette variable d'état pour stocker la position de la carte
-    var lastMapCenter by remember { mutableStateOf<GeoPoint?>(null) }
+    // Stocker la position et le zoom actuels de la carte
+    var currentMapPosition by remember { mutableStateOf<GeoPoint?>(null) }
+    var currentMapZoom by remember { mutableStateOf(15.0) }
+
+    // Variable pour verrouiller les changements de position
+    var isRepositioningLocked by remember { mutableStateOf(false) }
 
     // Utiliser collectAsState pour observer le StateFlow
     val parcellesFlow = remember { repository.parcelles }.collectAsState()
@@ -99,7 +105,6 @@ fun Map(navController: NavHostController) {
     LaunchedEffect(parcellesFlow.value) {
         parcelles = parcellesFlow.value
     }
-
 
     // Selected marker state
     var selectedParcelleData by remember { mutableStateOf<ParcelleData?>(null) }
@@ -133,6 +138,21 @@ fun Map(navController: NavHostController) {
             setMultiTouchControls(true)
             setBuiltInZoomControls(false) // Désactive les boutons +/-
             controller.setZoom(15.0)
+        }
+    }
+
+    // Fonction pour sauvegarder la position actuelle de la carte
+    val saveCurrentMapState = {
+        currentMapPosition = mapView.mapCenter as GeoPoint
+        currentMapZoom = mapView.zoomLevelDouble
+    }
+
+    // Fonction pour restaurer la position sauvegardée
+    val restoreMapState = {
+        currentMapPosition?.let { position ->
+            // Appliquer directement sans animation pour éviter le clignotement
+            mapView.controller.setZoom(currentMapZoom)
+            mapView.controller.setCenter(position)
         }
     }
 
@@ -183,51 +203,62 @@ fun Map(navController: NavHostController) {
         // Map view
         AndroidView(
             factory = { mapView },
-            modifier = Modifier.fillMaxSize()
-        ) { map ->
-            // Default starting position -> actual user location
-            val actualLocation = getActualGeoPosition(context);
-            // Center initially on default position
-            map.controller.setCenter(actualLocation)
+            modifier = Modifier.fillMaxSize(),
+            update = { map ->
+                // Mettre à jour la carte uniquement si le verrouillage n'est pas actif
+                if (!isRepositioningLocked) {
+                    // Default starting position -> actual user location
+                    val actualLocation = getActualGeoPosition(context)
 
-            // Add location overlay without automatic recentering
-            val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map).apply {
-                enableMyLocation()
-            }
+                    // Center initially on default position only if pas de position sauvegardée
+                    if (currentMapPosition == null) {
+                        map.controller.setCenter(actualLocation)
+                    }
 
-            // Clear existing overlays to prevent duplicates
-            map.overlays.clear()
+                    // Add location overlay without automatic recentering
+                    val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map).apply {
+                        enableMyLocation()
+                    }
 
-            // Add location overlay
-            map.overlays.add(locationOverlay)
+                    // Clear existing overlays to prevent duplicates
+                    map.overlays.clear()
 
+                    // Add location overlay
+                    map.overlays.add(locationOverlay)
 
-            parcelles.forEach { parcelle ->
-                // Create marker for each parcelle
-                val marker = Marker(map).apply {
-                    position = GeoPoint(parcelle.lat, parcelle.long)
-                    title = parcelle.idAuthor
-                    icon = ContextCompat.getDrawable(context, R.drawable.ic_map_filled)
+                    parcelles.forEach { parcelle ->
+                        // Create marker for each parcelle
+                        val marker = Marker(map).apply {
+                            position = GeoPoint(parcelle.lat, parcelle.long)
+                            title = parcelle.idAuthor
+                            icon = ContextCompat.getDrawable(context, R.drawable.ic_map_filled)
 
-                    // Désactiver le centrage automatique par défaut
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    setPanToView(false)  // On garde cette ligne pour empêcher le comportement par défaut
+                            // Désactiver le centrage automatique par défaut
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            setPanToView(false)  // Empêcher le comportement par défaut
 
-                    setOnMarkerClickListener { marker, _ ->
-                        // Capturer la position actuelle avant de sélectionner le marqueur
-                        lastMapCenter = map.mapCenter as GeoPoint
+                            setOnMarkerClickListener { marker, _ ->
+                                // Sauvegarder l'état de la carte avant de centrer sur le marqueur
+                                saveCurrentMapState()
 
-                        // Centrer manuellement la carte sur le marqueur
-                        map.controller.animateTo(marker.position)
+                                // Centrer manuellement la carte sur le marqueur
+                                map.controller.animateTo(marker.position)
 
-                        selectedParcelleData = parcelle // Set selected parcelle data
-                        showBottomSheet = false // Close bottom sheet if open
-                        true // Return true to indicate the click was handled
+                                selectedParcelleData = parcelle // Set selected parcelle data
+                                showBottomSheet = false // Close bottom sheet if open
+                                true // Return true to indicate the click was handled
+                            }
+                        }
+                        map.overlays.add(marker)
+                    }
+
+                    // Restaurer la position si elle existe
+                    if (currentMapPosition != null) {
+                        restoreMapState()
                     }
                 }
-                map.overlays.add(marker)
             }
-        }
+        )
 
         // Search bar at top
         Box(
@@ -397,29 +428,34 @@ fun Map(navController: NavHostController) {
             }
         }
 
-        // Preview card for selected marker
+        // Preview card for selected marker with animations améliorées
         AnimatedVisibility(
             visible = selectedParcelleData != null && !showBottomSheet,
-            enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it }),
+            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(animationSpec = tween(150)),
+            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(animationSpec = tween(100)),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             selectedParcelleData?.let { parcelle ->
                 MapPreviewCard(
                     parcelle = parcelle,
                     onClose = {
-                        // Récupérer la position actuelle avant de fermer
-                        val currentPosition = mapView.mapCenter as GeoPoint
-                        val currentZoom = mapView.zoomLevelDouble
+                        // Verrouiller la position avant la fermeture
+                        isRepositioningLocked = true
+
+                        // Sauvegarde de l'état actuel
+                        saveCurrentMapState()
 
                         // Fermer la carte d'information
                         selectedParcelleData = null
 
-                        // Restaurer la position avec un petit délai
+                        // Restaurer immédiatement la position
+                        restoreMapState()
+
+                        // Déverrouiller après une courte période
                         coroutineScope.launch {
-                            delay(50) // Petit délai pour laisser l'UI se mettre à jour
-                            mapView.controller.setZoom(currentZoom)
-                            mapView.controller.setCenter(currentPosition)
+                            withContext(Dispatchers.Main) {
+                                isRepositioningLocked = false
+                            }
                         }
                     },
                     onExpandClick = { showBottomSheet = true }
@@ -431,15 +467,22 @@ fun Map(navController: NavHostController) {
         if (showBottomSheet && selectedParcelleData != null) {
             ModalBottomSheet(
                 onDismissRequest = {
-                    showBottomSheet = false
-                    // Appliquer la même logique ici pour éviter le recentrage
-                    val currentPosition = mapView.mapCenter as GeoPoint
-                    val currentZoom = mapView.zoomLevelDouble
+                    // Verrouiller la position avant la fermeture
+                    isRepositioningLocked = true
 
+                    // Sauvegarde de l'état actuel
+                    saveCurrentMapState()
+
+                    showBottomSheet = false
+
+                    // Restaurer immédiatement la position
+                    restoreMapState()
+
+                    // Déverrouiller après une courte période
                     coroutineScope.launch {
-                        delay(50)
-                        mapView.controller.setZoom(currentZoom)
-                        mapView.controller.setCenter(currentPosition)
+                        withContext(Dispatchers.Main) {
+                            isRepositioningLocked = false
+                        }
                     }
                 },
                 sheetState = sheetState
