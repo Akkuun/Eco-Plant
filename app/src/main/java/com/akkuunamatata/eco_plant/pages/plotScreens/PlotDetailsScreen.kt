@@ -73,25 +73,39 @@ fun PlotDetailScreen(
                         var totalService0 = 0f
                         var totalService1 = 0f
                         var totalService2 = 0f
-                        var count = 0
+                        var counts0 = 0
+                        var counts1 = 0
+                        var counts2 = 0
 
                         for (plantDoc in plantsSnapshot.documents) {
                             val serviceValues = plantDoc.get("serviceValues") as? List<*>
                             if (serviceValues != null && serviceValues.size >= 3) {
-                                totalService0 += (serviceValues[0] as? Number)?.toFloat() ?: 0f
-                                totalService1 += (serviceValues[1] as? Number)?.toFloat() ?: 0f
-                                totalService2 += (serviceValues[2] as? Number)?.toFloat() ?: 0f
-                                count++
+                                for (i in 0..2) {
+                                    val score = (serviceValues[i] as? Number)?.toFloat() ?: 0f
+                                    if (score < 0) continue
+                                    when (i) {
+                                        0 -> {
+                                            totalService0 += score
+                                            counts0++
+                                        }
+                                        1 -> {
+                                            totalService1 += score
+                                            counts1++
+                                        }
+                                        2 -> {
+                                            totalService2 += score
+                                            counts2++
+                                        }
+                                    }
+                                }
                             }
                         }
 
-                        if (count > 0) {
-                            avgScores = listOf(
-                                totalService0 / count,
-                                totalService1 / count,
-                                totalService2 / count
-                            )
-                        }
+                        avgScores = listOf(
+                            if (counts0 > 0) totalService0 / counts0 else -1f,
+                            if (counts1 > 0) totalService1 / counts1 else -1f,
+                            if (counts2 > 0) totalService2 / counts2 else -1f
+                        )
                     }
                 } else {
                     errorMessage = plotNotFoundMessage
