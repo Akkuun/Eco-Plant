@@ -61,7 +61,7 @@
     <string name="update_username">Mettre à jour le nom d\'utilisateur</string>
     <string name="update_email">Mettre à jour l\'e-mail</string>
     <string name="update_language">Mettre à jour la langue</string>
-    <string name="are_you_sure_to_logout"> Êtes-vous sûr de vouloir vous déconnecter</string>
+    <string name="are_you_sure_to_logout">" Êtes-vous sûr de vouloir vous déconnecter"</string>
     <string name="are_you_sure_to_delete_account">Êtes-vous sûr de vouloir supprimer votre compte ?</string>
     <string name="im_sure">  Je suis sûr</string>
     <string name="cancel">Anuler</string>
@@ -71,6 +71,8 @@
     <string name="dark_mode">Mode sombre</string>
     <string name="light_mode">Mode clair</string>
     <string name="update_theme">Mettre à jour le thème</string>
+    <string name="please_verif">Veuillez vérifier votre e-mail pour activer votre compte.</string>
+    <string name="verif_mail">Un e-mail de vérification a été envoyé à</string>
 
     <!-- Identified plant -->
     <string name="search_plot">Rechercher une parcelle</string>
@@ -100,6 +102,7 @@
     <string name="add_plant">Ajouter une plante</string>
 
     <!-- PlotSettings Screen -->
+    <string name="plot">Parcelle</string>
     <string name="plot_settings">Paramètres de la parcelle</string>
     <string name="delete_plot">Supprimer cette parcelle</string>
     <string name="confirm_deletion">Confirmer la suppression</string>
@@ -123,6 +126,7 @@
     <!-- Map Screen -->
     <string name="search_city">Rechercher une ville</string>
     <string name="no_location_found">Ville non valide</string>
+    <string name="longitude">Longitude</string>
     <string name="coordinates">Coordonnées</string>
     <string name="plants">Plantes: </string>
     <string name="culture_condition">Conditions de culture: </string>
@@ -134,7 +138,10 @@
     <string name="reliability">Valeur de confiance: </string>
 
     <!-- Plant advice -->
-    <string name="advice_to_improve_scores">Advice to improve scores</string>
+    <string name="advice_to_improve_scores">Conseils pour améliorer les scores</string>
 
     <string name="no_value">Pas de valeur</string>
+    <string name="latitude">Latitude</string>
+    <string name="users_plot">Vos parcelles</string>
+    <string name="ident_plants">Identification de plantes</string>
 </resources>
