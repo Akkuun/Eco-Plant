@@ -103,12 +103,25 @@ private fun EmailVerificationContent(
     context: android.content.Context,
     navController: androidx.navigation.NavHostController
 ) {
+    // État pour le cooldown du bouton de renvoi d'email
+    val cooldownSeconds = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(30) }
+    val isCooldownActive = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(true) }
+
+    // Effet pour gérer le cooldown
+    LaunchedEffect(key1 = Unit) {
+        while (cooldownSeconds.value > 0) {
+            delay(1000)
+            cooldownSeconds.value -= 1
+        }
+        isCooldownActive.value = false
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Instruction text
         Text(
-            text = "Please verify your email to activate your account.",
+            text = stringResource(R.string.please_verif),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -116,18 +129,28 @@ private fun EmailVerificationContent(
 
         // Email sent notification
         Text(
-            text = "A verification email has been sent to ${auth.currentUser?.email}.",
+            text = "${stringResource(R.string.verif_mail)} ${auth.currentUser?.email}.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Resend email button
+        // Bouton de renvoi d'email avec cooldown
         Button(
-            onClick = { resendVerificationEmail(auth, context) },
-            modifier = Modifier.padding(8.dp)
+            onClick = {
+                resendVerificationEmail(auth, context)
+                // Réinitialiser le cooldown après clic
+                cooldownSeconds.value = 30
+                isCooldownActive.value = true
+            },
+            modifier = Modifier.padding(8.dp),
+            enabled = !isCooldownActive.value
         ) {
-            Text(text = stringResource(id = R.string.resend_email))
+            if (isCooldownActive.value) {
+                Text(text = "${stringResource(id = R.string.resend_email)} (${cooldownSeconds.value})")
+            } else {
+                Text(text = stringResource(id = R.string.resend_email))
+            }
         }
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -135,7 +158,7 @@ private fun EmailVerificationContent(
         Button(
             onClick = {
                 auth.signOut()
-                navController.navigate("settings") // Navigate back to settings
+                navController.navigate("settings")
             },
             modifier = Modifier.padding(8.dp)
         ) {

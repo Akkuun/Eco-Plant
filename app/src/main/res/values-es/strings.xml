@@ -72,6 +72,8 @@
     <string name="dark_mode">Modo oscuro</string>
     <string name="light_mode">Modo claro</string>
     <string name="update_theme">Actualizar tema</string>
+    <string name="please_verif">Por favor, verifique su correo electrónico para activar su cuenta.</string>
+    <string name="verif_mail">Se ha enviado un correo electrónico de verificación a</string>
 
     <!-- Identified plant -->
     <string name="search_plot">Buscar una parcela</string>
