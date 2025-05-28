@@ -1,5 +1,3 @@
-package com.akkuunamatata.eco_plant.pages.mapsScreens
-
 import NotLoggedInScreen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -36,6 +34,7 @@ import com.akkuunamatata.eco_plant.R
 import com.akkuunamatata.eco_plant.database.plants.ParcelleData
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
@@ -49,6 +48,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.ui.res.stringResource
 import com.akkuunamatata.eco_plant.database.plants.maps.PlotRepository
+import com.akkuunamatata.eco_plant.pages.mapsScreens.MapFullPreviewCard
+import com.akkuunamatata.eco_plant.pages.mapsScreens.MapPreviewCard
 import com.akkuunamatata.eco_plant.utils.getActualGeoPosition
 import com.akkuunamatata.eco_plant.utils.searchLocationWithNominatim
 import com.google.firebase.auth.FirebaseAuth
@@ -81,17 +82,20 @@ fun Map(navController: NavHostController) {
     var parcelles by remember { mutableStateOf<List<ParcelleData>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
-// Utiliser collectAsState pour observer le StateFlow
+    // Ajouter cette variable d'état pour stocker la position de la carte
+    var lastMapCenter by remember { mutableStateOf<GeoPoint?>(null) }
+
+    // Utiliser collectAsState pour observer le StateFlow
     val parcellesFlow = remember { repository.parcelles }.collectAsState()
 
-// Effet pour charger les données au démarrage
+    // Effet pour charger les données au démarrage
     LaunchedEffect(Unit) {
         isLoading = true
         repository.getAllParcelles()
         isLoading = false
     }
 
-// Mettre à jour parcelles quand parcellesFlow change
+    // Mettre à jour parcelles quand parcellesFlow change
     LaunchedEffect(parcellesFlow.value) {
         parcelles = parcellesFlow.value
     }
@@ -165,8 +169,7 @@ fun Map(navController: NavHostController) {
                     mapView.controller.animateTo(GeoPoint(result.first, result.second))
                     mapView.controller.setZoom(12.0) // Zoom level appropriate for cities
                 } else {
-                    isSearchError =
-                        true // Mettre l'état d'erreur à true au lieu d'afficher un message
+                    isSearchError = true // Mettre l'état d'erreur à true au lieu d'afficher un message
                 }
             } catch (e: Exception) {
                 isSearchError = true // Mettre l'état d'erreur à true en cas d'exception
@@ -211,6 +214,9 @@ fun Map(navController: NavHostController) {
                     setPanToView(false)  // On garde cette ligne pour empêcher le comportement par défaut
 
                     setOnMarkerClickListener { marker, _ ->
+                        // Capturer la position actuelle avant de sélectionner le marqueur
+                        lastMapCenter = map.mapCenter as GeoPoint
+
                         // Centrer manuellement la carte sur le marqueur
                         map.controller.animateTo(marker.position)
 
@@ -336,8 +342,7 @@ fun Map(navController: NavHostController) {
                             // Clear icon button
                             IconButton(onClick = {
                                 searchQuery = ""
-                                isSearchError =
-                                    false // Réinitialiser l'erreur en effaçant la recherche
+                                isSearchError = false // Réinitialiser l'erreur en effaçant la recherche
                                 focusManager.clearFocus() // Ferme également le clavier lors de l'effacement
                             }) {
                                 Icon(
@@ -402,7 +407,21 @@ fun Map(navController: NavHostController) {
             selectedParcelleData?.let { parcelle ->
                 MapPreviewCard(
                     parcelle = parcelle,
-                    onClose = { selectedParcelleData = null },
+                    onClose = {
+                        // Récupérer la position actuelle avant de fermer
+                        val currentPosition = mapView.mapCenter as GeoPoint
+                        val currentZoom = mapView.zoomLevelDouble
+
+                        // Fermer la carte d'information
+                        selectedParcelleData = null
+
+                        // Restaurer la position avec un petit délai
+                        coroutineScope.launch {
+                            delay(50) // Petit délai pour laisser l'UI se mettre à jour
+                            mapView.controller.setZoom(currentZoom)
+                            mapView.controller.setCenter(currentPosition)
+                        }
+                    },
                     onExpandClick = { showBottomSheet = true }
                 )
             }
@@ -411,7 +430,18 @@ fun Map(navController: NavHostController) {
         // Full modal bottom sheet
         if (showBottomSheet && selectedParcelleData != null) {
             ModalBottomSheet(
-                onDismissRequest = { showBottomSheet = false },
+                onDismissRequest = {
+                    showBottomSheet = false
+                    // Appliquer la même logique ici pour éviter le recentrage
+                    val currentPosition = mapView.mapCenter as GeoPoint
+                    val currentZoom = mapView.zoomLevelDouble
+
+                    coroutineScope.launch {
+                        delay(50)
+                        mapView.controller.setZoom(currentZoom)
+                        mapView.controller.setCenter(currentPosition)
+                    }
+                },
                 sheetState = sheetState
             ) {
                 selectedParcelleData?.let { parcelle ->
@@ -421,7 +451,3 @@ fun Map(navController: NavHostController) {
         }
     }
 }
-
-
-
-
