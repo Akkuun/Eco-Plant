@@ -87,7 +87,13 @@ fun ScanNotLoggedInScreen(navController: NavHostController) {
                 ),
                 shape = RoundedCornerShape(4.dp)
             ) {
-                Text(stringResource(R.string.Go_to_login), fontSize = 16.sp)
+                Text(
+                    text = stringResource(R.string.Go_to_login),
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    lineHeight = 20.sp
+                )
             }
 
             // Bouton secondaire pour s'inscrire
@@ -102,7 +108,13 @@ fun ScanNotLoggedInScreen(navController: NavHostController) {
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text(stringResource(R.string.create_an_account), fontSize = 16.sp)
+                Text(
+                    text = stringResource(R.string.create_an_account),
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    lineHeight = 20.sp
+                )
             }
         }
     }
