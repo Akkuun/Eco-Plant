@@ -4,10 +4,13 @@ import ScanNotLoggedInScreen
 import android.Manifest
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Environment
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -66,7 +69,8 @@ fun ScanScreen(
 fun Scan(navController: NavHostController) {
     var locationText by remember { mutableStateOf("Position") }
     var hasLocationPermission by remember { mutableStateOf(false) }
-    val hasCameraPermission by remember { mutableStateOf(false) }
+    var hasCameraPermission by remember { mutableStateOf(false) }
+    var hasGalleryPermission by remember { mutableStateOf(false) }
     var latitude by remember { mutableStateOf<Double?>(null) }
     var longitude by remember { mutableStateOf<Double?>(null) }
     val context = LocalContext.current
@@ -80,23 +84,6 @@ fun Scan(navController: NavHostController) {
         val imageFile = File(imageDir, "photo_${System.currentTimeMillis()}.jpg")
         return imageFile
     }
-
-    // Gestion des permissions
-    val requestPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        hasLocationPermission = granted
-        if (granted) {
-            getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
-                locationText = location
-                latitude = lat
-                longitude = lon
-            }
-        } else {
-            locationText = "Permission Denied"
-        }
-    }
-
-
-
 
     fun saveBitmapToEcoPlantFolder(context: Context, bitmap: Bitmap): Uri? {
         // Prepare the content values to insert into the MediaStore
@@ -120,6 +107,14 @@ fun Scan(navController: NavHostController) {
         return imageUri
     }
 
+    // IMPORTANT: Déclarer les launchers avant de les utiliser dans d'autres launchers
+
+    // Lancer la galerie
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            navController.navigateToOrganChoice(it)
+        }
+    }
 
     // Camera launcher
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
@@ -133,16 +128,31 @@ fun Scan(navController: NavHostController) {
                 val savedUri = saveBitmapToEcoPlantFolder(context, bitmap)
 
                 if (savedUri != null) {
-                    navController.navigateToOrganChoice(
-                        savedUri
-                    )
+                    navController.navigateToOrganChoice(savedUri)
                 }
             }
         }
     }
 
-    val requestCameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+    // Gestion des permissions de localisation
+    val requestLocationPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        hasLocationPermission = granted
         if (granted) {
+            getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
+                locationText = location
+                latitude = lat
+                longitude = lon
+            }
+        } else {
+            locationText = "Permission Denied"
+        }
+    }
+
+    // Gestion des permissions de caméra
+    val requestCameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        hasCameraPermission = granted
+        if (granted) {
+            // Permission accordée, on peut lancer la caméra
             val photoFile = createImageFile()
             val uri = FileProvider.getUriForFile(
                 context,
@@ -151,22 +161,29 @@ fun Scan(navController: NavHostController) {
             )
             imageUri.value = uri
             cameraLauncher.launch(uri)
+        } else {
+            Log.d("ScanScreen", "Camera permission denied")
         }
     }
 
-    // Lancer la galerie
-    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            navController.navigateToOrganChoice(it)
+    // Gestion des permissions d'accès à la galerie
+    val galleryPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        val allGranted = permissions.all { it.value }
+        hasGalleryPermission = allGranted
+
+        if (allGranted) {
+            // Lancer la galerie une fois les permissions accordées
+            galleryLauncher.launch("image/*")
+        } else {
+            Log.d("ScanScreen", "Gallery permissions denied")
         }
     }
 
-
-
-    // Check permission on first launch
+    // Check permissions on first launch
     LaunchedEffect(Unit) {
+        // Vérifier les permissions de localisation
         when {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
                 hasLocationPermission = true
                 getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
                     locationText = location
@@ -175,8 +192,27 @@ fun Scan(navController: NavHostController) {
                 }
             }
             else -> {
-                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
+        }
+
+        // Vérifier les permissions de caméra
+        hasCameraPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+        // Vérifier les permissions de galerie
+        hasGalleryPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_MEDIA_IMAGES
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
         }
     }
 
@@ -231,7 +267,23 @@ fun Scan(navController: NavHostController) {
                             contentAlignment = Alignment.Center
                         ) {
                             Button(
-                                onClick = { galleryLauncher.launch("image/*") },
+                                onClick = {
+                                    // Vérifier et demander les permissions avant d'ouvrir la galerie
+                                    if (hasGalleryPermission) {
+                                        galleryLauncher.launch("image/*")
+                                    } else {
+                                        // Demander les permissions appropriées selon la version d'Android
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                            galleryPermissionLauncher.launch(arrayOf(
+                                                Manifest.permission.READ_MEDIA_IMAGES
+                                            ))
+                                        } else {
+                                            galleryPermissionLauncher.launch(arrayOf(
+                                                Manifest.permission.READ_EXTERNAL_STORAGE
+                                            ))
+                                        }
+                                    }
+                                },
                                 shape = CircleShape,
                                 contentPadding = PaddingValues(5.dp),
                                 modifier = Modifier
