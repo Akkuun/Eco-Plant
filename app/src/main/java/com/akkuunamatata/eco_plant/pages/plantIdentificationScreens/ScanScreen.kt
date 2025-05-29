@@ -49,6 +49,7 @@ import com.akkuunamatata.eco_plant.components.LocationBar
 import com.akkuunamatata.eco_plant.utils.getLocationAndUpdateText
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun ScanScreen(
@@ -85,6 +86,32 @@ fun Scan(navController: NavHostController) {
         return imageFile
     }
 
+    // Fonction pour copier un URI de la galerie vers un fichier local
+    // Cette fonction est essentielle pour gérer les URI externes de la galerie
+    fun copyUriToLocalFile(uri: Uri): Uri? {
+        try {
+            // Créer un fichier temporaire pour stocker l'image
+            val destinationFile = createImageFile()
+
+            // Ouvrir l'URI source et copier son contenu dans le fichier de destination
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                FileOutputStream(destinationFile).use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+
+            // Créer un URI FileProvider à partir du fichier local
+            return FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                destinationFile
+            )
+        } catch (e: Exception) {
+            Log.e("Scan", "Error copying URI to local file", e)
+            return null
+        }
+    }
+
     fun saveBitmapToEcoPlantFolder(context: Context, bitmap: Bitmap): Uri? {
         // Prepare the content values to insert into the MediaStore
         val contentValues = ContentValues().apply {
@@ -107,12 +134,27 @@ fun Scan(navController: NavHostController) {
         return imageUri
     }
 
-    // IMPORTANT: Déclarer les launchers avant de les utiliser dans d'autres launchers
-
     // Lancer la galerie
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
-            navController.navigateToOrganChoice(it)
+            try {
+                Log.d("Scan", "Gallery image selected: $it")
+
+                // Copier l'URI de la galerie vers un fichier local avec un URI FileProvider
+                val localUri = copyUriToLocalFile(it)
+
+                // Si la copie a réussi, naviguer avec le nouvel URI
+                localUri?.let { newUri ->
+                    Log.d("Scan", "Copied to local URI: $newUri")
+                    navController.navigateToOrganChoice(newUri)
+                } ?: run {
+                    // Si la copie a échoué, essayer de naviguer avec l'URI original
+                    Log.d("Scan", "Copying failed, trying with original URI")
+                    navController.navigateToOrganChoice(it)
+                }
+            } catch (e: Exception) {
+                Log.e("Scan", "Error processing gallery image", e)
+            }
         }
     }
 
@@ -122,13 +164,22 @@ fun Scan(navController: NavHostController) {
             // After image is captured, load the bitmap from the URI
             val uri = imageUri.value
             if (uri != null) {
-                val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                bitmapImage = bitmap
+                Log.d("Scan", "Camera image captured: $uri")
+                try {
+                    val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                    bitmapImage = bitmap
 
-                val savedUri = saveBitmapToEcoPlantFolder(context, bitmap)
+                    val savedUri = saveBitmapToEcoPlantFolder(context, bitmap)
 
-                if (savedUri != null) {
-                    navController.navigateToOrganChoice(savedUri)
+                    if (savedUri != null) {
+                        Log.d("Scan", "Saved camera image: $savedUri")
+                        navController.navigateToOrganChoice(savedUri)
+                    } else {
+                        Log.d("Scan", "Using original camera URI: $uri")
+                        navController.navigateToOrganChoice(uri)
+                    }
+                } catch (e: Exception) {
+                    Log.e("Scan", "Error processing camera image", e)
                 }
             }
         }
@@ -352,5 +403,8 @@ fun Scan(navController: NavHostController) {
 fun NavHostController.navigateToOrganChoice(
     imageUri: Uri,
 ) {
-    this.navigate("organ_choice?imageUri=${imageUri}")
+    Log.d("Navigation", "Navigating to organ_choice with URI: $imageUri")
+    // Encoder l'URI pour éviter les problèmes de caractères spéciaux
+    val encodedUri = Uri.encode(imageUri.toString())
+    this.navigate("organ_choice?imageUri=$encodedUri")
 }
