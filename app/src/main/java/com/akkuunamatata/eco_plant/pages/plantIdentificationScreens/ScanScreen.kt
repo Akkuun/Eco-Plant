@@ -4,10 +4,13 @@ import ScanNotLoggedInScreen
 import android.Manifest
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Environment
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -46,6 +49,7 @@ import com.akkuunamatata.eco_plant.components.LocationBar
 import com.akkuunamatata.eco_plant.utils.getLocationAndUpdateText
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun ScanScreen(
@@ -66,7 +70,8 @@ fun ScanScreen(
 fun Scan(navController: NavHostController) {
     var locationText by remember { mutableStateOf("Position") }
     var hasLocationPermission by remember { mutableStateOf(false) }
-    val hasCameraPermission by remember { mutableStateOf(false) }
+    var hasCameraPermission by remember { mutableStateOf(false) }
+    var hasGalleryPermission by remember { mutableStateOf(false) }
     var latitude by remember { mutableStateOf<Double?>(null) }
     var longitude by remember { mutableStateOf<Double?>(null) }
     val context = LocalContext.current
@@ -81,22 +86,31 @@ fun Scan(navController: NavHostController) {
         return imageFile
     }
 
-    // Gestion des permissions
-    val requestPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        hasLocationPermission = granted
-        if (granted) {
-            getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
-                locationText = location
-                latitude = lat
-                longitude = lon
+    // Fonction pour copier un URI de la galerie vers un fichier local
+    // Cette fonction est essentielle pour gérer les URI externes de la galerie
+    fun copyUriToLocalFile(uri: Uri): Uri? {
+        try {
+            // Créer un fichier temporaire pour stocker l'image
+            val destinationFile = createImageFile()
+
+            // Ouvrir l'URI source et copier son contenu dans le fichier de destination
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                FileOutputStream(destinationFile).use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
             }
-        } else {
-            locationText = "Permission Denied"
+
+            // Créer un URI FileProvider à partir du fichier local
+            return FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                destinationFile
+            )
+        } catch (e: Exception) {
+            Log.e("Scan", "Error copying URI to local file", e)
+            return null
         }
     }
-
-
-
 
     fun saveBitmapToEcoPlantFolder(context: Context, bitmap: Bitmap): Uri? {
         // Prepare the content values to insert into the MediaStore
@@ -120,6 +134,29 @@ fun Scan(navController: NavHostController) {
         return imageUri
     }
 
+    // Lancer la galerie
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            try {
+                Log.d("Scan", "Gallery image selected: $it")
+
+                // Copier l'URI de la galerie vers un fichier local avec un URI FileProvider
+                val localUri = copyUriToLocalFile(it)
+
+                // Si la copie a réussi, naviguer avec le nouvel URI
+                localUri?.let { newUri ->
+                    Log.d("Scan", "Copied to local URI: $newUri")
+                    navController.navigateToOrganChoice(newUri)
+                } ?: run {
+                    // Si la copie a échoué, essayer de naviguer avec l'URI original
+                    Log.d("Scan", "Copying failed, trying with original URI")
+                    navController.navigateToOrganChoice(it)
+                }
+            } catch (e: Exception) {
+                Log.e("Scan", "Error processing gallery image", e)
+            }
+        }
+    }
 
     // Camera launcher
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
@@ -127,22 +164,46 @@ fun Scan(navController: NavHostController) {
             // After image is captured, load the bitmap from the URI
             val uri = imageUri.value
             if (uri != null) {
-                val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                bitmapImage = bitmap
+                Log.d("Scan", "Camera image captured: $uri")
+                try {
+                    val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                    bitmapImage = bitmap
 
-                val savedUri = saveBitmapToEcoPlantFolder(context, bitmap)
+                    val savedUri = saveBitmapToEcoPlantFolder(context, bitmap)
 
-                if (savedUri != null) {
-                    navController.navigateToOrganChoice(
-                        savedUri
-                    )
+                    if (savedUri != null) {
+                        Log.d("Scan", "Saved camera image: $savedUri")
+                        navController.navigateToOrganChoice(savedUri)
+                    } else {
+                        Log.d("Scan", "Using original camera URI: $uri")
+                        navController.navigateToOrganChoice(uri)
+                    }
+                } catch (e: Exception) {
+                    Log.e("Scan", "Error processing camera image", e)
                 }
             }
         }
     }
 
-    val requestCameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+    // Gestion des permissions de localisation
+    val requestLocationPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        hasLocationPermission = granted
         if (granted) {
+            getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
+                locationText = location
+                latitude = lat
+                longitude = lon
+            }
+        } else {
+            locationText = "Permission Denied"
+        }
+    }
+
+    // Gestion des permissions de caméra
+    val requestCameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        hasCameraPermission = granted
+        if (granted) {
+            // Permission accordée, on peut lancer la caméra
             val photoFile = createImageFile()
             val uri = FileProvider.getUriForFile(
                 context,
@@ -151,22 +212,29 @@ fun Scan(navController: NavHostController) {
             )
             imageUri.value = uri
             cameraLauncher.launch(uri)
+        } else {
+            Log.d("ScanScreen", "Camera permission denied")
         }
     }
 
-    // Lancer la galerie
-    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            navController.navigateToOrganChoice(it)
+    // Gestion des permissions d'accès à la galerie
+    val galleryPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        val allGranted = permissions.all { it.value }
+        hasGalleryPermission = allGranted
+
+        if (allGranted) {
+            // Lancer la galerie une fois les permissions accordées
+            galleryLauncher.launch("image/*")
+        } else {
+            Log.d("ScanScreen", "Gallery permissions denied")
         }
     }
 
-
-
-    // Check permission on first launch
+    // Check permissions on first launch
     LaunchedEffect(Unit) {
+        // Vérifier les permissions de localisation
         when {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED -> {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
                 hasLocationPermission = true
                 getLocationAndUpdateText(fusedLocationClient, context) { location, lat, lon ->
                     locationText = location
@@ -175,8 +243,27 @@ fun Scan(navController: NavHostController) {
                 }
             }
             else -> {
-                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
+        }
+
+        // Vérifier les permissions de caméra
+        hasCameraPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+        // Vérifier les permissions de galerie
+        hasGalleryPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_MEDIA_IMAGES
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
         }
     }
 
@@ -231,7 +318,23 @@ fun Scan(navController: NavHostController) {
                             contentAlignment = Alignment.Center
                         ) {
                             Button(
-                                onClick = { galleryLauncher.launch("image/*") },
+                                onClick = {
+                                    // Vérifier et demander les permissions avant d'ouvrir la galerie
+                                    if (hasGalleryPermission) {
+                                        galleryLauncher.launch("image/*")
+                                    } else {
+                                        // Demander les permissions appropriées selon la version d'Android
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                            galleryPermissionLauncher.launch(arrayOf(
+                                                Manifest.permission.READ_MEDIA_IMAGES
+                                            ))
+                                        } else {
+                                            galleryPermissionLauncher.launch(arrayOf(
+                                                Manifest.permission.READ_EXTERNAL_STORAGE
+                                            ))
+                                        }
+                                    }
+                                },
                                 shape = CircleShape,
                                 contentPadding = PaddingValues(5.dp),
                                 modifier = Modifier
@@ -300,5 +403,8 @@ fun Scan(navController: NavHostController) {
 fun NavHostController.navigateToOrganChoice(
     imageUri: Uri,
 ) {
-    this.navigate("organ_choice?imageUri=${imageUri}")
+    Log.d("Navigation", "Navigating to organ_choice with URI: $imageUri")
+    // Encoder l'URI pour éviter les problèmes de caractères spéciaux
+    val encodedUri = Uri.encode(imageUri.toString())
+    this.navigate("organ_choice?imageUri=$encodedUri")
 }

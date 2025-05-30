@@ -2,6 +2,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -87,22 +90,38 @@ fun ScanNotLoggedInScreen(navController: NavHostController) {
                 ),
                 shape = RoundedCornerShape(4.dp)
             ) {
-                Text(stringResource(R.string.Go_to_login), fontSize = 16.sp)
+                Text(
+                    text = stringResource(R.string.Go_to_login),
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    lineHeight = 20.sp
+                )
             }
 
-            // Bouton secondaire pour s'inscrire
+// Ajout d'un espace entre les boutons
+            Spacer(modifier = Modifier.height(12.dp))
+
+// Bouton secondaire pour s'inscrire
             OutlinedButton(
                 onClick = { navController.navigate("sign_in") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(top = 12.dp),
+                    .height(70.dp),  // Hauteur plus grande pour accommoder deux lignes
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.primary
-                )
+                ),
+                contentPadding = PaddingValues(vertical = 8.dp, horizontal = 16.dp)  // Déplacé dans contentPadding
             ) {
-                Text(stringResource(R.string.create_an_account), fontSize = 16.sp)
+                Text(
+                    text = stringResource(R.string.create_an_account),
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Visible,
+                    lineHeight = 20.sp
+                )
             }
         }
     }

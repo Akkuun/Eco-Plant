@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.akkuunamatata.eco_plant"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.akkuunamatata.eco_plant"
     xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <!-- Permission de base -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Permission caméra explicite -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Anciennes permissions de stockage (pour Android < 10) -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
+    <!-- Nouvelles permissions de médias (pour Android 13+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
     <application
         android:allowBackup="true"
@@ -35,7 +44,6 @@
             android:theme="@style/Theme.EcoPlant" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -49,8 +57,5 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-
     </application>
-
 </manifest>

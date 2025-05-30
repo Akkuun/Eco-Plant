@@ -64,8 +64,7 @@ fun AppNavHost(
         // Map screen route
         composable(Routes.MAP) { MapScreen(navController) }
 
-        // History screen route
-        composable(Routes.HISTORY) { HistoryScreen() }
+
 
         // Scan screen route
         composable(Routes.SCAN) { ScanScreen(navController) }
